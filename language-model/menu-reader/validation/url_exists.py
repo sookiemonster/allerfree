@@ -1,5 +1,5 @@
-import requests
 import logging
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -25,14 +25,3 @@ def url_exists(url: str):
     except requests.exceptions.RequestException as e:
         logger.error(e)
         return False
-
-
-def image_is_valid(img_url: str) -> bool:
-    if not img_url:
-        logger.error("Received `None` URL")
-        return False
-
-    if not url_exists(img_url):
-        return False
-
-    return True

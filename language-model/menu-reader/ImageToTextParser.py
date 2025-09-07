@@ -1,5 +1,7 @@
-from google.cloud import vision
 import logging
+from google.cloud import vision
+from validation.image_validation import image_is_valid
+from typing import Optional
 
 
 class ImageToTextParser(object):
@@ -32,8 +34,11 @@ class ImageToTextParser(object):
 
         return response
 
-    def detect_text(self, image_uri: str) -> str:
+    def detect_text(self, image_uri: str) -> Optional[str]:
         """Detects text in the file."""
+
+        if not image_is_valid(image_uri):
+            return None
 
         response = self.get_ocr_response(image_uri=image_uri)
         texts = response.text_annotations
