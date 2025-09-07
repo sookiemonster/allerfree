@@ -9,3 +9,8 @@ dependencies = [
     "google-cloud>=0.34.0",
     "google-cloud-vision>=3.10.2",
 ]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.30.1",
+]
