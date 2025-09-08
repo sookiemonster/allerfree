@@ -1,0 +1,25 @@
+{
+    "manifest_version" : 3,
+    "version" : "1.0.0",
+    "name" : "Allerfree",
+    "icons": {
+        "32" : "gwc-logo-circle.png"
+    },
+
+    "action": {
+        "default_popup": "index.html"
+    },
+    "permissions": [
+        "scripting"
+    ],
+    "host_permissions": [
+        "http://*/*",
+        "https://*/*"
+    ]
+  }
+  
+
+
+  
+    
+  
