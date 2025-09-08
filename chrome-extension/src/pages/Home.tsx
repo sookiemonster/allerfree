@@ -9,7 +9,7 @@ function Home()
 			target: { tabId: tab.id! },
 			func: () => {
 				alert('hello worl');
-				document.body.style.backgroundColor = 'red';
+				document.body.style.backgroundColor = 'navy';
 			}
 		});
 	}
@@ -24,7 +24,7 @@ function Home()
 				<img src={reactLogo} className="logo react" alt="React logo" />
 				</a>
 			</div>
-			<h1>Vite + React</h1>
+			<h1>Home</h1>
 			<div className="card">
 				<button onClick={()=> console.log('print')}>
 				{/* count is {count} */}printets
