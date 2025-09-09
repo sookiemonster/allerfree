@@ -1,3 +1,4 @@
+
 {
     "manifest_version" : 3,
     "version" : "1.0.0",
@@ -9,14 +10,16 @@
     "action": {
         "default_popup": "index.html"
     },
-    "permissions": [
-        "scripting"
-    ],
+    "permissions": ["scripting", "tabs", "activeTab"],
+    "background":{
+        "service_worker": "service-worker.js",
+        "type": "module"
+    },
     "host_permissions": [
         "http://*/*",
         "https://*/*"
     ]
-  }
+}
   
 
 

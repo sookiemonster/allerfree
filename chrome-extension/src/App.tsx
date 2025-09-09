@@ -10,18 +10,18 @@ function App() {
   	
 	return (
 		<>
-		  <nav>
-      	<Link to="/">Home</Link>
-      	<Link to="/results">Results</Link>
-      	<Link to="/profiles">Profiles</Link>
-      	<Link to="/allergies">Allergies</Link>
-    	</nav>
-		<Routes> 
-    	<Route path="/" element={<Home />} />
-			<Route path="/results" element={<Results />} />
-			<Route path="/profiles" element={<Profiles />} />
-			<Route path="/allergies" element={<Allergies />} />
-    </Routes>
+			<nav>
+				<Link to="/">Home</Link>
+				<Link to="/results">Results</Link>
+				<Link to="/profiles">Profiles</Link>
+				<Link to="/allergies">Allergies</Link>
+    		</nav>
+			<Routes> 
+    			<Route path="/" element={<Home />} />
+				<Route path="/results" element={<Results />} />
+				<Route path="/profiles" element={<Profiles />} />
+				<Route path="/allergies" element={<Allergies />} />
+    		</Routes>
 		</>
 	)
 } export default App
