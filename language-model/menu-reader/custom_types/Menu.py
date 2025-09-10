@@ -12,5 +12,12 @@ class MenuSymbol(StrEnum):
 @dataclass
 class MenuItem:
     name: str
-    descrption: str
-    symbols: List[MenuSymbol]
+    description: str
+    symbols: List[str]
+
+
+@dataclass
+class MenuSection:
+    section: str
+    description: str
+    items: List[MenuItem]

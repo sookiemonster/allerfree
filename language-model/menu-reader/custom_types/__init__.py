@@ -1,2 +1,2 @@
 from .ImageData import ImageData
-from .MenuItem import MenuItem, MenuSymbol
+from .Menu import MenuItem, MenuSymbol, MenuSection
