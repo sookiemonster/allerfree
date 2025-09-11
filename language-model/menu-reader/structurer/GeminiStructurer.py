@@ -12,7 +12,7 @@ class GeminiStructurer(MenuStructurer):
     def __init__(self, gemini_client: Client) -> None:
         self.gemini_client = gemini_client
     
-    def structure(self, unstructured_ocr_text: str, img: ImageData) -> List[MenuSection]:
+    def structure(self, unstructured_ocr_text: str, img: ImageData) -> str:
         prompt = self._get_prompt(unstructured_ocr_text)
 
         logger.info("Attempting to structure OCR with prompt: \n", prompt)

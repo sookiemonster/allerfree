@@ -11,5 +11,5 @@ class MenuStructurer(ABC):
         return make_prompt(MenuStructurer.TEMPLATE_FILE, unstructured_ocr_text=unstructured_ocr_text)
 
     @abstractmethod
-    def structure(self, unstructured_ocr_text: str, img: ImageData) -> List[MenuSection]:
+    def structure(self, unstructured_ocr_text: str, img: ImageData) -> str:
         pass
