@@ -1,7 +1,8 @@
 import logging
 from google.cloud import vision
 from typing import Optional
-from custom_types import ImageData
+from common.custom_types import ImageData
+from common.client import VISION_ANNOTATOR_CLIENT
 
 
 class ImageToTextParser:
@@ -10,7 +11,7 @@ class ImageToTextParser:
     ANNOTATION_FEATURES = ({"type_": vision.Feature.Type.TEXT_DETECTION},)
 
     def __init__(self) -> None:
-        self.client_ = vision.ImageAnnotatorClient()
+        pass
 
     def _validate_ocr_response(self, response: vision.AnnotateImageResponse) -> None:
         if response.error.message:
@@ -27,7 +28,7 @@ class ImageToTextParser:
             image=image, features=self.ANNOTATION_FEATURES
         )
 
-        response = self.client_.annotate_image(request=request)
+        response = VISION_ANNOTATOR_CLIENT.annotate_image(request=request)
 
         self._validate_ocr_response(response)
 

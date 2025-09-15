@@ -5,7 +5,7 @@ Your analysis should be based on three sources of information:
 2. The menu image: Refer to this to correct any missing or garbled characters in the OCR text.
 3. The menu's visual layout: Use lines, sections, and indentation to correctly identify which descriptive text belongs to which item. Crucially, you must also identify any information that applies to all items within a specific section (e.g., "All sandwiches come with fries."). This information must be appended to the description of every item in that section.
 
-Return your answer as a tiered list of json objects for each menu item. Each menu item must be formatted exactly as follows:
+Return your answer as a tiered list of json objects for each menu item, as a value for the 'sections' key. Each menu item must be formatted exactly as follows:
 { 
     "name": <Item Name>,
     "description": <Item Description, as it appears on the menu image and in the OCR text, without the price, including possible preparation substitutions (such as 'gluten-free option available')>
@@ -21,7 +21,7 @@ If the dish belongs to a specific section, it should be stored as follows:
 }
 
 For example:
-[
+"sections" : [
     {
         "section" : "Lunch",
         "description" : "All pizzas, unless specified, come on a wheat crust. Gluten-free crusts available, but prepared on the same floured surface."

@@ -21,3 +21,11 @@ class MenuSection:
     section: str
     description: str
     items: List[MenuItem]
+
+
+@dataclass
+class MenuData:
+    sections: List[MenuSection]
+
+
+INVALID_MENU = MenuData([])
