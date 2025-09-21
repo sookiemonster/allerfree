@@ -57,6 +57,8 @@
     if (sig !== lastSig) {
       lastSig = sig;
 
+      console.log("dsf");
+
       if(!isMenuTabSelected()) 
       {
         buttonInjected = false;
@@ -74,51 +76,68 @@
     }
   }
 
-  function injectButton()
-  {
+  function injectButton() {
     const menuDiv = document.querySelector('div[aria-label="Menu"]');
-      if (!menuDiv) {
-        return false;
-      }
-      
-      const h2 = document.createElement("h2");
-      h2.textContent = "weefdeee";
-      h2.style.color = "red";
-      menuDiv.prepend(h2);
-      buttonInjected = true;
-      return true;
-      
+    if (!menuDiv) {
+      return false;
+    }
+
+    // grab the first inner div (this wraps the h2 Menu heading)
+    const headerDiv = menuDiv.querySelector("div");
+    if (!headerDiv) {
+      return false;
+    }
+
+    // apply grid layout: 2 equal columns
+    headerDiv.style.display = "grid";
+    headerDiv.style.gridTemplateColumns = "1fr 1fr";
+    headerDiv.style.alignItems = "center";
+
+    // create button
+    const btn = document.createElement("button");
+    btn.textContent = "Can I Eat Here?";
+    btn.className = "allergen-detector-btn";
+
+    // place button in second grid column
+    headerDiv.appendChild(btn);
+
+    return true;
   }
 
-  // first time run
-  emit('initial');
 
-  // Observe broad DOM mutations; debounce to reduce spam.
-  const observer = new MutationObserver(
-    debounce(() => emit('dom-mutation'), 200)
-  );
+  // first time run (delayed)
+  setTimeout(() => {
+    console.log("what");
+    emit("initial");
+    // Observe broad DOM mutations; debounce to reduce spam.
+    const observer = new MutationObserver(
+      debounce(() => emit('dom-mutation'), 200)
+    );
+  
+    // Observe the whole document: Maps re-parents nodes frequently.
+    observer.observe(document.documentElement, {
+      subtree: true,
+      childList: true,
+      characterData: true,
+      attributes: true
+    });
+  
+    // emit on coming back to the tab
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') emit('visible');
+    });
+  
+    // Fallback: periodic check in case some changes dodge MutationObserver (rare).
+    const poll = setInterval(() => emit('poll'), 1000);
+  
+    // Clean up if page unloads
+    window.addEventListener('beforeunload', () => {
+      observer.disconnect();
+      clearInterval(poll);
+    });
+  }, 2000);
 
-  // Observe the whole document: Maps re-parents nodes frequently.
-  observer.observe(document.documentElement, {
-    subtree: true,
-    childList: true,
-    characterData: true,
-    attributes: true
-  });
 
-  // emit on coming back to the tab
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') emit('visible');
-  });
-
-  // Fallback: periodic check in case some changes dodge MutationObserver (rare).
-  const poll = setInterval(() => emit('poll'), 1000);
-
-  // Clean up if page unloads
-  window.addEventListener('beforeunload', () => {
-    observer.disconnect();
-    clearInterval(poll);
-  });
 
   // check if the menu is open so we can inject if it is
   function isMenuTabSelected() {
