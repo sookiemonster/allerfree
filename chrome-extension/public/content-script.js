@@ -50,18 +50,44 @@
 
   let lastSig = null;
 
+  let buttonInjected = false;
+
   function emit(reason) {
     const sig = buildSignature();
     if (sig !== lastSig) {
       lastSig = sig;
-      // const success = isMenuTabSelected();
 
-      // console.log("d sfdsf", success);
-      if(!isMenuTabSelected()) return;
-      alert(`Menu tab opened`);
-      // Optional debug:
-      // console.log('[Allerfree] change:', reason, JSON.parse(sig));
+      if(!isMenuTabSelected()) 
+      {
+        buttonInjected = false;
+        return;
+      }
+
+      if(buttonInjected)
+      {
+        return;
+      }
+
+      buttonInjected = injectButton();
+
+      console.log(buttonInjected ? "Button injectd" : "inection failed");
     }
+  }
+
+  function injectButton()
+  {
+    const menuDiv = document.querySelector('div[aria-label="Menu"]');
+      if (!menuDiv) {
+        return false;
+      }
+      
+      const h2 = document.createElement("h2");
+      h2.textContent = "weefdeee";
+      h2.style.color = "red";
+      menuDiv.prepend(h2);
+      buttonInjected = true;
+      return true;
+      
   }
 
   // first time run
