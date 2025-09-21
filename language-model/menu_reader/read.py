@@ -12,6 +12,8 @@ def read_menu_using_structurer(img: ImageData, structurer: MenuStructurer) -> Me
 
     if not ocr_text:
         return INVALID_MENU
+    
+    return MenuData([])
 
     menu_data = structurer.structure(ocr_text, img)
     return menu_data
