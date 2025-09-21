@@ -13,6 +13,9 @@ class ImageToTextParser:
     def __init__(self) -> None:
         pass
 
+    def _check_confidences(self, response: vision.AnnotateImageResponse) -> None:
+        print(response)
+
     def _validate_ocr_response(self, response: vision.AnnotateImageResponse) -> None:
         if response.error.message:
             self.logger.error("Failed to OCR url: ", response.error.message)
@@ -20,6 +23,9 @@ class ImageToTextParser:
                 f"{response.error.message}\nFor more info on error messages, check: "
                 "https://cloud.google.com/apis/design/errors".format()
             )
+        
+        self._check_confidences(response)
+        
 
     def _get_ocr_response(self, img: ImageData) -> vision.AnnotateImageResponse:
         image = vision.Image(content=img.base64)

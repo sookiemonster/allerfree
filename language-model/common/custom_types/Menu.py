@@ -28,4 +28,5 @@ class MenuData:
     sections: List[MenuSection]
 
 
-INVALID_MENU = MenuData([])
+def make_invalid_menu(message: str = "") -> MenuData:
+    return MenuData(sections=[MenuSection("INVALID_MENU", message, [])])

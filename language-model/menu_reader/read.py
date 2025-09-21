@@ -1,5 +1,5 @@
 from common.client import GEMINI_API_CLIENT
-from common.custom_types import ImageData, MenuData, INVALID_MENU
+from common.custom_types import ImageData, MenuData, make_invalid_menu
 from .structurer import MenuStructurer, GeminiStructurer
 from .ocr import ImageToTextParser
 
@@ -11,7 +11,9 @@ def read_menu_using_structurer(img: ImageData, structurer: MenuStructurer) -> Me
     ocr_text = parser.detect_text(img)
 
     if not ocr_text:
-        return INVALID_MENU
+        return make_invalid_menu(
+            "Failed to OCR the image. Likely the image byte data is malformed, or, possibly, contains no text."
+        )
 
     menu_data = structurer.structure(ocr_text, img)
     return menu_data
