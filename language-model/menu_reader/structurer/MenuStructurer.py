@@ -18,14 +18,14 @@ class MenuStructurer(ABC):
             return False
 
         logger.error(
-            "Failed to structure menu with reason: ",
+            "Failed to structure menu with reason: %s",
             json_dict[MenuStructurer.ERROR_KEY],
         )
         return True
 
     @classmethod
     def _to_menu_schema(cls, json_string: Optional[str]) -> MenuData:
-        logger.debug("RECEIVED JSON STRING", json_string)
+        logger.debug("RECEIVED JSON STRING: \n %s", json_string)
         print(json_string)
 
         if not json_string:
@@ -40,7 +40,7 @@ class MenuStructurer(ABC):
             )
             return INVALID_MENU
 
-        logger.debug("CONVERTED TO JSON_DICT", json_dict)
+        logger.debug("CONVERTED TO JSON_DICT:\n %s", json_dict)
 
         if MenuStructurer._is_not_restaurant_menu(json_dict):
             return INVALID_MENU
