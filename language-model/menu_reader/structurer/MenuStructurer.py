@@ -10,6 +10,18 @@ logger = getLogger(__name__)
 
 class MenuStructurer(ABC):
     TEMPLATE_FILE = "structure_menu.j2"
+    ERROR_KEY = "error"
+
+    @classmethod
+    def _is_not_restaurant_menu(cls, json_dict: dict) -> bool:
+        if MenuStructurer.ERROR_KEY not in json_dict.keys():
+            return False
+
+        logger.error(
+            "Failed to structure menu with reason: ",
+            json_dict[MenuStructurer.ERROR_KEY],
+        )
+        return True
 
     @classmethod
     def _to_menu_schema(cls, json_string: Optional[str]) -> MenuData:
@@ -19,7 +31,15 @@ class MenuStructurer(ABC):
             )
             return INVALID_MENU
 
-        json_dict = json.loads(json_string)
+        if not (json_dict := json.loads(json_string)):
+            logger.error(
+                "Did not receive a JSON string from the structurer. Is the image invalid or something?"
+            )
+            return INVALID_MENU
+
+        if MenuStructurer._is_not_restaurant_menu(json_dict):
+            return INVALID_MENU
+
         return MenuData(**json_dict)
 
     def _get_prompt(self, unstructured_ocr_text: str) -> str:

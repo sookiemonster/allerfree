@@ -59,8 +59,7 @@ Important constraints:
 1. Do not include prices.
 2. For item and section descriptions, only information related to the ingredients or dish preparation concerns of the food item that diners with allergies must know (For example, do not include that 'all pizzas are artisan & hand-crafted by our master chefs', but include that `all pizzas are made on the same floured surfaces`).
 3. Do not include any introductory text, concluding remarks, or any other content besides the list itself.
-4. If the attached image and OCR text do not describe a restaurant menu of food/drink options, ignore the text structuring task and simply return 'not a menu.'
-
+4. If the attached image and OCR text do not describe a restaurant menu of food/drink options, ignore the text structuring task and simply return the JSON object: '{ "error" : "NOT_RESTAURANT_MENU" }'
 Remember, the image should not be:
 - A general advertisement or promotional flyer for a restaurant.
 - A single picture of a plate of food.
