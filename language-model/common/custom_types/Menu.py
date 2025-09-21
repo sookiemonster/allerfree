@@ -28,4 +28,4 @@ class MenuData:
     sections: List[MenuSection]
 
 
-INVALID_MENU = MenuData([])
+INVALID_MENU = MenuData(sections=[MenuSection("INVALID_MENU", "", [])])

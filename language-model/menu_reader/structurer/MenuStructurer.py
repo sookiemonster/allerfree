@@ -25,6 +25,9 @@ class MenuStructurer(ABC):
 
     @classmethod
     def _to_menu_schema(cls, json_string: Optional[str]) -> MenuData:
+        logger.debug("RECEIVED JSON STRING", json_string)
+        print(json_string)
+
         if not json_string:
             logger.error(
                 "Received NONE for JSON string when trying to convert to menu schema. Is this actually a menu?"
@@ -36,6 +39,8 @@ class MenuStructurer(ABC):
                 "Did not receive a JSON string from the structurer. Is the image invalid or something?"
             )
             return INVALID_MENU
+
+        logger.debug("CONVERTED TO JSON_DICT", json_dict)
 
         if MenuStructurer._is_not_restaurant_menu(json_dict):
             return INVALID_MENU
