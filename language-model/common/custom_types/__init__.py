@@ -1,2 +1,12 @@
 from .ImageData import ImageData
-from .Menu import MenuItem, MenuSymbol, MenuSection, MenuData, make_invalid_menu
+from .Menu import (
+    MenuItem,
+    MenuSymbol,
+    MenuSection,
+    MenuData,
+    make_invalid_menu,
+    LabeledAllergenMenu,
+    AllergenPrediction,
+    AllergenMenuSection,
+)
+from .SupportedAllergen import SupportedAllergen
