@@ -184,7 +184,17 @@
     btn.className = BTN_ID; // class name most likely weill stay same same as btn id
     btn.textContent = "Can I Eat Here?";
     btn.onclick = () => {
-      alert("Button was clicked!");
+      // alert("Button was clicked!");
+      const menu = document.querySelector('div[aria-label="Menu"]');
+      const carousel = menu.querySelector('div[aria-roledescription="carousel"]');
+
+      const imageLinks = Array.from(
+        carousel.querySelectorAll('img')
+      ).map(img => img.src);
+
+      console.log(imageLinks);
+      alert(imageLinks);
+
     };
 
     // place button in second grid column
