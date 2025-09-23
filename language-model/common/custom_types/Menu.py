@@ -47,3 +47,9 @@ class AllergenMenuSection(MenuSection):
 @dataclass
 class LabeledAllergenMenu:
     sections: List[AllergenMenuSection]
+
+
+def make_invalid_labeled_menu(message: str = "") -> LabeledAllergenMenu:
+    return LabeledAllergenMenu(
+        sections=[AllergenMenuSection("INVALID_MENU", message, [], [])]
+    )

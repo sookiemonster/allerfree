@@ -4,6 +4,8 @@ from common.custom_types import (
     MenuData,
     LabeledAllergenMenu,
     SupportedAllergen,
+    from_string,
+    make_invalid_labeled_menu,
 )
 from json import dumps
 from dataclasses import asdict
@@ -17,7 +19,20 @@ class Detector(ABC):
 
     @staticmethod
     def _to_menu_schema(allergen_menu_str: Optional[str]) -> LabeledAllergenMenu:
-        return LabeledAllergenMenu([])
+        parse_result = from_string(allergen_menu_str)
+        if not parse_result.did_succeed:
+            return make_invalid_labeled_menu(
+                parse_result.error or "(failed without explaining...)"
+            )
+
+        json_dict = parse_result.json_dict
+
+        if "sections" not in json_dict.keys():
+            return make_invalid_labeled_menu(
+                "Received malformed labeled menu data object"
+            )
+
+        return LabeledAllergenMenu(**json_dict)
 
     @staticmethod
     def _menu_to_str(menu: MenuData) -> str:
