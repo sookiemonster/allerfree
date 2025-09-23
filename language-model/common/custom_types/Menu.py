@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Literal
 from enum import StrEnum
 
 
@@ -30,3 +30,26 @@ class MenuData:
 
 def make_invalid_menu(message: str = "") -> MenuData:
     return MenuData(sections=[MenuSection("INVALID_MENU", message, [])])
+
+
+@dataclass
+class AllergenPrediction:
+    allergen_name: str
+    prediction: Literal["VERY_LIKELY", "MAY_CONTAIN", "VERY_UNLIKELY"]
+    explanation: str
+
+
+@dataclass
+class AllergenMenuSection(MenuSection):
+    contains: List[AllergenPrediction]
+
+
+@dataclass
+class LabeledAllergenMenu:
+    sections: List[AllergenMenuSection]
+
+
+def make_invalid_labeled_menu(message: str = "") -> LabeledAllergenMenu:
+    return LabeledAllergenMenu(
+        sections=[AllergenMenuSection("INVALID_MENU", message, [], [])]
+    )
