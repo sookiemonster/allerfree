@@ -183,6 +183,9 @@
     btn.id = BTN_ID; // id so we can presence-check via getElementById
     btn.className = BTN_ID; // class name most likely weill stay same same as btn id
     btn.textContent = "Can I Eat Here?";
+    btn.onclick = () => {
+      alert("Button was clicked!");
+    };
 
     // place button in second grid column
     headerDiv.appendChild(btn);
