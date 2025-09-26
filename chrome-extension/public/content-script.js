@@ -41,10 +41,6 @@
     return JSON.stringify({ href, len, h1, tabs, buttons, lists, head, tail });
   }
   
-  // menu tracker for specifically the menu tab
-  function getMenuRoot() {
-    return document.querySelector('div[aria-label="Menu"]') || null;
-  }
   // dom state tracker over just menu
   function buildMenuSignature(root) {
     if (!root) return null;
@@ -56,6 +52,61 @@
     const tail = text.slice(-180);
     return JSON.stringify({ len, childCount, firstChildTag, head, tail });
   }
+  
+  // menu tracker for specifically the menu tab
+  function getMenuRoot() {
+    return document.querySelector('div[aria-label="Menu"]') || null;
+  }
+
+  function getCarousel(root) {
+    if (!root) return null;
+    return root.querySelector('div[aria-roledescription="carousel"]') || null;
+  }
+  // ============================================
+  //  image State
+  // ============================================
+  let menuImageLinks = []; // <— single source of truth for current menu image URLs
+  
+  // ============================================
+  // grabMenuImages (called on every Menu change)
+  // ============================================
+  function grabMenuImages() {
+    const root = getMenuRoot();
+
+    // If there is no Menu, clear the array and stop
+    if (!root) {
+      menuImageLinks = [];
+      return;
+    }
+
+    const carousel = getCarousel(root);
+
+    // If no carousel exists in the Menu, also clear
+    if (!carousel) {
+      menuImageLinks = [];
+      return;
+    }
+
+    // Collect all image srcs inside the carousel
+    const links = Array.from(carousel.querySelectorAll('img'))
+      .map(img => img?.src?.trim())
+      .filter(Boolean);
+
+    // Deduplicate while preserving order
+    const seen = new Set();
+    const unique = [];
+    for (const url of links) {
+      if (!seen.has(url)) {
+        seen.add(url);
+        unique.push(url);
+      }
+    }
+
+    menuImageLinks = unique;
+    // console.log("[MenuImages]", menuImageLinks);
+  }
+
+
 
   // ============================================
   //  Handle Menu changes when menu is open
@@ -72,8 +123,12 @@
     // If Menu disappeared, clear state and stop.
     if (!root || sig === null) {
       lastMenuSig = null;
+      menuImageLinks = [];
       return;
     }
+
+    // Always update our image list on any menu mutation
+    grabMenuImages();
 
     // If nothing changed and button exists, do nothing.
     if (sig === lastMenuSig && document.getElementById(BTN_ID)) {
@@ -119,6 +174,10 @@
     }
     observedMenuRoot = null;
     lastMenuSig = null;
+
+    // Re-run grabMenuImages; if menu/carousel missing,
+    // it will automatically set menuImageLinks = []
+    grabMenuImages();
   }
 
   // ============================================
@@ -184,17 +243,13 @@
     btn.className = BTN_ID; // class name most likely weill stay same same as btn id
     btn.textContent = "Can I Eat Here?";
     btn.onclick = () => {
-      // alert("Button was clicked!");
-      const menu = document.querySelector('div[aria-label="Menu"]');
-      const carousel = menu.querySelector('div[aria-roledescription="carousel"]');
-
-      const imageLinks = Array.from(
-        carousel.querySelectorAll('img')
-      ).map(img => img.src);
-
-      console.log(imageLinks);
-      alert(imageLinks);
-
+      // Present the current snapshot of links we maintain
+      const msg = menuImageLinks.length
+        ? menuImageLinks.join("\n")
+        : "(No menu images detected)";
+      alert(msg);
+      // Optional: console for developers
+      console.log("[MenuImages snapshot]", menuImageLinks);
     };
 
     // place button in second grid column
