@@ -67,6 +67,22 @@
   // ============================================
   let menuImageLinks = []; // <— single source of truth for current menu image URLs
   
+  
+  // ============================================
+  //  to background service worker communication
+  // ============================================
+  function sendMenuImagesToBackground(images) {
+    console.log("send message", images)
+    try {
+      chrome.runtime?.sendMessage({
+        type: "MENU_IMAGES_UPDATE",
+        images,                 // array of URLs (or objects later)
+        url: location.href,
+      });
+    } catch (_) {}
+  }
+
+  
   // ============================================
   // grabMenuImages (called on every Menu change)
   // ============================================
@@ -76,6 +92,7 @@
     // If there is no Menu, clear the array and stop
     if (!root) {
       menuImageLinks = [];
+      sendMenuImagesToBackground(menuImageLinks);
       return;
     }
 
@@ -84,6 +101,7 @@
     // If no carousel exists in the Menu, also clear
     if (!carousel) {
       menuImageLinks = [];
+      sendMenuImagesToBackground(menuImageLinks);
       return;
     }
 
@@ -103,10 +121,11 @@
     }
 
     menuImageLinks = unique;
+    sendMenuImagesToBackground(menuImageLinks);
     // console.log("[MenuImages]", menuImageLinks);
   }
 
-
+  
 
   // ============================================
   //  Handle Menu changes when menu is open

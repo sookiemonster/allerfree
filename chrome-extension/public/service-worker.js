@@ -1,39 +1,36 @@
-// // test function to put an alert on the page
-// async function injectAlert(tabId, message = "Hello from extension!") {
-//   if (!tabId) return;
-//   try {
-//     await chrome.scripting.executeScript({
-//       target: { tabId },
-//       func: (msg) => alert(msg),
-//       args: [message]
-//     });
-//   } catch (e) {
-//     console.warn("Injection failed:", e);
-//   }
-// }
+// service-worker.js  
 
-// // Tab finished loading
-// chrome.tabs.onUpdated.addListener(async (tabId, info) => {
-//   if (!(await isGoogleMapsTab(tabId))) {
-//     return;
-//   }
+// Minimal "latest only" state
+let latestImages = [];
 
-//   if (info.status !== "complete") {
-//     return;
-//   }
+// Notify all connected popups
+const popupPorts = new Set();
+function notifyPopups() {
+  const payload = { type: "MENU_IMAGES_PUSH", images: latestImages };
+  for (const port of popupPorts) {
+    try { port.postMessage(payload); } catch {}
+  }
+}
 
-//   injectAlert(tabId, "Tab finished loading!");
-// });
+// Receive updates from content scripts
+chrome.runtime.onMessage.addListener((msg, _sender, _sendResponse) => {
+  if (msg?.type === "MENU_IMAGES_UPDATE") {
+    latestImages = Array.isArray(msg.images) ? msg.images : [];
+    notifyPopups();
+  }
+  return false; // no async sendResponse
+});
 
-// async function isGoogleMapsTab(tabId) {
-//   try {
-//     const tab = await chrome.tabs.get(tabId);
-//     return (
-//       tab?.url &&
-//       tab.url.startsWith("https://www.google.") &&
-//       tab.url.includes("/maps")
-//     );
-//   } catch {
-//     return false;
-//   }
-// }
+// Popup connections
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name !== "popup") return;
+  popupPorts.add(port);
+
+  port.onMessage.addListener((msg) => {
+    if (msg?.type === "GET_MENU_IMAGES") {
+      port.postMessage({ type: "MENU_IMAGES_RESULT", images: latestImages });
+    }
+  });
+
+  port.onDisconnect.addListener(() => popupPorts.delete(port));
+});
