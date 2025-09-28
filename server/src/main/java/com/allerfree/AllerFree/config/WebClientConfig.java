@@ -1,4 +1,4 @@
-package com.allerfree.AllerFree;
+package com.allerfree.AllerFree.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

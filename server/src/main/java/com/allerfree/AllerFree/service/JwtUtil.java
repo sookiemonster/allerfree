@@ -1,4 +1,4 @@
-package com.allerfree.AllerFree.config;
+package com.allerfree.AllerFree.service;
 
 import org.springframework.stereotype.Component;
 

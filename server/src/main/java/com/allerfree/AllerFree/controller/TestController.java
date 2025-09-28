@@ -1,4 +1,4 @@
-package com.allerfree.AllerFree;
+package com.allerfree.AllerFree.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +22,6 @@ public class TestController {
 
     @GetMapping("/testAPI2")
     public ResponseEntity<?> dummyAPICall2() {
-        
         return ResponseEntity.ok(new TestResponse(webClient.get().uri("/health").retrieve().bodyToMono(String.class).block()));
     }
 
