@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "fastapi[standard]>=0.118.0",
     "google-api-python-client>=2.181.0",
     "google-cloud>=0.34.0",
     "google-cloud-vision>=3.10.2",
