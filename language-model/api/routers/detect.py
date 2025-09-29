@@ -1,4 +1,11 @@
 from fastapi import APIRouter
+from pydantic import BaseModel, Base64Bytes
+from typing import List
+
+class MenuRequest(BaseModel):
+    allergies: List[str]
+    image_base64: Base64Bytes
+
 
 router = APIRouter(
     prefix="/detect",
@@ -8,5 +15,5 @@ router = APIRouter(
 
 
 @router.get("/menu_image/", tags=["detection"])
-async def menu_image():
+async def menu_image(request: MenuRequest):
     return "Detecting!"
