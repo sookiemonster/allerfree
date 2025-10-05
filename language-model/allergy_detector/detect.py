@@ -28,5 +28,30 @@ async def detect_allergens(
 def aggregate_allergies(
     menus: Dict[SupportedAllergen, LabeledAllergenMenu],
 ) -> LabeledAllergenMenu:
-    raise Exception("not implemented yet")
-    # allergens = menus.keys()
+    allergens = list(menus.keys())
+    agg_menu = menus.pop(allergens[0])
+
+    if len(menus) == 0:
+        return agg_menu
+
+    for section in agg_menu.sections:
+        for other_menu in menus.values():
+            same_section = next(
+                (s2 for s2 in other_menu.sections if s2.section == section.section),
+                None,
+            )
+
+            if not same_section:
+                continue
+
+            for item in section.items:
+                same_item = next(
+                    (i for i in same_section.items if item.name == i.name), None
+                )
+
+                if not same_item or not same_item.contains:
+                    continue
+
+                item.contains = (item.contains or []) + same_item.contains
+
+    return agg_menu
