@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import List, Union
+from typing import List, Union, Dict
 from common.custom_types import (
     LabeledAllergenMenu,
     SupportedAllergen,
@@ -9,12 +9,16 @@ from common.custom_types import (
     MenuData,
 )
 from menu_reader import read_menu
-from allergy_detector import detect_allergens
+from allergy_detector import detect_allergens, aggregate_allergies
 
 
 class MenuRequest(BaseModel):
     allergies: List[SupportedAllergen]
     image: ImageData
+
+
+class MenuResponse(BaseModel):
+    menus: Dict[SupportedAllergen, LabeledAllergenMenu]
 
 
 router = APIRouter(
@@ -42,10 +46,11 @@ async def menu_image(
 ) -> LabeledAllergenMenu:
     validate_request_content(request)
 
-    ocr_menu = read_menu(request.image)
+    ocr_menu = await read_menu(request.image)
     validate_menu_stage(ocr_menu)
 
-    labeled_menu = detect_allergens(menu=ocr_menu, allergens=request.allergies)
-    validate_menu_stage(labeled_menu)
+    labeled_menus = await detect_allergens(menu=ocr_menu, allergens=request.allergies)
+    for menu in labeled_menus.values():
+        validate_menu_stage(menu)
 
-    return labeled_menu
+    return await aggregate_allergies(labeled_menus)

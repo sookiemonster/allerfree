@@ -47,14 +47,14 @@ class Detector(ABC):
                 raise Exception("Unhandled allergen.")
 
     @classmethod
-    def _get_prompt(cls, menu: MenuData, allergen: SupportedAllergen) -> str:
-        return make_prompt(
+    async def _get_prompt(cls, menu: MenuData, allergen: SupportedAllergen) -> str:
+        return await make_prompt(
             cls._get_template_filename(allergen),
             menu_data_str=Detector._menu_to_str(menu),
         )
 
     @abstractmethod
-    def detect_allergen(
+    async def detect_allergen(
         self, menu: MenuData, allergen: SupportedAllergen
     ) -> LabeledAllergenMenu:
         pass
