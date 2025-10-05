@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 from common.custom_types import MenuData, ImageData, make_invalid_menu
 from common.prompts import make_prompt
+from pydantic import ValidationError
 import json
 
 logger = getLogger(__name__)
@@ -44,13 +45,16 @@ class MenuStructurer(ABC):
         if err := MenuStructurer._get_menu_error(json_dict):
             return make_invalid_menu(err)
 
-        return MenuData(**json_dict)
+        try:
+            return MenuData.model_validate(json_dict)
+        except ValidationError as e:
+            return make_invalid_menu(f"Pydantic validation error: {e}")
 
-    def _get_prompt(self, unstructured_ocr_text: str) -> str:
-        return make_prompt(
+    async def _get_prompt(self, unstructured_ocr_text: str) -> str:
+        return await make_prompt(
             MenuStructurer.TEMPLATE_FILE, unstructured_ocr_text=unstructured_ocr_text
         )
 
     @abstractmethod
-    def structure(self, unstructured_ocr_text: str, img: ImageData) -> MenuData:
+    async def structure(self, unstructured_ocr_text: str, img: ImageData) -> MenuData:
         pass
