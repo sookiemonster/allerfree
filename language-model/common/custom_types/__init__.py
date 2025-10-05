@@ -10,7 +10,6 @@ from .Menu import (
     is_invalid_menu,
     LabeledAllergenMenu,
     AllergenPrediction,
-    AllergenMenuSection,
 )
 from .SupportedAllergen import SupportedAllergen
 from .from_string import from_string

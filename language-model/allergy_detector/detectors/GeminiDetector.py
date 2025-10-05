@@ -21,7 +21,7 @@ class GeminiDetector(Detector):
         menu: MenuData,
         allergen: SupportedAllergen,
     ) -> LabeledAllergenMenu:
-        prompt = self._get_prompt(menu, allergen)
+        prompt = await self._get_prompt(menu, allergen)
 
         logger.info("Attempting to check %s with prompt: \n%s", allergen, prompt)
 

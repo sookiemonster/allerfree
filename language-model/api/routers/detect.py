@@ -50,7 +50,8 @@ async def menu_image(
     validate_menu_stage(ocr_menu)
 
     labeled_menus = await detect_allergens(menu=ocr_menu, allergens=request.allergies)
+
     for menu in labeled_menus.values():
         validate_menu_stage(menu)
 
-    return await aggregate_allergies(labeled_menus)
+    return aggregate_allergies(labeled_menus)
