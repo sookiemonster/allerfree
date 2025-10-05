@@ -36,6 +36,7 @@ def aggregate_allergies(
 
     for section in agg_menu.sections:
         for other_menu in menus.values():
+
             same_section = next(
                 (s2 for s2 in other_menu.sections if s2.section == section.section),
                 None,

@@ -17,8 +17,7 @@ async def read_menu_using_structurer(
             "Failed to OCR the image. Likely the image byte data is malformed, or, possibly, contains no text."
         )
 
-    menu_data = structurer.structure(ocr_text, img)
-    return menu_data
+    return await structurer.structure(ocr_text, img)
 
 
 async def read_menu(img: ImageData) -> MenuData:

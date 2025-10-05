@@ -26,17 +26,17 @@ Use the following lists to inform your predictions. Pay close attention to the "
 
 You must analyze each item and assign a prediction based on the following rules. Your explanation should be concise and justify your choice.
 
-Predict **"very likely"** if:
+Predict "VERY_LIKELY" if:
 * The dish explicitly contains a common source of shellfish (e.g., "shrimp scampi," "lobster roll," "fried calamari").
 * The dish contains an ingredient known to be a surprising or hidden source of shellfish, based on the reference list (e.g., a stir-fry containing oyster sauce, Pad Thai which typically uses fish sauce).
 * The dish is named in a way that implies a seafood mixture (e.g., "Seafood Delight," "Fruits de Mer," "Cioppino").
 
-Predict **"may contain"** if:
+Predict "MAY_CONTAIN" if:
 * The dish is prepared in a way that introduces a high risk of cross-contamination, such as being fried in a shared fryer with breaded shrimp or calamari (e.g., french fries at a seafood restaurant).
 * Ingredients are ambiguous and could plausibly contain hidden shellfish (e.g., "house special sauce," "seafood broth," "Caesar dressing").
 * The dish is from a cuisine type that heavily uses shellfish-derived ingredients (e.g., Thai, Vietnamese, Cajun) even if not explicitly listed.
 
-Predict **"very unlikely"** if:
+Predict "VERY_UNLIKELY" if:
 * The dish is explicitly marked as shellfish-free  and there are no warnings about cross-contamination.
 * The dish consists entirely of ingredients that are naturally shellfish-free and is from a cuisine that doesn't rely heavily on shellfish bases (e.g., a simple chicken parmesan, a vegan lentil soup, a beef steak with roasted potatoes).
 
@@ -73,7 +73,7 @@ Consider the following example output:
                 "contains": [
                     {
                         "allergen" : "shellfish",
-                        "prediction" : "very likely",
+                        "prediction" : "VERY_LIKELY",
                         "explanation" : "The savory sauce in traditional Pad Thai often contains fish sauce, which is frequently made with fermented shrimp."
                     }
                 ]
@@ -85,7 +85,7 @@ Consider the following example output:
                 "contains": [
                     {
                         "allergen" : "shellfish",
-                        "prediction" : "may contain",
+                        "prediction" : "MAY_CONTAIN",
                         "explanation" : "The section description warns that the fryer is shared with shrimp, posing a high risk of cross-contamination."
                     }
                 ]
@@ -97,7 +97,7 @@ Consider the following example output:
                 "contains": [
                     {
                         "allergen" : "shellfish",
-                        "prediction" : "very likely",
+                        "prediction" : "VERY_LIKELY",
                         "explanation" : "Authentic Thai curry pastes, which form the base of the dish, almost always contain shrimp paste as a key flavoring ingredient."
                     }
                 ]

@@ -34,4 +34,8 @@ class GeminiDetector(Detector):
             ),
         )
 
+        print("START RESPONSE TEXT")
+        print(response.text)
+        print("END RESPONSE TEXT")
+
         return Detector._to_menu_schema(response.text)
