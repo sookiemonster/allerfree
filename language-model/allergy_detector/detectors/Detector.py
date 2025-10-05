@@ -49,6 +49,8 @@ class Detector(ABC):
                 return "detect_gluten.j2"
             case SupportedAllergen.SHELLFISH:
                 return "detect_shellfish.j2"
+            case SupportedAllergen.TREE_NUTS:
+                return "detect_tree_nuts.j2"
             case _:
                 raise Exception("Unhandled allergen.")
 
