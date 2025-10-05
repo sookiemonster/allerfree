@@ -1,1 +1,1 @@
-from .detect import detect_allergen
+from .detect import detect_allergen, detect_allergens

@@ -1,19 +1,51 @@
-from fastapi import APIRouter
-from pydantic import BaseModel, Base64Bytes
-from typing import List
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from typing import List, Union
+from common.custom_types import (
+    LabeledAllergenMenu,
+    SupportedAllergen,
+    ImageData,
+    is_invalid_menu,
+    MenuData,
+)
+from menu_reader import read_menu
+from allergy_detector import detect_allergens
+
 
 class MenuRequest(BaseModel):
-    allergies: List[str]
-    image_base64: Base64Bytes
+    allergies: List[SupportedAllergen]
+    image: ImageData
 
 
 router = APIRouter(
     prefix="/detect",
-    # # dependencies=[],
-    # responses={404: {"description": "Not found"}},
+    responses={404: {"description": "Not found"}},
 )
 
 
-@router.get("/menu_image/", tags=["detection"])
-async def menu_image(request: MenuRequest):
-    return "Detecting!"
+def validate_request_content(request: MenuRequest) -> None:
+    return
+    raise HTTPException(status_code=404, detail="Error!")
+
+
+def validate_menu_stage(menu_data: Union[MenuData, LabeledAllergenMenu]) -> None:
+
+    is_invalid, reason = is_invalid_menu(menu_data)
+
+    if is_invalid:
+        raise HTTPException(status_code=404, detail=reason)
+
+
+@router.post("/menu_image/", tags=["detection"])
+async def menu_image(
+    request: MenuRequest,
+) -> LabeledAllergenMenu:
+    validate_request_content(request)
+
+    ocr_menu = read_menu(request.image)
+    validate_menu_stage(ocr_menu)
+
+    labeled_menu = detect_allergens(menu=ocr_menu, allergens=request.allergies)
+    validate_menu_stage(labeled_menu)
+
+    return labeled_menu

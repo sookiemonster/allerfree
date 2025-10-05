@@ -1,6 +1,8 @@
 from dataclasses import dataclass
-from typing import List, Literal
+from typing import List, Literal, Union, Tuple
 from enum import StrEnum
+
+INVALID_MENU_STRING = "!INVALID_MENU!"
 
 
 class MenuSymbol(StrEnum):
@@ -29,7 +31,7 @@ class MenuData:
 
 
 def make_invalid_menu(message: str = "") -> MenuData:
-    return MenuData(sections=[MenuSection("INVALID_MENU", message, [])])
+    return MenuData(sections=[MenuSection(INVALID_MENU_STRING, message, [])])
 
 
 @dataclass
@@ -51,5 +53,17 @@ class LabeledAllergenMenu:
 
 def make_invalid_labeled_menu(message: str = "") -> LabeledAllergenMenu:
     return LabeledAllergenMenu(
-        sections=[AllergenMenuSection("INVALID_MENU", message, [], [])]
+        sections=[AllergenMenuSection(INVALID_MENU_STRING, message, [], [])]
     )
+
+
+def is_invalid_menu(
+    menu_data: Union[MenuData, LabeledAllergenMenu],
+) -> Tuple[bool, str]:
+    if len(menu_data.sections) == 0:
+        return True, "No sections present in the menu object."
+
+    if menu_data.sections[0].section == INVALID_MENU_STRING:
+        return True, menu_data.sections[0].description
+
+    return False, ""
