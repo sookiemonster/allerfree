@@ -37,17 +37,17 @@ Analysis and Prediction Guidelines
 
 You must analyze each item and assign a prediction based on the following rules. Your explanation should be concise and justify your choice.
 
-Predict "very likely" if:
+Predict "VERY_LIKELY" if:
 * The dish explicitly contains a common source of gluten (e.g., "wheat bread," "pasta," "rye toast").
 * The dish contains an ingredient known to be a surprising or hidden source of gluten, based on the reference list (e.g., a dish with soy sauce, imitation crab, or malt vinegar).
 * The dish description includes keywords like "breaded," "battered," "crispy," or "in a pastry."
 * The dish is marked as gluten-free ("GF"), but the menu includes a strong warning about cross-contamination for that specific item type (e.g., "gluten-free crust prepared on the same floured surface").
 
-Predict "may contain" if:
+Predict "MAY_CONTAIN" if:
 * The dish is prepared in a way that introduces a high risk of cross-contamination, such as being fried in a shared fryer with breaded items (e.g., french fries).
 * Ingredients are ambiguous and could potentially contain gluten (e.g., "thick gravy," "special sauce," "grain blend").
 
-Predict "very unlikely" if:
+Predict "VERY_UNLIKELY" if:
 * The dish is explicitly marked as gluten-free ("GF") and there are no warnings about cross-contamination.
 * The dish consists entirely of naturally gluten-free ingredients (e.g., steamed vegetables, grilled steak with salt and pepper, plain rice) and has no sauces or complex seasonings mentioned.
 
@@ -85,7 +85,7 @@ Consider the following example output:
                 "contains": [
                     {
                         "allergen" : "gluten",
-                        "prediction" : "very likely",
+                        "prediction" : "VERY_LIKELY",
                         "explanation" : "The section descrption outlines that pizzas come on a wheat crust by default, and wheat is not gluten-free."
                     }
                 ]
@@ -99,7 +99,7 @@ Consider the following example output:
                 "contains": [
                     {
                     "allergen" : "gluten",
-                    "prediction" : "very likely",
+                    "prediction" : "VERY_LIKELY",
                     "explanation" : "While the crust is gluten-free as per the GF symbol and menu description, the menu also mentions that all pizzas are made on the same floured surface, so it is likely not gluten-free."
                     }
                  ]
@@ -119,7 +119,7 @@ Consider the following example output:
                 "contains": [
                     {
                     "allergen" : "gluten",
-                    "prediction" : "may contain",
+                    "prediction" : "MAY_CONTAIN",
                     "explanation" : "Fries don't typically gluten ingredients, but the oil it's fried in may used to fry dishes with non-gluten-free ingredients."
                     }
                 ]

@@ -5,6 +5,7 @@ import Home from "./pages/Home"
 import Results from "./pages/Results"
 import Profiles from "./pages/Profiles"
 import Allergies from "./pages/Allergies"
+import Test from "./pages/Test"
 
 function App() {
   	
@@ -15,6 +16,7 @@ function App() {
 				<Route path="/results" element={<Results />} />
 				<Route path="/profiles" element={<Profiles />} />
 				<Route path="/allergies" element={<Allergies />} />
+				<Route path="/test" element={<Test />} />
     		</Routes>
 		</>
 	)
