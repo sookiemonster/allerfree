@@ -3,6 +3,48 @@
 // Minimal "latest only" state
 let latestImages = [];
 
+// Global selected profile
+let currentSelectedProfile = "Kyle";
+
+// Placeholder profiles map
+const SAMPLE_PROFILES = {
+  Kyle:   { 
+    profile_name: "Kyle",   
+    allergens: [] 
+  },
+  Kelly:  { 
+    profile_name: "Kelly",  
+    allergens: [
+      { sensitivity: "SEVERE", allergen: "gluten" },
+      { sensitivity: "SEVERE", allergen: "gluten" },
+    ] 
+  },
+  Daniel: { 
+    profile_name: "Daniel", 
+    allergens: [
+      { sensitivity: "SEVERE", allergen: "gluten" },
+      { sensitivity: "SEVERE", allergen: "nuts" },
+      { sensitivity: "SEVERE", allergen: "shellfish" },
+    ] 
+  },
+  Thomas: { 
+    profile_name: "Thomas", 
+    allergens: [
+      { sensitivity: "MILD", allergen: "gluten" },
+      { sensitivity: "MILD", allergen: "shellfish" },
+    ] 
+  },
+};
+
+// Returns JSON with a single profile
+function getSampleProfileData() {
+  return {
+    profile: SAMPLE_PROFILES[currentSelectedProfile],
+  };
+}
+
+
+
 // Notify all connected popups
 const popupPorts = new Set();
 function notifyPopups() {
@@ -52,6 +94,13 @@ chrome.runtime.onConnect.addListener((port) => {
           });
         });
     }
+
+    if (msg?.type === "GET_SAMPLE_PROFILE_DATA") {
+        port.postMessage({
+          type: "SAMPLE_PROFILE_DATA_RESULT",
+          ...getSampleProfileData(),
+        });
+      }
   });
 
  

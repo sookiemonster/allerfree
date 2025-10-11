@@ -1,13 +1,51 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+type Sensitivity = "MILD" | "SEVERE";
+type Allergen = {
+  allergen: string;
+  sensitivity: Sensitivity;
+}
+type Profile = {
+  profile_name: string;
+  allergens: Allergen[];
+}
+type GetSampleProfile = { type: "SAMPLE_PROFILE_DATA_RESULT"; profile: Profile; }
+
+// UI types stay the same
+type UiSeverity = "severe" | "mild";
+type UiAllergy = { name: string; severity: UiSeverity; icon: string };
+
+const toUiSeverity = (s: Sensitivity): UiSeverity => (s === "MILD" ? "mild" : "severe");
 
 function Profiles()
 {
-    const [savedAllergies] = useState([
+    const [savedAllergies, setSavedAllergies] = useState([
         { name: "gluten", severity: "severe", icon: "🌾" },
         { name: "soy", severity: "severe", icon: "🫘" },
         { name: "sesame", severity: "mild", icon: "⚪" }
     ]);
+
+
+    useEffect(() => {
+        const port = chrome.runtime.connect({ name: "popup" });
+
+        port.onMessage.addListener((msg: GetSampleProfile) => {
+            if (msg.type === "SAMPLE_PROFILE_DATA_RESULT") {
+            const profile = msg.profile;
+            const uiAllergies: UiAllergy[] = (profile?.allergens ?? []).map(a => ({
+                name: a.allergen,                 // <-- use `allergen`
+                severity: toUiSeverity(a.sensitivity),
+                icon: "😈",
+            }));
+            setSavedAllergies(uiAllergies);
+            }
+        });
+
+        port.postMessage({ type: "GET_SAMPLE_PROFILE_DATA" });
+
+        return () => { try { port.disconnect(); } catch {} };
+    }, []);
 
     return(
         <div className="profiles-page">
