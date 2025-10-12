@@ -1,0 +1,49 @@
+Consider the list of ingredients that typically contain gluten. 
+
+ingredient: Wheat and its derivatives (Flour, Durum, Semolina, Spelt, Farro, Kamut)
+explanation: This is the most prevalent gluten-containing grain and the foundation of most baked goods. Flour is the milled powder of wheat, while varieties like Spelt and Farro are popular "ancient grains" that still contain gluten.
+associated food items: bread, pasta, pizza crust, cakes, cookies, pastries, bagels, tortillas, pancakes, waffles, crackers
+
+ingredient: Rye
+explanation: A cereal grain that's closely related to wheat. It's well-known for its use in specific types of bread and spirits, imparting a distinct, slightly sour flavor.
+associated food items: rye bread, pumpernickel bread, some crackers, rye whiskey, some beers
+
+ingredient: Barley
+explanation: A versatile grain often found in whole or "pearled" form. While its derivative, malt, is a common hidden ingredient, barley itself is frequently used in hearty dishes like soups and stews.
+associated food items: beef and barley soup, stews, some multigrain hot cereals, beer brewing
+
+ingredient: Breadcrumbs and Batters
+explanation: These crispy coatings are almost always made from dried wheat bread or wheat flour. Any food described as "breaded," "crispy," "battered," or "fried" likely has a gluten-containing coating.
+associated food items: fried chicken, onion rings, chicken nuggets, fish and chips, schnitzel, crab cakes
+
+ingredient: Soy Sauce (and Teriyaki Sauce)
+explanation: While the primary ingredient is soybeans, traditional soy sauce is brewed with roasted wheat, which is a crucial part of the fermentation process. Teriyaki sauce is typically made with a soy sauce base. (Note: Tamari is a similar sauce often made without wheat and is a common gluten-free alternative).
+associated food items: sushi (for dipping), marinades, stir-fries, fried rice, dipping sauces, Asian food (Japanese, Chinese, and Korean dishes like ramen, General Tso's chicken, bulgogi)
+
+ingredient: Malt (Malt Syrup, Malt Extract, Malt Vinegar)
+explanation: Malt is produced from a germinated cereal grain, which is almost always barley. Barley contains gluten. Any ingredient with "malt" in the name should be considered a source of gluten unless specified otherwise.
+associated food items: beer, malted milkshakes, some breakfast cereals (e.g., Raisin Bran), chocolate candy (e.g., Whoppers), malt vinegar for potato chips and dressings
+
+ingredient: Seitan
+explanation: This popular vegetarian and vegan meat substitute is made almost entirely from hydrated vital wheat gluten. It is essentially a concentrated block of gluten, prized for its chewy, meat-like texture. 🥩
+associated food items: vegetarian "meats" (mock duck, meatless sausages, veggie burgers), some plant-based deli slices, vegan stir-fries
+
+ingredient: Couscous
+explanation: Despite its appearance as a tiny grain, couscous is actually a type of pasta. It is made from small granules of semolina flour, which is derived from durum wheat.
+associated food items: side dishes in Mediterranean and North African cuisine, salads, tagines
+
+ingredient: Imitation Crab Meat (Surimi)
+explanation: Surimi is a paste made from fish (often pollock) that is processed and formed to resemble crab leg meat. Wheat starch is almost always added as a primary binder to give it a firm, desirable texture. 🦀
+associated food items: California rolls, seafood salads, crab rangoon, some frozen seafood medleys
+
+ingredient: Bouillon Cubes & some Packaged Broths
+explanation: Many brands of bouillon cubes, powders, and pre-packaged liquid broths use wheat flour or wheat proteins as a filler or thickening agent. Another common ingredient, yeast extract, can sometimes be derived from spent brewer's yeast (from beer manufacturing), which contains barley.
+associated food items: soups, stews, gravies, sauces, risotto, seasoning for rice
+
+ingredient: Licorice
+explanation: Traditional black licorice candy is often made using wheat flour as a binder to hold the ingredients together and provide its classic chewy consistency.
+associated food items: black licorice twists, licorice-based candies
+
+ingredient: Modified Food Starch
+explanation: This is a broad term for a starch that has been chemically altered to perform better in food processing (e.g., as a thickener or stabilizer). While often derived from corn, potato, or tapioca (which are gluten-free), it can also be derived from wheat. In many regions, if it comes from wheat, it must be declared on the label (e.g., "modified food starch (wheat)"), but it is an easy detail to overlook.
+associated food items: canned soups, salad dressings, instant pudding, frozen meals, sauces, gravies

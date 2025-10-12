@@ -22,9 +22,16 @@
     "content_scripts": [
     {
       "matches": ["https://www.google.com/maps/*"],
-      "js": ["content-script.js"],
+      "js": [
+        "content/utils.js",
+        "content/dom.js",
+        "content/menu-scrape.js",
+        "content/menu.js",
+        "content/index.js"
+      ],
       "run_at": "document_idle",
-      "all_frames": false
+      "all_frames": false,
+      "css": ["button.css"]
     }
   ]
 }

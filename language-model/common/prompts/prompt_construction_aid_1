@@ -1,0 +1,68 @@
+Now you are trying to create an LLM agent that predicts whether a given user can eat at a given restaurant. 
+
+Use this to construct a prompt for a generative LLM model that analyzes a text menu input and outputs a list of dishes on 
+the menu and predicts how likely they are to contain gluten outputting three possible values "very unlikely", "may contain", or "very likely", and an explanation on why.
+
+
+The input dishes will detail the dish name, a brief description, and any symbols found (eg. GF for gluten-free). 
+Ensure that the prompt specifies the following output structure, based on the following example. 
+The input itself will have the a similar schema, the difference being that it will not have the "contains" attribute for any of the dishes. 
+{
+"sections" : [
+    {
+        "section" : "Lunch",
+        "description" : "All pizzas, unless specified, come on a wheat crust. Gluten-free crusts available, but prepared on the same floured surface."
+        "items" : [
+            {
+
+                "name": "Margherita Pizza",
+
+                "description": "Classic tomato sauce, fresh mozzarella, and basil."
+
+                "symbols": [],
+                "contains": [
+                    {
+                        "allergen" : "gluten",
+                        "prediction" : "very likely",
+                        "explanation" : "The section descrption outlines that pizzas come on a wheat crust by default, and wheat is not gluten-free."
+                    }
+                ]
+            },
+            {
+                "name": "Cauliflower Herb Pizza",
+                "description": "Classic tomato sauce, fresh mozzarella, basil, and fresh herbs & spices on a gluten-free cauliflower crust.",
+                "symbols": [
+                    "GF"
+                ],
+                "contains": [
+                    {
+                    "allergen" : "gluten",
+                    "prediction" : "very likely",
+                    "explanation" : "While the crust is gluten-free as per the GF symbol and menu description, the menu also mentions that all pizzas are made on the same floured surface, so it is likely not gluten-free."
+                    }
+                 ]
+            }
+        ]
+    },
+    {
+        "section" : "Sides"
+        "description" : ""
+        "items" : [
+            {
+                "name": "French Fries",
+                "description": "Classic french fries, seasoned with salt and fried in peanut oil."
+                "symbols": [
+                    "GF",  "VG"
+                ],
+                "contains": [
+                    {
+                    "allergen" : "gluten",
+                    "prediction" : "may contain",
+                    "explanation" : "Fries don't typically gluten ingredients, but the oil it's fried in may used to fry dishes with non-gluten-free ingredients."
+                    }
+                ]
+            },
+        ]
+    }
+]
+}

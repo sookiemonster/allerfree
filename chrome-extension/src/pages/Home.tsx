@@ -1,45 +1,18 @@
-import reactLogo from '../assets/react.svg';
-import viteLogo from '/vite.svg'
+import { Link } from "react-router-dom";
 
 function Home()
 {
-    const onclick = async () => {
-    	let [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
-		chrome.scripting.executeScript({
-			target: { tabId: tab.id! },
-			func: () => {
-				alert('hello worl');
-				document.body.style.backgroundColor = 'navy';
-			}
-		});
-	}
-    
     return(
-        <>
-			<div>
-				<a href="https://vite.dev" target="_blank">
-				<img src={viteLogo} className="logo" alt="Vite logo" />
-				</a>
-				<a href="https://react.dev" target="_blank">
-				<img src={reactLogo} className="logo react" alt="React logo" />
-				</a>
-			</div>
-			<h1>Home</h1>
-			<div className="card">
-				<button onClick={()=> console.log('print')}>
-				{/* count is {count} */}printets
-				</button>
-				<button onClick={()=> onclick()}>
-				{/* count is {count} */}alert
-				</button>
-				<p>
-				Edit <code>src/App.tsx</code> and save to test HMR
-				</p>
-			</div>
-			<p className="read-the-docs">
-				Click on the Vite and React logos to learn more
-			</p>
-		</>
-
+        <div className="home-page">
+            <div className="home-content">
+                <img src="/wheat-icon.png" alt="Wheat icon" className="home-wheat-icon" />
+                <h1 className="home-title">Allerfree</h1>
+                <Link to="/profiles">
+                    <button className="circle-arrow-btn">
+                        →
+                    </button>
+                </Link>
+            </div>
+        </div>
     )
 } export default Home
