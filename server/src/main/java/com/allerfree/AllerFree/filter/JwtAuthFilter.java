@@ -34,8 +34,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try{
             String token = getTokenFromRequest(request);
-
-            if (token != null && !jwtUtil.tokenIsExpired(token)) {
+            if (token != null && !jwtUtil.tokenIsExpired(token)){
                 System.out.println("Adding user to security context");
                 if (jwtUtil.getUsername(token).equals("username")){ //Supposed to load user from database and compare with data stored in token -> but we don't actually have user accounts
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
@@ -45,19 +44,25 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken); //Adds authToken to security context
                 }
-                
-                //See if user was added to security context
-                Authentication authentication = SecurityContextHolder.getContext().getAuthentication(); 
-                if (authentication != null && authentication.isAuthenticated()) {
-                    System.out.print("In security context: ");
-                    System.out.println(authentication.getName());
-                }
+                    
+                // //See if user was added to security context
+                // Authentication authentication = SecurityContextHolder.getContext().getAuthentication(); 
+                // if (authentication != null && authentication.isAuthenticated()) {
+                //     System.out.print("In security context: ");
+                //     System.out.println(authentication.getName());
+                // }
             }
             //Continue request chain
             chain.doFilter(request, response);
-        }catch (Exception e){
+        }catch (io.jsonwebtoken.security.SignatureException e){
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Error: Unauthorized");
+            response.getWriter().write("Error: Invalid token");
+        }catch (io.jsonwebtoken.ExpiredJwtException e2){
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Error: Token has expired");
+        }catch (Exception e3){ //Need to fix catch all scenario (instead of just receiving 403 Forbidden)
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("Error: Something went wrong");
         }
         
     }
