@@ -13,7 +13,7 @@ public class JwtUtil {
 
     public String generateToken() {
         Date timeNow = new Date();
-        Date validUntil = new Date(timeNow.getTime() + 1 * 60 * 1000); //Expires in 30 minutes
+        Date validUntil = new Date(timeNow.getTime() + 30 * 60 * 1000); //Expires in 30 minutes
 
         return Jwts.builder()
             .subject("username")
