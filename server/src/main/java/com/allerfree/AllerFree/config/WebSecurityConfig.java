@@ -23,7 +23,7 @@ public class WebSecurityConfig {
         return http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                                                        .requestMatchers("/testAPI2", "/requestToken", "/detect").permitAll() //Anyone can access these endpoints
+                                                        .requestMatchers("/requestToken", "/detect").permitAll() //Anyone can access these endpoints
                                                         .anyRequest().authenticated()) //All other endpoints need authentication
             .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
