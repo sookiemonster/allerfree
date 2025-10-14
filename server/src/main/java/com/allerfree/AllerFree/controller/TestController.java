@@ -1,37 +1,95 @@
 package com.allerfree.AllerFree.controller;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.allerfree.AllerFree.payload.response.TestResponse;
+import com.allerfree.AllerFree.dto.AllergenDetection;
+import com.allerfree.AllerFree.dto.AllergenPrediction;
+import com.allerfree.AllerFree.dto.Allergy;
+import com.allerfree.AllerFree.dto.Image;
+import com.allerfree.AllerFree.dto.MenuItem;
+import com.allerfree.AllerFree.dto.MenuOutput;
+import com.allerfree.AllerFree.dto.MenuRequest;
+import com.allerfree.AllerFree.dto.MenuResponse;
+import com.allerfree.AllerFree.dto.MenuSection;
+import com.allerfree.AllerFree.dto.Profile;
 
 @RestController
 public class TestController {    
     @Autowired
     private WebClient webClient;
+
+    private final List<String> mimeTypes = Arrays.asList("image/jpeg", "image/png");
+
+    @PostMapping("/detect")
+    public ResponseEntity<MenuResponse> detectAllergens(@RequestBody AllergenDetection ad){
+        //For input validation
+        List<Integer> successful = new ArrayList<Integer>();
+        HashMap<Integer, String> failed = new HashMap<Integer, String>();
+
+        Set<String> allergySet = new HashSet<>(); //Combine all allergies into a set
+        for (Profile profile : ad.getProfiles()){
+            for (Allergy allergy : profile.getAllergens()){
+                allergySet.add(allergy.getAllergen());
+            }
+        }
+
+        MenuResponse menuResults = new MenuResponse(); //Object to deserialize response from LLM API
+        MenuRequest requestBody = new MenuRequest(); //Object to serialize as request body for LLM API
+        
+        requestBody.setAllergies(allergySet);
+        int imgCounter = 0;
+        for (Image img : ad.getImages()){ //Send one image at a time to LLM API
+
+            if (!Base64.isBase64(img.getBase64().getBytes())){ //Skip images not Base64 encoded
+                failed.put(imgCounter, "Image is not Base64 encoded");
+            }else if (!mimeTypes.contains(img.getMime_type())){ //Skip images with invalid mime types
+                failed.put(imgCounter,"Invalid mime type");
+            }else{ //Attempt to send image to LLM API
+                requestBody.setImage(img);
+                try{
+                    //Make POST requests to LLM API and store in menuResults
+                    MenuOutput output = webClient.post().uri("/detect/menu_image/").contentType(MediaType.APPLICATION_JSON).bodyValue(requestBody).retrieve().bodyToMono(MenuOutput.class).block(); //Should make this call async?
+                    menuResults.combineSections(output.getSections()); //Aggregate results from LLM into one MenuResponse object
+                    successful.add(imgCounter);
+                }catch (Exception e){ //Temporary error handling
+                    failed.put(imgCounter,"SOMETHING WENT WRONG WITH POST REQUEST TO LLM API: " + e.getMessage());
+                }
+            }
+
+            imgCounter++;
+        }
+
+        //Parse + Format Response
+            //For each profile name -> different menu result
+                //Only include their specific allergens
+                //If HIGH sensitivity bump up prediction by one (i.e. MAY_CONTAIN -> VERY_LIKELY)
+            //Deal with duplicate items (maybe from same menu page being sent)
+
+        menuResults.setFailed(failed);
+        menuResults.setSuccessful(successful);
+        return ResponseEntity.ok(menuResults);
+        
+    }
     
-    @GetMapping("/testAPI")
-    public ResponseEntity<?> dummyAPICall() {
-        System.out.println("GET REQUEST");
-        System.out.println(webClient.get().uri("/health").retrieve().bodyToMono(String.class).block());
-        return ResponseEntity.ok(new TestResponse(webClient.get().uri("/health").retrieve().bodyToMono(String.class).block()));
+    @ExceptionHandler
+    public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
-
-    @GetMapping("/testAPI2")
-    public ResponseEntity<?> dummyAPICall2(){
-        String originalInput = "TEST";
-        String encodedString = new String(Base64.encodeBase64(originalInput.getBytes()));
-        System.out.println(Base64.isBase64(encodedString.getBytes()));
-        return ResponseEntity.ok(new TestResponse(webClient.get().uri("/health").retrieve().bodyToMono(String.class).block()));
-    }
-
-    @GetMapping("/testAPI3")
-    public String dummyAPICall3() {
-        System.out.println("GET REQUEST 3");
-        return "SUCCESS";
-    }
+    
 }
