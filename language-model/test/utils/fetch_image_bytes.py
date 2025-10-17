@@ -5,7 +5,7 @@ from common.custom_types import ImageData
 from typing import Tuple, Optional
 
 
-def fetch_image_as_base64(url: str) -> Optional[Tuple[bytes, str]]:
+def fetch_image_from_url(url: str) -> Optional[Tuple[bytes, str]]:
     """
     Fetches an image from a URL and returns its base64 content and MIME type.
 
