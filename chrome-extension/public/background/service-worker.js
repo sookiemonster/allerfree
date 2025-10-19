@@ -4,14 +4,12 @@ import { getSampleProfileData } from "./profileData.js";
 
 import { openPopupWithRoute } from "./resultsPopupUtils.js";
 import { buildMenuAnalysisStringResponse } from "./menuAnalysis.js";
-
-// Minimal "latest only" state
-let latestImages = [];
+import { getLatestImages, setLatestImages } from "./menuState.js"; 
 
 // Notify all connected popups
 const popupPorts = new Set();
 function notifyPopups() {
-  const payload = { type: "MENU_IMAGES_PUSH", images: latestImages };
+  const payload = { type: "MENU_IMAGES_PUSH", images: getLatestImages() };
   for (const port of popupPorts) {
     try { port.postMessage(payload); } catch {}
   }
@@ -21,7 +19,7 @@ function notifyPopups() {
 chrome.runtime.onMessage.addListener((msg, _sender, _sendResponse) => {
   switch (msg?.type) {
     case "MENU_IMAGES_UPDATE": {
-      latestImages = Array.isArray(msg.images) ? msg.images : [];
+      setLatestImages(Array.isArray(msg.images) ? msg.images : []);
       notifyPopups();
       break;
     }
@@ -50,12 +48,12 @@ chrome.runtime.onConnect.addListener((port) => {
   port.onMessage.addListener((msg) => {
     switch (msg?.type) {
       case "GET_MENU_IMAGES": {
-        port.postMessage({ type: "MENU_IMAGES_RESULT", images: latestImages });
+        port.postMessage({ type: "MENU_IMAGES_RESULT", images: getLatestImages() });
         break;
       }
 
       case "GET_MENU_IMAGES_BASE64": {
-        const toConvert = (latestImages || [])
+        const toConvert = (getLatestImages() || [])
           .map(transformUrl)
           .filter(Boolean);
 
