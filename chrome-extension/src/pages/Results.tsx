@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 type PushMsg = { type: "MENU_IMAGES_PUSH"; images: string[] };
 type GetResult = { type: "MENU_IMAGES_RESULT"; images: string[] };
+type AnalyzeResult = { type: "ANALYZE_MENU_RESULT"; text?: string };
 
 function NavToggle({
   isResults,
@@ -27,29 +28,33 @@ function Results() {
   const [images, setImages] = useState<string[]>([]);
   const toggle = () => setIsResults((v) => !v);
 
+	const [analysisText, setAnalysisText] = useState<string>("");
+
 	useEffect(() => {
 		const port = chrome.runtime.connect({ name: "popup" });
 		portRef.current = port;
 
-		port.onMessage.addListener((msg: PushMsg | GetResult ) => {
+		port.onMessage.addListener((msg: PushMsg | GetResult | AnalyzeResult) => {
 			if (msg.type === "MENU_IMAGES_PUSH" || msg.type === "MENU_IMAGES_RESULT") {
 				setImages(Array.isArray(msg.images) ? msg.images : []);
 			}
+
+			if (msg.type === "ANALYZE_MENU_RESULT") {
+        setAnalysisText(msg.text ?? "(no data)");
+      }
 		});
 
 		// Ask for the current snapshot immediately
 		port.postMessage({ type: "GET_MENU_IMAGES" });
 
 		return () => { try { port.disconnect(); } catch {} };
-		}, []);
+	}, []);
+		
 
   
-	//   // --- Button handler: ask SW to convert latest images to Base64 ---
-	// const handleGetBase64 = () => {
-	//   portRef.current?.postMessage({
-	//     type: "GET_MENU_IMAGES_BASE64"
-	//   } as any);
-	// };
+	const getMenuAnalysis = () => {
+    portRef.current?.postMessage({ type: "ANALYZE_MENU_STUB" });
+  };
 
   return (
     <>
@@ -59,7 +64,7 @@ function Results() {
 
 	  <div style={{ padding: 12 }}>
       <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 10 }}>
-        <button onClick={() => console.log("test btn")} disabled={!portRef.current || images.length === 0}>
+        <button onClick={getMenuAnalysis} disabled={!portRef.current || images.length === 0}>
           Analyze Menus?
         </button>
         <span style={{ fontSize: 12, color: "#555" }}>
@@ -67,6 +72,21 @@ function Results() {
         </span>
       </div>
     </div>
+		{analysisText && (
+			<pre
+				style={{
+					whiteSpace: "pre-wrap",
+					marginTop: 12,
+					maxHeight: 320,        
+					overflowY: "auto",    
+					padding: 8,
+					borderRadius: 6,
+				}}
+			>
+				{analysisText}
+			</pre>
+		)}
+
     </>
   );
 

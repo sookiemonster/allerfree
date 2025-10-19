@@ -3,6 +3,7 @@ import { transformUrl, convertUrlsToBase64 } from "./helperBase64.js";
 import { getSampleProfileData } from "./profileData.js";
 
 import { openPopupWithRoute } from "./resultsPopupUtils.js";
+import { buildMenuAnalysisStringResponse } from "./menuAnalysis.js";
 
 // Minimal "latest only" state
 let latestImages = [];
@@ -80,6 +81,12 @@ chrome.runtime.onConnect.addListener((port) => {
           type: "SAMPLE_PROFILE_DATA_RESULT",
           ...getSampleProfileData(),
         });
+        break;
+      }
+
+      case "ANALYZE_MENU_STUB": {
+        const text = buildMenuAnalysisStringResponse();
+        port.postMessage({ type: "ANALYZE_MENU_RESULT", text });
         break;
       }
 

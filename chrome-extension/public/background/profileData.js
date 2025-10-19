@@ -38,7 +38,7 @@ export function getSampleProfileData() {
   };
 }
 
-function getAllSampleProfileData()
+export function getAllSampleProfileData()
 {
     return{
         profiles: SAMPLE_PROFILES,
