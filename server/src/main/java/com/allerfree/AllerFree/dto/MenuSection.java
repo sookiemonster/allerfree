@@ -1,5 +1,6 @@
 package com.allerfree.AllerFree.dto;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -13,4 +14,27 @@ public class MenuSection {
     private String section;
     private String description;
     private List<MenuItem> items;
+
+    public void addMenuItem(MenuItem item, Allergy[] allergies){
+        List<AllergenPrediction> personalizedContains = new ArrayList<AllergenPrediction>();
+        
+        //Create copy with all same except empty contains list
+        MenuItem copy = new MenuItem(item.getName(), item.getDescription(), item.getSymbols(), personalizedContains);
+        
+        for (AllergenPrediction pred : item.getContains()){
+            //Check if allergy is in the list of provided allergies
+            for (Allergy allergy : allergies){
+                if (pred.getAllergen().equals(allergy.getAllergen())){
+                    AllergenPrediction predCopy = new AllergenPrediction(pred.getAllergen(), pred.getPrediction(), pred.getExplanation());
+                    if (allergy.getSensitivity().equals("HIGH") && pred.getPrediction().equals("MAY_CONTAIN")){ //Adjust depending on sensitivity (MAY_CONTAIN to VERY_LIKELY if sensitivity is HIGH)
+                        predCopy.setPrediction("VERY_LIKELY");
+                    }
+                    personalizedContains.add(predCopy); //Add AllergenPrediction to MenuItem
+                    break;
+                }
+            }
+        }
+        copy.setContains(personalizedContains);
+        items.add(copy);
+    }
 }

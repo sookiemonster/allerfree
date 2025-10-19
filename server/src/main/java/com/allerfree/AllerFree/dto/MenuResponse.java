@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 @AllArgsConstructor
@@ -14,9 +13,5 @@ import java.util.HashMap;
 public class MenuResponse {
     private List<Integer> successful;
     private HashMap<Integer, String> failed;
-    private List<MenuSection> sections = new ArrayList<MenuSection>();
-
-    public void combineSections(List<MenuSection> sec){
-        sections.addAll(sec);
-    }
+    private HashMap<String, MenuOutput> results;
 }
