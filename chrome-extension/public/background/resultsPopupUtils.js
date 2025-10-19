@@ -1,4 +1,4 @@
-function openPopupWithRoute(route = "") {
+export function openPopupWithRoute(route = "") {
   const popupPath =
     chrome.runtime.getManifest().action?.default_popup || "index.html";
   const finalPopup = `${popupPath}${route || ""}`;
