@@ -29,42 +29,47 @@ chrome.runtime.onConnect.addListener((port) => {
   popupPorts.add(port);
 
   port.onMessage.addListener((msg) => {
-    if (msg?.type === "GET_MENU_IMAGES") {
-      port.postMessage({ type: "MENU_IMAGES_RESULT", images: latestImages });
-    }
+    switch (msg?.type) {
+      case "GET_MENU_IMAGES": {
+        port.postMessage({ type: "MENU_IMAGES_RESULT", images: latestImages });
+        break;
+      }
 
-     // test calls to see base 64 conversion is working
-    if (msg?.type === "GET_MENU_IMAGES_BASE64") {
-      const toConvert = (latestImages || [])
-      .map(transformUrl)
-      .filter(Boolean);
+      case "GET_MENU_IMAGES_BASE64": {
+        const toConvert = (latestImages || [])
+          .map(transformUrl)
+          .filter(Boolean);
 
-      convertUrlsToBase64(toConvert)
-        .then((dataUrls) => {
-          port.postMessage({
-            type: "MENU_IMAGES_BASE64_RESULT",
-            dataUrls,
-            count: dataUrls.length
+        convertUrlsToBase64(toConvert)
+          .then((dataUrls) => {
+            port.postMessage({
+              type: "MENU_IMAGES_BASE64_RESULT",
+              dataUrls,
+              count: dataUrls.length
+            });
+          })
+          .catch((err) => {
+            port.postMessage({
+              type: "MENU_IMAGES_BASE64_RESULT",
+              error: err.message
+            });
           });
-        })
-        .catch((err) => {
-          port.postMessage({
-            type: "MENU_IMAGES_BASE64_RESULT",
-            error: err.message
-          });
-        });
-    }
+        break;
+      }
 
-    if (msg?.type === "GET_SAMPLE_PROFILE_DATA") {
+      case "GET_SAMPLE_PROFILE_DATA": {
         port.postMessage({
           type: "SAMPLE_PROFILE_DATA_RESULT",
           ...getSampleProfileData(),
         });
+        break;
       }
-  });
 
- 
+      default:
+        // no-op for unknown message types
+        break;
+    }
+  });
 
   port.onDisconnect.addListener(() => popupPorts.delete(port));
 });
-
