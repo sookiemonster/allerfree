@@ -100,9 +100,15 @@
     btn.className = BTN_ID;
     btn.textContent = "Can I Eat Here?";
     btn.onclick = function () {
-      const msg = menuImageLinks.length ? menuImageLinks.join("\n") : "(No menu images detected)";
-      alert(msg);
-      console.log("[MenuImages snapshot]", menuImageLinks);
+      // const msg = menuImageLinks.length ? menuImageLinks.join("\n") : "(No menu images detected)";
+      // alert(msg);
+      // console.log("[MenuImages snapshot]", menuImageLinks);
+
+      // The extension's popup page and navigate to /results
+    chrome.runtime.sendMessage({
+        type: "OPEN_POPUP",
+        route: "#/results" 
+      });
     };
 
     headerDiv.appendChild(btn);

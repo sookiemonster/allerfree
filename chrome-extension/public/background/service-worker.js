@@ -20,6 +20,22 @@ chrome.runtime.onMessage.addListener((msg, _sender, _sendResponse) => {
     latestImages = Array.isArray(msg.images) ? msg.images : [];
     notifyPopups();
   }
+
+  // open popup and navigate to results page
+  // triggered by "Can i eat here?" button
+  if (msg?.type === "OPEN_POPUP") {
+    const popupPath =
+      chrome.runtime.getManifest().action?.default_popup || "index.html";
+    const route = typeof msg.route === "string" ? msg.route : "";
+
+    // Point the popup to the desired route, open it, then reset
+    chrome.action.setPopup({ popup: `${popupPath}${route}` });
+    chrome.action.openPopup().catch((e) => console.warn("openPopup failed:", e));
+    // Reset immediately so future opens use the default unless explicitly routed
+    setTimeout(() => chrome.action.setPopup({ popup: popupPath }), 0);
+  }
+
+
   return false; // no async sendResponse
 });
 

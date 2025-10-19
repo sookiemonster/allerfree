@@ -1,45 +1,34 @@
 import { useState } from "react";
 
-async function getCurrentUrl(): Promise <string | null> {
-	const [tab] = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
-	return tab?.url ?? null;
+function NavToggle({
+  isResults,
+  onToggle,
+}: {
+  isResults: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div style={{ marginTop: 12 }}>
+      <button onClick={onToggle}>
+        {isResults ? "Go to Start Analysis Process" : "Go to Results"}
+      </button>
+    </div>
+  );
 }
 
-function Results()
-{
-  //   const onclick = async () => {
-  //   let [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
-	// 	chrome.scripting.executeScript({
-	// 		target: { tabId: tab.id! },
-	// 		func: () => {
-	// 			alert('hello worl');
-	// 			document.body.style.backgroundColor = 'navy';
-	// 		}
-	// 	});
-	// }
+function Results() {
+  // false = show "Start Analysis Process" first
+  const [isResults, setIsResults] = useState<boolean>(false);
 
-	const [Url, setUrl] = useState<string | null>(null)
+  const toggle = () => setIsResults((v) => !v);
 
-	const grabUrl = async () => {
-		setUrl(await getCurrentUrl());
-	}
+  return (
+    <>
+      <NavToggle isResults={isResults} onToggle={toggle} />
+      {/* Always render small navigator to switch views */}
+      {isResults ? <h1>Results</h1> : <h1>Start Analysis Process</h1>}
+    </>
+  );
+}
 
-	return(
-	<>
-		<h1>Results</h1>
-		<button onClick={()=> grabUrl()}>
-		Click to grab Url
-		</button>
-		{
-			Url ?
-			<p>
-				last read url is: {Url}
-			</p> 
-			:
-			<p>
-				click the darn button
-			</p>
-		}
-	</>
-	)
-} export default Results
+export default Results;
