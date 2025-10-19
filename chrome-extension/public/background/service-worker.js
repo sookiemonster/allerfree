@@ -2,6 +2,8 @@
 import { transformUrl, convertUrlsToBase64 } from "./helperBase64.js";
 import { getSampleProfileData } from "./profileData.js";
 
+import { openPopupWithRoute } from "./resultsPopupUtils.js";
+
 // Minimal "latest only" state
 let latestImages = [];
 
@@ -16,25 +18,25 @@ function notifyPopups() {
 
 // Receive updates from content scripts
 chrome.runtime.onMessage.addListener((msg, _sender, _sendResponse) => {
-  if (msg?.type === "MENU_IMAGES_UPDATE") {
-    latestImages = Array.isArray(msg.images) ? msg.images : [];
-    notifyPopups();
+  switch (msg?.type) {
+    case "MENU_IMAGES_UPDATE": {
+      latestImages = Array.isArray(msg.images) ? msg.images : [];
+      notifyPopups();
+      break;
+    }
+
+    // open popup and navigate to results page
+    // triggered by "Can I Eat Here?" button
+    case "OPEN_POPUP": {
+      const route = typeof msg.route === "string" ? msg.route : "";
+      openPopupWithRoute(route);
+      break;
+    }
+
+    default:
+      // no-op
+      break;
   }
-
-  // open popup and navigate to results page
-  // triggered by "Can i eat here?" button
-  if (msg?.type === "OPEN_POPUP") {
-    const popupPath =
-      chrome.runtime.getManifest().action?.default_popup || "index.html";
-    const route = typeof msg.route === "string" ? msg.route : "";
-
-    // Point the popup to the desired route, open it, then reset
-    chrome.action.setPopup({ popup: `${popupPath}${route}` });
-    chrome.action.openPopup().catch((e) => console.warn("openPopup failed:", e));
-    // Reset immediately so future opens use the default unless explicitly routed
-    setTimeout(() => chrome.action.setPopup({ popup: popupPath }), 0);
-  }
-
 
   return false; // no async sendResponse
 });
