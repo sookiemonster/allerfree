@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
 import java.util.List;
 
 @AllArgsConstructor
@@ -11,5 +12,5 @@ import java.util.List;
 @Data
 public class AllergenDetection {
     private List<Image> images;
-    private Profile[] profiles;
+    private HashMap<String, Profile> profiles;
 }
