@@ -2,13 +2,14 @@
 import { transformUrl, convertUrlsToBase64 } from "./helperBase64.js";
 import { getSampleProfileData } from "./profileData.js";
 
-// Minimal "latest only" state
-let latestImages = [];
+import { openPopupWithRoute } from "./resultsPopupUtils.js";
+import { buildMenuAnalysisStringResponse } from "./menuAnalysis.js";
+import { getLatestImages, setLatestImages } from "./menuState.js"; 
 
 // Notify all connected popups
 const popupPorts = new Set();
 function notifyPopups() {
-  const payload = { type: "MENU_IMAGES_PUSH", images: latestImages };
+  const payload = { type: "MENU_IMAGES_PUSH", images: getLatestImages() };
   for (const port of popupPorts) {
     try { port.postMessage(payload); } catch {}
   }
@@ -16,10 +17,26 @@ function notifyPopups() {
 
 // Receive updates from content scripts
 chrome.runtime.onMessage.addListener((msg, _sender, _sendResponse) => {
-  if (msg?.type === "MENU_IMAGES_UPDATE") {
-    latestImages = Array.isArray(msg.images) ? msg.images : [];
-    notifyPopups();
+  switch (msg?.type) {
+    case "MENU_IMAGES_UPDATE": {
+      setLatestImages(Array.isArray(msg.images) ? msg.images : []);
+      notifyPopups();
+      break;
+    }
+
+    // open popup and navigate to results page
+    // triggered by "Can I Eat Here?" button
+    case "OPEN_POPUP": {
+      const route = typeof msg.route === "string" ? msg.route : "";
+      openPopupWithRoute(route);
+      break;
+    }
+
+    default:
+      // no-op
+      break;
   }
+
   return false; // no async sendResponse
 });
 
@@ -29,42 +46,66 @@ chrome.runtime.onConnect.addListener((port) => {
   popupPorts.add(port);
 
   port.onMessage.addListener((msg) => {
-    if (msg?.type === "GET_MENU_IMAGES") {
-      port.postMessage({ type: "MENU_IMAGES_RESULT", images: latestImages });
-    }
+    switch (msg?.type) {
+      case "GET_MENU_IMAGES": {
+        port.postMessage({ type: "MENU_IMAGES_RESULT", images: getLatestImages() });
+        break;
+      }
 
-     // test calls to see base 64 conversion is working
-    if (msg?.type === "GET_MENU_IMAGES_BASE64") {
-      const toConvert = (latestImages || [])
-      .map(transformUrl)
-      .filter(Boolean);
+      case "GET_MENU_IMAGES_BASE64": {
+        const toConvert = (getLatestImages() || [])
+          .map(transformUrl)
+          .filter(Boolean);
 
-      convertUrlsToBase64(toConvert)
-        .then((dataUrls) => {
-          port.postMessage({
-            type: "MENU_IMAGES_BASE64_RESULT",
-            dataUrls,
-            count: dataUrls.length
+        convertUrlsToBase64(toConvert)
+          .then((dataUrls) => {
+            port.postMessage({
+              type: "MENU_IMAGES_BASE64_RESULT",
+              dataUrls,
+              count: dataUrls.length
+            });
+          })
+          .catch((err) => {
+            port.postMessage({
+              type: "MENU_IMAGES_BASE64_RESULT",
+              error: err.message
+            });
           });
-        })
-        .catch((err) => {
-          port.postMessage({
-            type: "MENU_IMAGES_BASE64_RESULT",
-            error: err.message
-          });
-        });
-    }
+        break;
+      }
 
-    if (msg?.type === "GET_SAMPLE_PROFILE_DATA") {
+      case "GET_SAMPLE_PROFILE_DATA": {
         port.postMessage({
           type: "SAMPLE_PROFILE_DATA_RESULT",
           ...getSampleProfileData(),
         });
+        break;
       }
-  });
 
- 
+
+
+
+      case "ANALYZE_MENU_STUB":{
+        (async () => {
+          try{
+            const text = await buildMenuAnalysisStringResponse();
+            port.postMessage({ type: "ANALYZE_MENU_RESULT", text });
+          } catch (e) {
+            port.postMessage({
+              type: "ANALYZE_MENU_RESULT",
+              text: `Error: ${e?.message || String(e)}`,
+            });
+          }
+          
+        })();
+        break;
+      }
+
+      default:
+        // no-op for unknown message types
+        break;
+    }
+  });
 
   port.onDisconnect.addListener(() => popupPorts.delete(port));
 });
-
