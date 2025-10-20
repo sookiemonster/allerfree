@@ -82,9 +82,22 @@ chrome.runtime.onConnect.addListener((port) => {
         break;
       }
 
-      case "ANALYZE_MENU_STUB": {
-        const text = buildMenuAnalysisStringResponse();
-        port.postMessage({ type: "ANALYZE_MENU_RESULT", text });
+
+
+
+      case "ANALYZE_MENU_STUB":{
+        (async () => {
+          try{
+            const text = await buildMenuAnalysisStringResponse();
+            port.postMessage({ type: "ANALYZE_MENU_RESULT", text });
+          } catch (e) {
+            port.postMessage({
+              type: "ANALYZE_MENU_RESULT",
+              text: `Error: ${e?.message || String(e)}`,
+            });
+          }
+          
+        })();
         break;
       }
 

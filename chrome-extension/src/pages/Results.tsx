@@ -40,8 +40,19 @@ function Results() {
 			}
 
 			if (msg.type === "ANALYZE_MENU_RESULT") {
-        setAnalysisText(msg.text ?? "(no data)");
-      }
+				// allow either { text } or { error }
+				if ("error" in msg && msg.error) {
+					setAnalysisText(`Error: ${String(msg.error)}`);
+				} else {
+					const raw = (msg as any).text;
+					const safe =
+						typeof raw === "string"
+							? raw
+							: JSON.stringify(raw, null, 2); // ensure it's a string for <pre>{...}
+					setAnalysisText(safe || "(no data)");
+				}
+			}
+
 		});
 
 		// Ask for the current snapshot immediately
