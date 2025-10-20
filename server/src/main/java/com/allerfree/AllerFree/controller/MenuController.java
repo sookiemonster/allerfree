@@ -32,7 +32,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-public class TestController {    
+public class MenuController {    
     @Autowired
     private WebClient webClient;
 
