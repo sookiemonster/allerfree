@@ -41,16 +41,16 @@ Predict "VERY_LIKELY" if:
 * The dish explicitly contains a common source of gluten (e.g., "wheat bread," "pasta," "rye toast").
 * The dish contains an ingredient known to be a surprising or hidden source of gluten, based on the reference list (e.g., a dish with soy sauce, imitation crab, or malt vinegar).
 * The dish description includes keywords like "breaded," "battered," "crispy," or "in a pastry."
-* The dish is marked as gluten-free ("GF"), but the menu includes a strong warning about cross-contamination for that specific item type (e.g., "gluten-free crust prepared on the same floured surface").
+* The dish is marked as gluten-free ("GF"), but the menu explicitly includes a strong warning about cross-contamination for that specific item type (e.g., "gluten-free crust prepared on the same floured surface").
 
 Predict "MAY_CONTAIN" if:
 * The dish is prepared in a way that introduces a high risk of cross-contamination, such as being fried in a shared fryer with breaded items (e.g., french fries).
 * Ingredients are ambiguous and could potentially contain gluten (e.g., "thick gravy," "special sauce," "grain blend").
-* The menu section the dish is part of explicitly states that gluten-free ("GF") subsitutions are available for dishes in its section.
-* The dish is explicitly marked as gluten-free ("GF"), and there are no warnings about cross-contamination.
+* The dish's menu section says that gluten-free (or "GF") subsitutions are available for that dish (e.g. "gluten-free crust available", or "gluten-free substitution available"), but it is reasonable to assume cross-contamination (eg. a bakery, or pizzeria).
 
 Predict "VERY_UNLIKELY" if:
 * The dish consists entirely of naturally gluten-free ingredients (e.g., steamed vegetables, grilled steak with salt and pepper, plain rice) and has no sauces or complex seasonings mentioned.
+* The dish is explicitly tagged as gluten-free ("GF"), and there are no warnings about cross-contamination and gluten-containing dishes are not suspected to be prepared on the same surface.
 
 ---
 
