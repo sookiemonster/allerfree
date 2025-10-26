@@ -67,6 +67,13 @@ function Profiles()
         }
     };
 
+    const handleExistingAllergyClick = (allergy: { name: string, icon: string }) => {
+        if (currentProfile) {
+            setSelectedAllergen(allergy);
+            setShowSeverityModal(true);
+        }
+    };
+
     const savedAllergies = currentProfile?.allergies || [];
 
     return(
@@ -133,7 +140,11 @@ function Profiles()
                     <div className="allergies-carousel">
                         {savedAllergies.map((allergy, index) => (
                             <div key={index} className="allergy-item">
-                                <div className="allergy-circle">
+                                <div
+                                    className="allergy-circle"
+                                    onClick={() => handleExistingAllergyClick({ name: allergy.name, icon: allergy.icon })}
+                                    style={{ cursor: 'pointer' }}
+                                >
                                     <div className="allergy-icon">{allergy.icon}</div>
                                     {allergy.severity === "severe" && (
                                         <div className="severity-indicator severe">❗</div>
