@@ -7,6 +7,7 @@ import {
     addProfile,
     addAllergenToProfile,
     removeAllergenFromProfile,
+    clearProfiles,
 } from "../helpers/profiles";
 import type { ProfilesMap } from "../types/profiles";
 import type { Allergen } from "../types/profiles";
@@ -133,6 +134,21 @@ export default function ProfileTest() {
         }
     }
 
+    async function onClearProfiles() {
+    setIsSeeding(true);
+    setSeedMsg("");
+    try {
+        await clearProfiles();
+        await fetchProfiles();
+        setSeedMsg("Cleared all profiles.");
+    } catch (e) {
+        setSeedMsg("Error clearing profiles");
+        console.error(e);
+    } finally {
+        setIsSeeding(false);
+    }
+}
+
     const names = Object.keys(profiles).sort();
 
     return (
@@ -155,6 +171,9 @@ export default function ProfileTest() {
                         </button>
                         <button onClick={fetchProfiles} disabled={isSeeding} title="Reload from storage">
                             Refresh
+                        </button>
+                        <button onClick={onClearProfiles} disabled={isSeeding} title="Remove all profiles">
+                            Clear Profiles
                         </button>
                         {seedMsg && <span style={{ fontSize: 12, color: "#555" }}>{seedMsg}</span>}
                     </div>

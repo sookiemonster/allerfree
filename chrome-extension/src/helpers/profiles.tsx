@@ -52,6 +52,11 @@ export async function seedSampleProfiles(overwrite: boolean = false): Promise<bo
     return true;
 }
 
+export async function clearProfiles(): Promise<void> {
+    await chrome.storage.local.remove(PROFILES_STORAGE_KEY);
+}
+
+
 // ===================================
 // helper and all profile grabs
 // ===================================
