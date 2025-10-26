@@ -61,21 +61,20 @@ body {
   border-radius: 50%;
   border: none;
   background-color: rgba(222, 121, 33);
-  color: #ffffff;
+  color: black;
   font-size: 16px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: background-color 0.5s ease;
   padding: 0;
   flex-shrink: 0;
 }
 
 .circle-arrow-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  background-color: #1e572b;
+  color: white;
 }
 
 .name-input {
@@ -124,11 +123,17 @@ body {
   width: 75px;
   height: 75px;
   border-radius: 50%;
-  background-color: #4A4A4A;
+  background-color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  overflow: hidden;
+}
+
+.profile-picture img {
+  border: none;
+  outline: none;
 }
 
 .profile-icon {
@@ -405,36 +410,14 @@ body {
 }
 
 .allergies-carousel {
-  position: relative;
-  width: 200px;
-  height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  min-height: 70px;
   margin: 0 auto;
-}
-
-.allergy-item {
-  position: absolute;
-  width: 40px;
-  height: 60px;
-}
-
-.allergy-item:nth-child(1) {
-  left: 10px;
-  top: 0px;
-}
-
-.allergy-item:nth-child(2) {
-  left: 60px;
-  top: 20px;
-}
-
-.allergy-item:nth-child(3) {
-  left: 110px;
-  top: 20px;
-}
-
-.allergy-item:nth-child(4) {
-  right: 10px;
-  top: 0px;
+  flex-wrap: wrap;
 }
 
 .allergy-item {
@@ -442,15 +425,16 @@ body {
   flex-direction: column;
   align-items: center;
   text-align: center;
+  width: 40px;
 }
 
 .allergy-circle {
-  width: 45px;
-  height: 45px;
-  min-width: 45px;
-  min-height: 45px;
-  max-width: 45px;
-  max-height: 45px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
   border-radius: 50%;
   background-color: #8B4513;
   display: flex;
@@ -579,6 +563,20 @@ body {
   font-family: 'Bodoni Moda', serif;
 }
 
+.typing-cursor {
+  animation: blink 1s step-end infinite;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
 .simple-arrow-btn {
   background: none;
   border: none;
@@ -634,6 +632,11 @@ body {
 .circle-arrow-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+.circle-arrow-btn:disabled:hover {
+  background-color: rgba(222, 121, 33);
+  color: black;
 }
 
 

@@ -1,12 +1,19 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useProfiles } from "../contexts/ProfileContext";
 
 const availableAllergens = [
-    { name: "gluten", icon: "🌾" },
-    { name: "soy", icon: "🫘" },
-    { name: "sesame", icon: "⚪" }
+    { name: "gluten", icon: "/wheat.png" },
+    { name: "soy", icon: "/soy.png" },
+    { name: "sesame", icon: "/sesame.png" }
 ];
+
+// Migration map from old emoji icons to new PNG paths
+const iconMigrationMap: { [key: string]: string } = {
+    "🌾": "/wheat.png",
+    "🫘": "/soy.png",
+    "⚪": "/sesame.png"
+};
 
 function Profiles()
 {
@@ -19,6 +26,24 @@ function Profiles()
     const [newProfileName, setNewProfileName] = useState("");
     const [isEditingName, setIsEditingName] = useState(false);
     const [editedName, setEditedName] = useState("");
+
+    // Migrate old emoji icons to PNG paths
+    useEffect(() => {
+        if (currentProfile) {
+            let needsUpdate = false;
+            const updatedAllergies = currentProfile.allergies.map(allergy => {
+                if (iconMigrationMap[allergy.icon]) {
+                    needsUpdate = true;
+                    return { ...allergy, icon: iconMigrationMap[allergy.icon] };
+                }
+                return allergy;
+            });
+
+            if (needsUpdate) {
+                updateProfile(currentProfile.id, { allergies: updatedAllergies });
+            }
+        }
+    }, [currentProfile?.id]);
 
     const handleProfileChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const profileId = e.target.value;
@@ -130,7 +155,7 @@ function Profiles()
                             {currentProfile?.profilePicture ? (
                                 <img src={currentProfile.profilePicture} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                             ) : (
-                                <div className="profile-icon">👤</div>
+                                <img src="/profile.png" alt="Default Profile" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                             )}
                         </div>
                         {currentProfile && (
@@ -149,7 +174,7 @@ function Profiles()
                 </div>
 
                 {isCreatingNew ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '20px' }}>
                         <input
                             type="text"
                             className="name-input"
@@ -157,9 +182,9 @@ function Profiles()
                             value={newProfileName}
                             onChange={(e) => setNewProfileName(e.target.value)}
                             autoFocus
-                            style={{ marginBottom: 0 }}
+                            style={{ marginBottom: 0, width: '180px' }}
                         />
-                        <button className="checkmark-btn" onClick={handleCreateProfile}>
+                        <button className="circle-arrow-btn" onClick={handleCreateProfile}>
                             ✓
                         </button>
                     </div>
@@ -189,11 +214,12 @@ function Profiles()
                                         background: 'none',
                                         border: 'none',
                                         cursor: 'pointer',
-                                        fontSize: '16px',
-                                        padding: '4px'
+                                        padding: '4px',
+                                        display: 'flex',
+                                        alignItems: 'center'
                                     }}
                                 >
-                                    ✏️
+                                    <img src="/edit.png" alt="Edit" style={{ width: '16px', height: '16px' }} />
                                 </button>
                             )}
                         </div>
@@ -209,7 +235,7 @@ function Profiles()
                                     onClick={() => handleExistingAllergyClick({ name: allergy.name, icon: allergy.icon })}
                                     style={{ cursor: 'pointer' }}
                                 >
-                                    <div className="allergy-icon">{allergy.icon}</div>
+                                    <img src={allergy.icon} alt={allergy.name} className="allergy-icon" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
                                     {allergy.severity === "severe" && (
                                         <div className="severity-indicator severe">❗</div>
                                     )}
@@ -246,7 +272,7 @@ function Profiles()
                                         style={{ opacity: isAlreadyAdded ? 0.4 : 1, cursor: isAlreadyAdded ? 'not-allowed' : 'pointer' }}
                                     >
                                         <div className="allergen-circle">
-                                            <div className="wheat-icon">{allergen.icon}</div>
+                                            <img src={allergen.icon} alt={allergen.name} className="wheat-icon" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
                                         </div>
                                         <p className="allergen-label">{allergen.name}</p>
                                     </div>
