@@ -1,5 +1,5 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: 'Inconsolata', monospace;
   line-height: 1.5;
   font-weight: 400;
 
@@ -26,13 +26,17 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
-  width: 450px;
-  height: 600px;
-  min-width: 450px;
-  min-height: 600px;
-  max-width: 450px;
-  max-height: 600px;
+  width: 300px;
+  height: 400px;
+  min-width: 300px;
+  min-height: 400px;
+  max-width: 300px;
+  max-height: 400px;
   overflow: hidden;
+  background-image: url('/AllerFree_FrontPage.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 h1 {

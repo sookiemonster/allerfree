@@ -28,7 +28,7 @@ export default function DetectionResultPane({
 
   return (
     <>
-      <Box bdrs={"sm"}>
+      <Box /*bdrs={"sm"}*/>
         <Grid px={"lg"} align="center" py={"xs"}>
           <Grid.Col ta={"left"} span={8}>
             <Title fs={"italic"} fw={"600"} c={"white"} order={4}>
@@ -50,7 +50,7 @@ export default function DetectionResultPane({
           </Grid.Col>
         </Grid>
         <ScrollArea mah={"500px"} scrollbars="y" pr={"xs"} classNames={classes}>
-          <Stack p={"sm"} bdrs={"sm"} mah={"500px"}>
+          <Stack p={"sm"} /*bdrs={"sm"}*/ mah={"500px"}>
             {allitems.map((item) => (
               <DetectionResultCard {...item} />
             ))}
