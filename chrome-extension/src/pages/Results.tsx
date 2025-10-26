@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { buildMenuAnalysisStringResponse } from "../helpers/menuAnalysis";
+import type { DetectionResult } from "../types/DetectionResult";
+import DetectionResultPane from "../components/DetectionResult/DetectionResultPane";
 
 type PushMsg = { type: "MENU_IMAGES_PUSH"; images: string[] };
 type GetResult = { type: "MENU_IMAGES_RESULT"; images: string[] };
@@ -24,7 +26,8 @@ function Results() {
   const portRef = useRef<chrome.runtime.Port | null>(null);
   const [isResults, setIsResults] = useState<boolean>(false);
   const [images, setImages] = useState<string[]>([]);
-  const [analysisText, setAnalysisText] = useState<string>("");
+  const [detection_result, setDetectionResult] =
+    useState<DetectionResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
 
   const toggle = () => setIsResults((v) => !v);
@@ -57,7 +60,8 @@ function Results() {
     try {
       const analysis = await buildMenuAnalysisStringResponse(images);
       if (typeof analysis === "string" && analysis.length > 0) {
-        setAnalysisText(analysis);
+        const formattedResponse: DetectionResult = JSON.parse(analysis);
+        setDetectionResult(formattedResponse);
         setIsResults(true); // jump to results on success
       }
       return analysis;
@@ -101,19 +105,8 @@ function Results() {
         </div>
       )}
 
-      {isResults && analysisText && (
-        <pre
-          style={{
-            whiteSpace: "pre-wrap",
-            marginTop: 12,
-            maxHeight: 320,
-            overflowY: "auto",
-            padding: 8,
-            borderRadius: 6,
-          }}
-        >
-          {analysisText}
-        </pre>
+      {isResults && detection_result && (
+        <DetectionResultPane detection_result={detection_result} />
       )}
     </>
   );
