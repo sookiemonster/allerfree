@@ -135,4 +135,9 @@ public class MenuController {
         return result;
     }
 
+    @PostMapping("/detectSample")
+    public ResponseEntity<MenuResponse> detectAllergensSample(@RequestBody AllergenDetection ad){
+        MenuResponse menuResults = new MenuResponse();
+        return ResponseEntity.ok(menuResults);
+    }
 }

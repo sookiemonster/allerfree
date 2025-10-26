@@ -35,7 +35,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         try{
             String token = getTokenFromRequest(request);
             if (token != null && !jwtUtil.tokenIsExpired(token)){
-                System.out.println("Adding user to security context");
+                // System.out.println("Adding user to security context");
                 if (jwtUtil.getUsername(token).equals("username")){ //Supposed to load user from database and compare with data stored in token -> but we don't actually have user accounts
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             "username",
