@@ -24,7 +24,7 @@ function Results() {
     const portRef = useRef<chrome.runtime.Port | null>(null);
     const [isResults, setIsResults] = useState<boolean>(false);
     const [images, setImages] = useState<string[]>([]);
-    const [analysisText, setAnalysisText] = useState<string>("");
+    const [analysisText, setAnalysisText] = useState<any>("");
     const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
 
     const toggle = () => setIsResults((v) => !v);
@@ -53,10 +53,10 @@ function Results() {
         setIsAnalyzing(true);
         try {
             const analysis = await buildMenuAnalysisStringResponse(images);
-            if (typeof analysis === "string" && analysis.length > 0) {
-                setAnalysisText(analysis);
+            // if (typeof analysis === "string" && analysis.length > 0) {
+                setAnalysisText(JSON.stringify(analysis, null, 2));
                 setIsResults(true); // jump to results on success
-            }
+            // }
             return analysis;
         } catch (err) {
             console.error("getMenuAnalysis failed:", err);

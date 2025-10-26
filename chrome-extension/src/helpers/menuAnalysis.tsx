@@ -42,24 +42,37 @@ async function postDataToLocalhost(pImages: ImagePayload[]) {
         const url = "http://localhost:8080/detect";
 
         const postData = {
-            pImages,
-            profiles: [
-                {
-                    name: "Profile 1",
-                    allergens: [
-                        { sensitivity: "HIGH", allergen: "gluten" },
-                        { sensitivity: "MILD", allergen: "tree_nuts" },
-                    ],
+            images: pImages,
+            profiles: {
+                Kyle:   { 
+                    profile_name: "Kyle",   
+                    allergens: [] 
                 },
-                {
-                    name: "Profile 2",
+                Kelly:  { 
+                    profile_name: "Kelly",  
                     allergens: [
-                        { sensitivity: "MILD", allergen: "gluten" },
-                        { sensitivity: "HIGH", allergen: "tree_nuts" },
-                    ],
+                    { sensitivity: "SEVERE", allergen: "gluten" },
+                    { sensitivity: "SEVERE", allergen: "gluten" },
+                    ] 
                 },
-            ],
-        };
+                Daniel: { 
+                    profile_name: "Daniel", 
+                    allergens: [
+                    { sensitivity: "SEVERE", allergen: "gluten" },
+                    { sensitivity: "SEVERE", allergen: "tree_nuts" },
+                    { sensitivity: "SEVERE", allergen: "shellfish" },
+                    ] 
+                },
+                Thomas: { 
+                    profile_name: "Thomas", 
+                    allergens: [
+                    { sensitivity: "MILD", allergen: "gluten" },
+                    { sensitivity: "MILD", allergen: "shellfish" },
+                    ] 
+                },
+            }
+        }
+        console.log(postData);
 
         const response = await fetch(url, {
             method: "POST",
