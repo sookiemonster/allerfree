@@ -90,26 +90,27 @@ export async function getProfileOrDefault(key: string): Promise<Profile> {
 // additions
 // ===================================
 /**
- * Add a new profile to storage.
- * @param key        Map key used to store the profile (e.g., "Kyle").
- * @param profile    The Profile object to store.
+ * Create a new empty profile whose name matches the key.
+ * @param key        Map key and profile name (e.g., "Kyle").
  * @param overwrite  If false and the key exists, do nothing and return false.
- * @returns          true if the profile was written, false if skipped.
+ * @returns          true if the profile was written, false if skipped/invalid key.
  */
 export async function addProfile(
     key: string,
-    profile: Profile,
     overwrite: boolean = false
 ): Promise<boolean> {
-    const all = await getAllProfiles();
-    const exists = Object.prototype.hasOwnProperty.call(all, key);
+    const name = key.trim();
+    if (!name) return false;
 
+    const all = await getAllProfiles();
+    const exists = Object.prototype.hasOwnProperty.call(all, name);
     if (exists && !overwrite) return false;
 
-    all[key] = profile;
+    all[name] = { name, allergens: [] };
     await saveProfiles(all);
     return true;
 }
+
 
 /**
  * Add (or update) an allergen entry for a specific profile.
@@ -149,6 +150,28 @@ export async function addAllergenToProfile(
     // Add new allergen entry
     list.push(allergenEntry);
     all[key] = { ...profile, allergens: list };
+    await saveProfiles(all);
+    return true;
+}
+
+// ===================================
+// removals
+// ===================================
+
+export async function removeAllergenFromProfile(
+    key: string,
+    allergen: string
+): Promise<boolean> {
+    const all = await getAllProfiles();
+    const profile = all[key];
+    if (!profile) return false;
+
+    const before = profile.allergens ?? [];
+    const after = before.filter(a => a.allergen !== allergen);
+
+    if (after.length === before.length) return false; // nothing removed
+
+    all[key] = { ...profile, allergens: after };
     await saveProfiles(all);
     return true;
 }
