@@ -1,8 +1,8 @@
 #root {
-  width: 450px;
-  height: 600px;
-  max-width: 450px;
-  max-height: 600px;
+  width: 350px;
+  height: 500px;
+  max-width: 350px;
+  max-height: 500px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
@@ -69,14 +69,14 @@
 }
 
 .name-input {
-  width: 300px;
-  padding: 12px 20px;
+  width: 240px;
+  padding: 10px 16px;
   border: none;
-  border-radius: 25px;
+  border-radius: 20px;
   background-color: rgba(255, 255, 255, 0.3);
   color: #8B4513;
-  font-size: 16px;
-  margin-bottom: 30px;
+  font-size: 14px;
+  margin-bottom: 25px;
   outline: none;
 }
 
@@ -86,34 +86,34 @@
 }
 
 .checkmark-btn {
-  width: 40px;
-  height: 40px;
+  width: 35px;
+  height: 35px;
   border-radius: 50%;
   border: 2px solid #333;
   background-color: transparent;
   color: #333;
-  font-size: 20px;
+  font-size: 18px;
   cursor: pointer;
-  margin-left: 10px;
+  margin-left: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
 .profile-section {
-  margin: 20px 0;
+  margin: 15px 0;
   text-align: center;
 }
 
 .profile-picture-container {
   position: relative;
   display: inline-block;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .profile-picture {
-  width: 120px;
-  height: 120px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   background-color: #4A4A4A;
   display: flex;
@@ -123,7 +123,7 @@
 }
 
 .profile-icon {
-  font-size: 60px;
+  font-size: 30px;
   color: #F5DEB3;
 }
 
@@ -131,13 +131,13 @@
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 35px;
-  height: 35px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  border: 3px solid #CB7A44;
+  border: 2px solid #CB7A44;
   background-color: #333;
   color: white;
-  font-size: 20px;
+  font-size: 12px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -146,34 +146,34 @@
 
 .profile-text {
   color: #333;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  margin: 10px 0;
+  margin: 8px 0;
 }
 
 .add-new-section {
-  margin-top: 50px;
+  margin-top: 40px;
   text-align: center;
 }
 
 .add-new-btn {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   border: none;
   background-color: #6B8E23;
   color: white;
-  font-size: 30px;
+  font-size: 24px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 10px;
+  margin: 0 auto 8px;
 }
 
 .add-new-text {
   color: #333;
-  font-size: 16px;
+  font-size: 14px;
   margin: 0;
 }
 
@@ -185,11 +185,11 @@
 
 .profiles-background-circle {
   position: absolute;
-  top: -150px;
+  top: -120px;
   left: 50%;
   transform: translateX(-50%);
-  width: 600px;
-  height: 600px;
+  width: 500px;
+  height: 500px;
   background-color: #F5DEB3;
   border-radius: 50%;
   z-index: 1;
@@ -203,11 +203,11 @@
 
 .allergies-background-circle {
   position: absolute;
-  top: -150px;
+  top: -120px;
   left: 50%;
   transform: translateX(-50%);
-  width: 600px;
-  height: 600px;
+  width: 500px;
+  height: 500px;
   background-color: #F5DEB3;
   border-radius: 50%;
   z-index: 1;
@@ -215,33 +215,33 @@
 
 .allergies-title {
   color: #333;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
   text-align: center;
 }
 
 .selected-allergen {
   display: flex;
   justify-content: flex-start;
-  margin-bottom: 30px;
-  margin-left: 20px;
+  margin-bottom: 20px;
+  margin-left: 15px;
 }
 
 .allergen-circle {
-  width: 65px;
-  height: 65px;
-  min-width: 65px;
-  min-height: 65px;
-  max-width: 65px;
-  max-height: 65px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
   border-radius: 50%;
   background-color: #8B4513;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   box-sizing: border-box;
   cursor: pointer;
 }
@@ -249,26 +249,26 @@
 .allergen-circle.selected {
   background-color: #4A90E2;
   color: white;
-  font-size: 24px;
+  font-size: 14px;
   font-weight: 600;
 }
 
 .wheat-icon {
-  font-size: 25px;
+  font-size: 16px;
   color: white;
 }
 
 .add-allergen-btn {
   position: absolute;
-  bottom: -5px;
-  right: -5px;
-  width: 25px;
-  height: 25px;
+  bottom: -3px;
+  right: -3px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   border: 2px solid white;
   background-color: #333;
   color: white;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -279,9 +279,9 @@
 .allergens-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  padding: 0 20px;
-  max-height: 350px;
+  gap: 15px;
+  padding: 0 15px;
+  max-height: 300px;
   overflow-y: auto;
 }
 
@@ -294,7 +294,7 @@
 
 .allergen-label {
   color: #333;
-  font-size: 14px;
+  font-size: 12px;
   margin: 0;
 }
 
@@ -318,8 +318,8 @@
 .modal-content {
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  padding: 20px;
+  gap: 12px;
+  padding: 15px;
   background: transparent;
 }
 
@@ -327,15 +327,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 15px 30px;
+  gap: 8px;
+  padding: 12px 24px;
   border: none;
-  border-radius: 25px;
-  font-size: 16px;
+  border-radius: 20px;
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s ease;
-  min-width: 200px;
+  min-width: 160px;
 }
 
 .severity-btn:hover {
@@ -353,68 +353,68 @@
 }
 
 .severity-icon {
-  font-size: 20px;
+  font-size: 16px;
 }
 
 .profile-title {
   color: #333;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 600;
   margin: 0;
 }
 
 .profile-selector {
-  padding: 8px 15px;
+  padding: 6px 12px;
   border: 2px solid #333;
-  border-radius: 20px;
+  border-radius: 16px;
   background-color: transparent;
   color: #333;
-  font-size: 14px;
+  font-size: 12px;
   cursor: pointer;
 }
 
 .profile-dots {
-  font-size: 12px;
+  font-size: 10px;
   color: #333;
 }
 
 .allergies-display {
   position: relative;
-  height: 120px;
+  height: 70px;
   margin: 10px 0;
-  padding: 0 20px;
+  padding: 0 10px;
 }
 
 .allergies-carousel {
   position: relative;
-  width: 350px;
-  height: 120px;
+  width: 200px;
+  height: 70px;
   margin: 0 auto;
 }
 
 .allergy-item {
   position: absolute;
-  width: 65px;
-  height: 90px;
+  width: 40px;
+  height: 60px;
 }
 
 .allergy-item:nth-child(1) {
-  left: 20px;
+  left: 10px;
   top: 0px;
 }
 
 .allergy-item:nth-child(2) {
-  left: 105px;
-  top: 40px;
+  left: 60px;
+  top: 20px;
 }
 
 .allergy-item:nth-child(3) {
-  left: 190px;
-  top: 40px;
+  left: 110px;
+  top: 20px;
 }
 
 .allergy-item:nth-child(4) {
-  right: 20px;
+  right: 10px;
   top: 0px;
 }
 
@@ -426,39 +426,39 @@
 }
 
 .allergy-circle {
-  width: 65px;
-  height: 65px;
-  min-width: 65px;
-  min-height: 65px;
-  max-width: 65px;
-  max-height: 65px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
   border-radius: 50%;
   background-color: #8B4513;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   box-sizing: border-box;
 }
 
 .allergy-icon {
-  font-size: 30px;
+  font-size: 18px;
   color: white;
 }
 
 .severity-indicator {
   position: absolute;
-  bottom: -5px;
-  right: -5px;
-  width: 25px;
-  height: 25px;
+  bottom: -2px;
+  right: -2px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  border: 2px solid white;
+  font-size: 9px;
+  border: 1.5px solid white;
   z-index: 10;
 }
 
@@ -473,20 +473,20 @@
 }
 
 .add-allergy-circle {
-  width: 65px;
-  height: 65px;
-  min-width: 65px;
-  min-height: 65px;
-  max-width: 65px;
-  max-height: 65px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  max-width: 40px;
+  max-height: 40px;
   border-radius: 50%;
   background-color: #6B8E23;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: white;
-  font-size: 30px;
+  font-size: 18px;
   cursor: pointer;
   text-decoration: none;
   box-sizing: border-box;
@@ -494,7 +494,7 @@
 
 .allergy-name {
   color: #333;
-  font-size: 14px;
+  font-size: 12px;
   margin: 0;
 }
 
@@ -502,20 +502,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  margin: 15px 0;
+  gap: 8px;
+  margin: 12px 0;
 }
 
 .current-allergies-title {
   color: #333;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   margin: 0;
 }
 
 .dropdown-arrow {
   color: #333;
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .home-page {
@@ -531,7 +531,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 20px;
+  gap: 16px;
 }
 
 .home-wheat-icon {
@@ -542,7 +542,7 @@
 
 .home-title {
   color: #333;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 600;
   margin: 0;
 }
@@ -551,7 +551,7 @@
   background: none;
   border: none;
   color: #333;
-  font-size: 24px;
+  font-size: 20px;
   cursor: pointer;
   padding: 5px;
   transition: color 0.2s ease;
@@ -564,11 +564,11 @@
 .chevron-section {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 15px;
 }
 
 .chevron-down {
   color: #333;
-  font-size: 24px;
+  font-size: 20px;
   cursor: pointer;
 }
