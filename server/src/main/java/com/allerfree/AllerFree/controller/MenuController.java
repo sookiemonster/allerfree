@@ -1,6 +1,7 @@
 package com.allerfree.AllerFree.controller;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,11 +10,12 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
+import org.springframework.core.io.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,6 +30,7 @@ import com.allerfree.AllerFree.dto.MenuRequest;
 import com.allerfree.AllerFree.dto.MenuResponse;
 import com.allerfree.AllerFree.dto.MenuSection;
 import com.allerfree.AllerFree.dto.Profile;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -150,9 +153,77 @@ public class MenuController {
         return result;
     }
 
+    @PostMapping("/passLlmOutput")
+    public ResponseEntity<String> passLlmOutput(@RequestBody AllergenDetection ad){
+        Set<String> allergySet = new HashSet<>(); //Combine all allergies into a set
+        for (Profile profile : ad.getProfiles().values()){
+            for (Allergy allergy : profile.getAllergens()){
+                allergySet.add(allergy.getAllergen());
+            }
+        }
+
+        Flux<Image> imageFlux = Flux.fromIterable(ad.getImages());
+        Mono<List<String>> results = imageFlux.flatMapSequential(image -> 
+            {
+                MenuRequest currentRequest = new MenuRequest(allergySet, image);
+                return webClient.post()
+                                .uri("/detect/menu_image/")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .bodyValue(currentRequest).retrieve()
+
+                                //Error Handling
+                                .onStatus(HttpStatusCode::isError, response -> 
+                                    response.bodyToMono(String.class)
+                                            .flatMap(e -> {
+                                                return Mono.empty(); // Skip failed request
+                                            })
+                                    )
+                                .bodyToMono(String.class)
+                                .onErrorResume(e -> {
+                                    return Mono.empty(); // Skip failed request
+                                });
+                })
+            .collectList(); //Collect all responses into a list
+        
+        String output = String.join(", ", results.block());
+        System.out.println(output.length());
+
+        return ResponseEntity.ok(output);
+    }
+
+    @Value("classpath:data/SampleResponse.json")
+    private Resource sampleResponseResource;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @PostMapping("/detectSample")
     public ResponseEntity<MenuResponse> detectAllergensSample(@RequestBody AllergenDetection ad){
-        MenuResponse menuResults = new MenuResponse();
+        HashMap<Integer, String> failed = new HashMap<Integer, String>();
+        MenuResponse menuResults = new MenuResponse(); //Object to return to frontend
+
+        if (ad.getProfiles().size() == 0){
+            failed.put(-1, "No profile to analyze with");
+            menuResults.setFailed(failed);
+            return ResponseEntity.ok(menuResults);
+        }
+
+        Set<String> allergySet = new HashSet<>(); //Combine all allergies into a set
+        for (Profile profile : ad.getProfiles().values()){
+            for (Allergy allergy : profile.getAllergens()){
+                allergySet.add(allergy.getAllergen());
+            }
+        }
+        
+        List<MenuOutput> resultAsList = new ArrayList<MenuOutput>();
+        try (var inputStream = sampleResponseResource.getInputStream()) {
+            MenuOutput menu = objectMapper.readValue(inputStream, MenuOutput.class);
+            resultAsList.add(menu);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        menuResults.setFailed(failed);
+        menuResults.setResults(parseResponse(resultAsList, ad.getProfiles()));
         return ResponseEntity.ok(menuResults);
     }
 }
