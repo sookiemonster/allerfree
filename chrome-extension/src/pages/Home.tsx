@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useProfiles } from "../contexts/ProfileContext";
 
 function Home()
@@ -7,6 +7,24 @@ function Home()
     const navigate = useNavigate();
     const { profiles, setCurrentProfile, clearCurrentProfile } = useProfiles();
     const [selectedProfileId, setSelectedProfileId] = useState("");
+    const [displayedText, setDisplayedText] = useState("");
+    const [isTypingComplete, setIsTypingComplete] = useState(false);
+    const fullText = "allerfree.";
+
+    useEffect(() => {
+        let index = 0;
+        const typingInterval = setInterval(() => {
+            if (index <= fullText.length) {
+                setDisplayedText(fullText.slice(0, index));
+                index++;
+            } else {
+                setIsTypingComplete(true);
+                clearInterval(typingInterval);
+            }
+        }, 150);
+
+        return () => clearInterval(typingInterval);
+    }, []);
 
     const handleProceed = () => {
         if (selectedProfileId) {
@@ -24,7 +42,7 @@ function Home()
         <div className="home-page">
             <div className="home-content">
                 <img src="/AllerFree_Logo.png" alt="AllerFree Logo" className="home-wheat-icon" />
-                <h1 className="home-title">allerfree.</h1>
+                <h1 className="home-title">{displayedText}{!isTypingComplete && <span className="typing-cursor">|</span>}</h1>
 
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <select
