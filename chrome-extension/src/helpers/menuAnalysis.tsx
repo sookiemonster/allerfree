@@ -51,23 +51,23 @@ async function postDataToLocalhost(pImages: ImagePayload[]) {
                 Kelly:  { 
                     profile_name: "Kelly",  
                     allergens: [
-                    { sensitivity: "SEVERE", allergen: "gluten" },
-                    { sensitivity: "SEVERE", allergen: "gluten" },
+                    { sensitivity: "HIGH", allergen: "gluten" },
+                    { sensitivity: "HIGH", allergen: "gluten" },
                     ] 
                 },
                 Daniel: { 
                     profile_name: "Daniel", 
                     allergens: [
-                    { sensitivity: "SEVERE", allergen: "gluten" },
-                    { sensitivity: "SEVERE", allergen: "tree_nuts" },
-                    { sensitivity: "SEVERE", allergen: "shellfish" },
+                    { sensitivity: "HIGH", allergen: "gluten" },
+                    { sensitivity: "HIGH", allergen: "tree_nuts" },
+                    { sensitivity: "HIGH", allergen: "shellfish" },
                     ] 
                 },
                 Thomas: { 
                     profile_name: "Thomas", 
                     allergens: [
-                    { sensitivity: "MILD", allergen: "gluten" },
-                    { sensitivity: "MILD", allergen: "shellfish" },
+                    { sensitivity: "HIGH", allergen: "gluten" },
+                    { sensitivity: "HIGH", allergen: "shellfish" },
                     ] 
                 },
             }
