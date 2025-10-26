@@ -4,14 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
 import java.util.HashMap;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 public class MenuResponse {
-    private List<Integer> successful;
     private HashMap<Integer, String> failed;
     private HashMap<String, MenuOutput> results;
 }

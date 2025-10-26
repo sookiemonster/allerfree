@@ -7,20 +7,12 @@ import Results from "./pages/Results";
 import Profiles from "./pages/Profiles";
 import Allergies from "./pages/Allergies";
 import Test from "./pages/Test";
+import ProfileTest from "./pages/profileTest";
 
 import { createTheme, MantineProvider } from "@mantine/core";
 const theme = createTheme({});
 
 function App() {
-  //   const apiResponse: DetectionResult = JSON.parse(SAMPLE_JSON);
-  //   return (
-  //     <>
-  //       <MantineProvider theme={theme}>
-  //         <DetectionResultPane detection_result={apiResponse} />
-  //       </MantineProvider>
-  //     </>
-  //   );
-
   return (
     <>
       <MantineProvider theme={theme}>
@@ -30,6 +22,7 @@ function App() {
           <Route path="/profiles" element={<Profiles />} />
           <Route path="/allergies" element={<Allergies />} />
           <Route path="/test" element={<Test />} />
+          <Route path="/profileTest" element={<ProfileTest />} />
         </Routes>
       </MantineProvider>
     </>

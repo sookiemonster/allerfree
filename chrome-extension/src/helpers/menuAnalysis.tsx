@@ -1,4 +1,7 @@
 import { transformUrl, convertUrlsToBase64 } from "../helpers/helperBase64";
+import type { ProfilesMap } from "../types/profiles";
+import { getAllProfiles } from "../helpers/profiles";
+import { getProfileOrDefault } from "../helpers/profiles";
 
 type ImagePayload = { base64: string; mime_type: string };
 
@@ -10,7 +13,37 @@ export async function buildMenuAnalysisStringResponse(pImages: string[] = []) {
     const dataUrls = await convertUrlsToBase64(urls); // string[] or DataUrl[]
 
     const images: ImagePayload[] = dataUrls.map(splitDataUrl);
-    return postDataToLocalhost(images);
+
+    const profiles: ProfilesMap = await getAllProfiles();
+
+    return postDataToLocalhost(images, profiles);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    return `Error creating Analysis Response: ${msg}`;
+  }
+}
+
+export async function buildMenuAnalysisStringResponseForNames(
+  pImages: string[] = [],
+  names: string[] = []
+) {
+  try {
+    const urls = pImages
+      .map(transformUrl)
+      .filter((u): u is string => Boolean(u));
+    const dataUrls = await convertUrlsToBase64(urls);
+
+    const images: ImagePayload[] = dataUrls.map(splitDataUrl);
+
+    // Build a ProfilesMap containing only the requested names
+    const entries = await Promise.all(
+      names.map(
+        async (name) => [name, await getProfileOrDefault(name)] as const
+      )
+    );
+    const profiles: ProfilesMap = Object.fromEntries(entries);
+
+    return postDataToLocalhost(images, profiles);
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
     return `Error creating Analysis Response: ${msg}`;
@@ -39,46 +72,27 @@ function splitDataUrl(dataUrl: string): ImagePayload {
   return out;
 }
 
-async function postDataToLocalhost(pImages: ImagePayload[]) {
+async function postDataToLocalhost(
+  pImages: ImagePayload[],
+  pProfiles: ProfilesMap
+) {
   try {
+    const tokenData = await getToken();
+
     const url = "http://localhost:8081/detect";
 
     const postData = {
       images: pImages,
-      profiles: {
-        Kyle: {
-          profile_name: "Kyle",
-          allergens: [],
-        },
-        Kelly: {
-          profile_name: "Kelly",
-          allergens: [
-            { sensitivity: "SEVERE", allergen: "gluten" },
-            { sensitivity: "SEVERE", allergen: "gluten" },
-          ],
-        },
-        Daniel: {
-          profile_name: "Daniel",
-          allergens: [
-            { sensitivity: "SEVERE", allergen: "gluten" },
-            { sensitivity: "SEVERE", allergen: "tree_nuts" },
-            { sensitivity: "SEVERE", allergen: "shellfish" },
-          ],
-        },
-        Thomas: {
-          profile_name: "Thomas",
-          allergens: [
-            { sensitivity: "MILD", allergen: "gluten" },
-            { sensitivity: "MILD", allergen: "shellfish" },
-          ],
-        },
-      },
+      profiles: pProfiles,
     };
     console.log(postData);
 
     const response = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: tokenData["type"] + " " + tokenData["token"],
+      },
       body: JSON.stringify(postData),
     });
 
@@ -90,6 +104,27 @@ async function postDataToLocalhost(pImages: ImagePayload[]) {
 
     const data = await response.json();
     console.log("Server response:", data);
+    return data;
+  } catch (error) {
+    console.error("Error posting data:", error);
+  }
+}
+
+async function getToken() {
+  try {
+    const url = "http://localhost:8080/requestToken";
+
+    const response = await fetch(url, {
+      method: "POST",
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `HTTP error! Status: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
     return data;
   } catch (error) {
     console.error("Error posting data:", error);
