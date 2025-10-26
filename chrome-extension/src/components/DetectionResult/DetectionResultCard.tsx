@@ -40,6 +40,10 @@ export default function DetectionResultCard({
 }: MenuItem) {
   const sortedPredictions = useMemo(() => {
     const copy = contains.slice();
+    if (copy.length == 0) {
+      return [];
+    }
+
     return copy.sort((a, b) => Number(a.safe_to_eat) - Number(b.safe_to_eat));
   }, [contains]);
 
@@ -85,7 +89,16 @@ interface ExplanationProps {
 }
 
 function AccordionExplanation({ sortedPredictions }: ExplanationProps) {
-  const firstElement = sortedPredictions[0].allergen;
+  const firstElement = sortedPredictions[0]?.allergen;
+
+  if (!firstElement) {
+    return (
+      <Text size="xs" c={"gray"} fs={"italic"}>
+        No allergens were listed for this profile, so this item should be safe
+        for you!
+      </Text>
+    );
+  }
 
   return (
     <>
