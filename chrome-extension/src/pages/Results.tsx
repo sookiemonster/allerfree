@@ -78,8 +78,7 @@ function Results() {
     setIsAnalyzing(true);
     try {
       const result = await buildMenuAnalysisStringResponse(images);
-      const formattedResponse: DetectionResult = JSON.parse(result);
-      setDetectionResult(formattedResponse);
+      setDetectionResult(result);
       setIsResults(true);
     } catch (err) {
       console.error("analyze (all) failed:", err);
@@ -96,8 +95,7 @@ function Results() {
         images,
         names
       );
-      const formattedResponse: DetectionResult = JSON.parse(result);
-      setDetectionResult(formattedResponse);
+      setDetectionResult(result);
       setIsResults(true);
     } catch (err) {
       console.error("analyze (selected) failed:", err);
