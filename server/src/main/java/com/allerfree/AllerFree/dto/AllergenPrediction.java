@@ -11,4 +11,5 @@ public class AllergenPrediction {
     private String allergen;
     private String prediction;
     private String explanation;
+    private boolean safe_to_eat;
 }
