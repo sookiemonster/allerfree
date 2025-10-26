@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.method.P;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,6 +43,21 @@ public class MenuController {
     public ResponseEntity<MenuResponse> detectAllergens(@RequestBody AllergenDetection ad){
         //For error handling
         HashMap<Integer, String> failed = new HashMap<Integer, String>();
+        MenuResponse menuResults = new MenuResponse(); //Object to return to frontend
+
+        if (ad.getProfiles().size() == 0){
+            for (int i = 0; i < ad.getImages().size(); i++){
+                failed.put(i, "No profile to analyze with");
+            }
+            menuResults.setFailed(failed);
+            return ResponseEntity.ok(menuResults);
+        }
+
+        if (ad.getImages().size() == 0){
+            failed.put(-1, "No images to analyze");
+            menuResults.setFailed(failed);
+            return ResponseEntity.ok(menuResults);
+        }
 
         Set<String> allergySet = new HashSet<>(); //Combine all allergies into a set
         for (Profile profile : ad.getProfiles().values()){
@@ -84,7 +100,6 @@ public class MenuController {
             })
             .collectList(); //Collect all responses into a list
 
-        MenuResponse menuResults = new MenuResponse(); //Object to return to frontend
         //Parse + Format Response
         menuResults.setFailed(failed);
         menuResults.setResults(parseResponse(results.block(), ad.getProfiles()));
