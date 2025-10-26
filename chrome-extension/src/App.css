@@ -107,7 +107,6 @@
 }
 
 .profile-section {
-  margin: 15px 0;
   text-align: center;
 }
 
@@ -118,8 +117,8 @@
 }
 
 .profile-picture {
-  width: 60px;
-  height: 60px;
+  width: 75px;
+  height: 75px;
   border-radius: 50%;
   background-color: #4A4A4A;
   display: flex;
@@ -442,12 +441,12 @@
 }
 
 .allergy-circle {
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  min-height: 40px;
-  max-width: 40px;
-  max-height: 40px;
+  width: 45px;
+  height: 45px;
+  min-width: 45px;
+  min-height: 45px;
+  max-width: 45px;
+  max-height: 45px;
   border-radius: 50%;
   background-color: #8B4513;
   display: flex;
@@ -647,7 +646,7 @@
   font-weight: 600;
   margin: 0 0 15px 0;
   text-align: center;
-  font-family: 'Bodoni Moda', serif;
+  font-family: 'Inconsolata', monospace;
 }
 
 .allergen-modal-grid {

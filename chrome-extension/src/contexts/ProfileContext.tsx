@@ -12,6 +12,7 @@ export interface Profile {
   name: string;
   allergies: Allergy[];
   createdAt: Date;
+  profilePicture?: string; // base64 encoded image
 }
 
 interface ProfileContextType {

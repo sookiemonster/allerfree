@@ -10,16 +10,53 @@ const availableAllergens = [
 
 function Profiles()
 {
-    const { profiles, currentProfile, setCurrentProfile, addAllergyToProfile, removeAllergyFromProfile } = useProfiles();
+    const { profiles, currentProfile, setCurrentProfile, updateProfile, addProfile, addAllergyToProfile, removeAllergyFromProfile } = useProfiles();
     const [showAllergenModal, setShowAllergenModal] = useState(false);
     const [showSeverityModal, setShowSeverityModal] = useState(false);
     const [selectedAllergen, setSelectedAllergen] = useState<{name: string, icon: string} | null>(null);
     const [isEditingExisting, setIsEditingExisting] = useState(false);
+    const [isCreatingNew, setIsCreatingNew] = useState(!currentProfile);
+    const [newProfileName, setNewProfileName] = useState("");
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [editedName, setEditedName] = useState("");
 
     const handleProfileChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const profileId = e.target.value;
         if (profileId) {
             setCurrentProfile(profileId);
+            setIsCreatingNew(false);
+        }
+    };
+
+    const handleCreateProfile = () => {
+        if (newProfileName.trim()) {
+            addProfile(newProfileName.trim());
+            setIsCreatingNew(false);
+            setNewProfileName("");
+        }
+    };
+
+    const handleEditName = () => {
+        setEditedName(currentProfile?.name || "");
+        setIsEditingName(true);
+    };
+
+    const handleSaveEditedName = () => {
+        if (currentProfile && editedName.trim()) {
+            updateProfile(currentProfile.id, { name: editedName.trim() });
+            setIsEditingName(false);
+        }
+    };
+
+    const handleProfilePictureUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file && currentProfile) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result as string;
+                updateProfile(currentProfile.id, { profilePicture: base64String });
+            };
+            reader.readAsDataURL(file);
         }
     };
 
@@ -90,29 +127,78 @@ function Profiles()
                 <div className="profile-section">
                     <div className="profile-picture-container">
                         <div className="profile-picture">
-                            <div className="profile-icon">👤</div>
+                            {currentProfile?.profilePicture ? (
+                                <img src={currentProfile.profilePicture} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                            ) : (
+                                <div className="profile-icon">👤</div>
+                            )}
                         </div>
+                        {currentProfile && (
+                            <label htmlFor="profile-picture-upload" className="add-photo-btn">
+                                +
+                            </label>
+                        )}
+                        <input
+                            id="profile-picture-upload"
+                            type="file"
+                            accept="image/*"
+                            style={{ display: 'none' }}
+                            onChange={handleProfilePictureUpload}
+                        />
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
-                    <h2 className="current-allergies-title">Current Allergies</h2>
-                </div>
+                {isCreatingNew ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                        <input
+                            type="text"
+                            className="name-input"
+                            placeholder="Enter profile name"
+                            value={newProfileName}
+                            onChange={(e) => setNewProfileName(e.target.value)}
+                            autoFocus
+                            style={{ marginBottom: 0 }}
+                        />
+                        <button className="checkmark-btn" onClick={handleCreateProfile}>
+                            ✓
+                        </button>
+                    </div>
+                ) : (
+                    <>
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
+                            <h2 className="current-allergies-title">Current Allergies</h2>
+                        </div>
 
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
-                    <select
-                        className="profile-dropdown"
-                        value={currentProfile?.id || ""}
-                        onChange={handleProfileChange}
-                    >
-                        <option value="">Select a profile</option>
-                        {profiles.map((profile) => (
-                            <option key={profile.id} value={profile.id}>
-                                {profile.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                            <select
+                                className="profile-dropdown"
+                                value={currentProfile?.id || ""}
+                                onChange={handleProfileChange}
+                            >
+                                <option value="">Select a profile</option>
+                                {profiles.map((profile) => (
+                                    <option key={profile.id} value={profile.id}>
+                                        {profile.name}
+                                    </option>
+                                ))}
+                            </select>
+                            {currentProfile && (
+                                <button
+                                    onClick={handleEditName}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        cursor: 'pointer',
+                                        fontSize: '16px',
+                                        padding: '4px'
+                                    }}
+                                >
+                                    ✏️
+                                </button>
+                            )}
+                        </div>
+                    </>
+                )}
 
                 <div className="allergies-display">
                     <div className="allergies-carousel">
@@ -139,7 +225,7 @@ function Profiles()
                             <div className="add-allergy-circle" onClick={handleAddAllergyClick}>
                                 <span>+</span>
                             </div>
-                            <p className="allergy-name">add new</p>
+                            <p className="allergy-name">new</p>
                         </div>
                     </div>
                 </div>
@@ -196,6 +282,29 @@ function Profiles()
                                 Delete Allergy
                             </button>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {isEditingName && (
+                <div className="modal-overlay" onClick={() => setIsEditingName(false)}>
+                    <div className="modal-content allergen-modal" onClick={(e) => e.stopPropagation()} style={{ minWidth: '200px', padding: '15px' }}>
+                        <h3 className="modal-title" style={{ fontSize: '16px', marginBottom: '10px' }}>Edit Name</h3>
+                        <input
+                            type="text"
+                            className="name-input"
+                            value={editedName}
+                            onChange={(e) => setEditedName(e.target.value)}
+                            autoFocus
+                            style={{ marginBottom: '10px', width: '100%', padding: '8px 12px' }}
+                        />
+                        <button
+                            className="severity-btn"
+                            onClick={handleSaveEditedName}
+                            style={{ width: '100%', minWidth: 'auto', padding: '8px 16px', fontSize: '12px', backgroundColor: 'rgba(58, 104, 58, 0.75)', color: '#ffffff' }}
+                        >
+                            Save
+                        </button>
                     </div>
                 </div>
             )}
