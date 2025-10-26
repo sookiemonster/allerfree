@@ -1,4 +1,6 @@
 import { transformUrl, convertUrlsToBase64 } from "../helpers/helperBase64";
+import type { ProfilesMap } from "../types/profiles";
+import { getAllProfiles } from "../helpers/profiles";
 
 type ImagePayload = { base64: string; mime_type: string };
 
@@ -8,7 +10,10 @@ export async function buildMenuAnalysisStringResponse(pImages: string[] = []) {
         const dataUrls = await convertUrlsToBase64(urls); // string[] or DataUrl[]
 
         const images: ImagePayload[] = dataUrls.map(splitDataUrl);
-        return postDataToLocalhost(images);
+
+        const profiles: ProfilesMap = await getAllProfiles();
+
+        return postDataToLocalhost(images, profiles);
     } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : String(e);
         return `Error creating Analysis Response: ${msg}`;
@@ -37,40 +42,13 @@ function splitDataUrl(dataUrl: string): ImagePayload {
     return out;
 }
 
-async function postDataToLocalhost(pImages: ImagePayload[]) {
+async function postDataToLocalhost(pImages: ImagePayload[], pProfiles: ProfilesMap) {
     try {
         const url = "http://localhost:8080/detect";
 
         const postData = {
             images: pImages,
-            profiles: {
-                Kyle:   { 
-                    profile_name: "Kyle",   
-                    allergens: [] 
-                },
-                Kelly:  { 
-                    profile_name: "Kelly",  
-                    allergens: [
-                    { sensitivity: "HIGH", allergen: "gluten" },
-                    { sensitivity: "HIGH", allergen: "gluten" },
-                    ] 
-                },
-                Daniel: { 
-                    profile_name: "Daniel", 
-                    allergens: [
-                    { sensitivity: "HIGH", allergen: "gluten" },
-                    { sensitivity: "HIGH", allergen: "tree_nuts" },
-                    { sensitivity: "HIGH", allergen: "shellfish" },
-                    ] 
-                },
-                Thomas: { 
-                    profile_name: "Thomas", 
-                    allergens: [
-                    { sensitivity: "HIGH", allergen: "gluten" },
-                    { sensitivity: "HIGH", allergen: "shellfish" },
-                    ] 
-                },
-            }
+            profiles: pProfiles,
         }
         console.log(postData);
 
