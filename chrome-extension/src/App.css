@@ -11,6 +11,10 @@
   overflow: hidden;
 }
 
+body {
+  background-color: #cb7a44;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
@@ -53,19 +57,19 @@
   border-radius: 50%;
   border: none;
   background-color: #fff;
-  color: #CB7A44;
+  color: #cb7a44;
   font-size: 24px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .circle-arrow-btn:hover {
   transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .name-input {
@@ -74,14 +78,14 @@
   border: none;
   border-radius: 25px;
   background-color: rgba(255, 255, 255, 0.3);
-  color: #8B4513;
+  color: #8b4513;
   font-size: 16px;
   margin-bottom: 30px;
   outline: none;
 }
 
 .name-input::placeholder {
-  color: #8B4513;
+  color: #8b4513;
   opacity: 0.7;
 }
 
@@ -115,7 +119,7 @@
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background-color: #4A4A4A;
+  background-color: #4a4a4a;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -124,7 +128,7 @@
 
 .profile-icon {
   font-size: 60px;
-  color: #F5DEB3;
+  color: #f5deb3;
 }
 
 .add-photo-btn {
@@ -134,7 +138,7 @@
   width: 35px;
   height: 35px;
   border-radius: 50%;
-  border: 3px solid #CB7A44;
+  border: 3px solid #cb7a44;
   background-color: #333;
   color: white;
   font-size: 20px;
@@ -161,7 +165,7 @@
   height: 60px;
   border-radius: 50%;
   border: none;
-  background-color: #6B8E23;
+  background-color: #6b8e23;
   color: white;
   font-size: 30px;
   cursor: pointer;
@@ -190,7 +194,7 @@
   transform: translateX(-50%);
   width: 600px;
   height: 600px;
-  background-color: #F5DEB3;
+  background-color: #f5deb3;
   border-radius: 50%;
   z-index: 1;
 }
@@ -208,7 +212,7 @@
   transform: translateX(-50%);
   width: 600px;
   height: 600px;
-  background-color: #F5DEB3;
+  background-color: #f5deb3;
   border-radius: 50%;
   z-index: 1;
 }
@@ -236,7 +240,7 @@
   max-width: 65px;
   max-height: 65px;
   border-radius: 50%;
-  background-color: #8B4513;
+  background-color: #8b4513;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -247,7 +251,7 @@
 }
 
 .allergen-circle.selected {
-  background-color: #4A90E2;
+  background-color: #4a90e2;
   color: white;
   font-size: 24px;
   font-weight: 600;
@@ -343,13 +347,13 @@
 }
 
 .severity-btn.mild {
-  background-color: #F5E6A8;
-  color: #8B6914;
+  background-color: #f5e6a8;
+  color: #8b6914;
 }
 
 .severity-btn.severe {
-  background-color: #F5B5B5;
-  color: #8B1414;
+  background-color: #f5b5b5;
+  color: #8b1414;
 }
 
 .severity-icon {
@@ -433,7 +437,7 @@
   max-width: 65px;
   max-height: 65px;
   border-radius: 50%;
-  background-color: #8B4513;
+  background-color: #8b4513;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -463,12 +467,12 @@
 }
 
 .severity-indicator.severe {
-  background-color: #FF4444;
+  background-color: #ff4444;
   color: white;
 }
 
 .severity-indicator.mild {
-  background-color: #FFB84D;
+  background-color: #ffb84d;
   color: white;
 }
 
@@ -480,7 +484,7 @@
   max-width: 65px;
   max-height: 65px;
   border-radius: 50%;
-  background-color: #6B8E23;
+  background-color: #6b8e23;
   display: flex;
   align-items: center;
   justify-content: center;
