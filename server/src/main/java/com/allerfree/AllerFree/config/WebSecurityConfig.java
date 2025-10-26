@@ -24,12 +24,8 @@ public class WebSecurityConfig {
         return http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-<<<<<<< HEAD
                                                         .requestMatchers(HttpMethod.POST, "/requestToken").permitAll() //Anyone can access these endpoints via POST
                                                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll() //Open endpoints for Swagger UI
-=======
-                                                        .requestMatchers("/requestToken", "/detect" , "/detect_test").permitAll() //Anyone can access these endpoints
->>>>>>> master
                                                         .anyRequest().authenticated()) //All other endpoints need authentication
             .sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
