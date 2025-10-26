@@ -68,6 +68,8 @@ function splitDataUrl(dataUrl: string): ImagePayload {
 
 async function postDataToLocalhost(pImages: ImagePayload[], pProfiles: ProfilesMap) {
     try {
+        const tokenData = await getToken();
+
         const url = "http://localhost:8080/detect";
 
         const postData = {
@@ -78,7 +80,10 @@ async function postDataToLocalhost(pImages: ImagePayload[], pProfiles: ProfilesM
 
         const response = await fetch(url, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: { 
+                "Content-Type": "application/json",
+                "Authorization": tokenData["type"] + " " + tokenData["token"]
+            },
             body: JSON.stringify(postData),
         });
 
@@ -88,6 +93,25 @@ async function postDataToLocalhost(pImages: ImagePayload[], pProfiles: ProfilesM
 
         const data = await response.json();
         console.log("Server response:", data);
+        return data;
+    } catch (error) {
+        console.error("Error posting data:", error);
+    }
+}
+
+async function getToken() {
+    try {
+        const url = "http://localhost:8080/requestToken";
+
+        const response = await fetch(url, {
+            method: "POST",
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
         return data;
     } catch (error) {
         console.error("Error posting data:", error);
