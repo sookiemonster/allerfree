@@ -155,7 +155,7 @@ function Profiles()
                             {currentProfile?.profilePicture ? (
                                 <img src={currentProfile.profilePicture} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                             ) : (
-                                <div className="profile-icon">👤</div>
+                                <img src="/profile.png" alt="Default Profile" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
                             )}
                         </div>
                         {currentProfile && (
@@ -174,7 +174,7 @@ function Profiles()
                 </div>
 
                 {isCreatingNew ? (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '20px' }}>
                         <input
                             type="text"
                             className="name-input"
@@ -182,9 +182,9 @@ function Profiles()
                             value={newProfileName}
                             onChange={(e) => setNewProfileName(e.target.value)}
                             autoFocus
-                            style={{ marginBottom: 0 }}
+                            style={{ marginBottom: 0, width: '180px' }}
                         />
-                        <button className="checkmark-btn" onClick={handleCreateProfile}>
+                        <button className="circle-arrow-btn" onClick={handleCreateProfile}>
                             ✓
                         </button>
                     </div>
