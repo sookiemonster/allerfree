@@ -1,0 +1,13 @@
+.scrollbar {
+  & {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+  }
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
+  &[data-orientation="vertical"] .thumb {
+    background-color: white;
+  }
+}

@@ -1,4 +1,4 @@
-package com.allerfree.AllerFree;
+package com.allerfree.AllerFree.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,7 +10,7 @@ public class WebClientConfig {
     @Bean
     WebClient webClient() {
         return WebClient.builder()
-                .baseUrl("https://9eiu2hf4c3.execute-api.us-east-1.amazonaws.com")
+                .baseUrl("http://127.0.0.1:8000/")
                 .build();
     }
 

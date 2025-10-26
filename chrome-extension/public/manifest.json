@@ -10,9 +10,9 @@
     "action": {
         "default_popup": "index.html"
     },
-    "permissions": ["scripting", "tabs", "activeTab"],
+    "permissions": ["scripting", "tabs", "activeTab", "storage"],
     "background":{
-        "service_worker": "service-worker.js",
+        "service_worker": "/background/service-worker.js",
         "type": "module"
     },
     "host_permissions": [
