@@ -5,7 +5,7 @@ import { useProfiles } from "../contexts/ProfileContext";
 function Home()
 {
     const navigate = useNavigate();
-    const { profiles, setCurrentProfile } = useProfiles();
+    const { profiles, setCurrentProfile, clearCurrentProfile } = useProfiles();
     const [selectedProfileId, setSelectedProfileId] = useState("");
 
     const handleProceed = () => {
@@ -16,6 +16,7 @@ function Home()
     };
 
     const handleCreateNew = () => {
+        clearCurrentProfile();
         navigate("/profiles");
     };
 

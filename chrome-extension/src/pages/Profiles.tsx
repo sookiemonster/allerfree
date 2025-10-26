@@ -74,15 +74,47 @@ function Profiles()
             <div className="profiles-background-circle"></div>
 
             <div style={{ position: 'relative', zIndex: 2 }}>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px', gap: '8px' }}>
                     <Link to="/">
-                        <button className="simple-arrow-btn" style={{ marginRight: '20px' }}>
+                        <button className="simple-arrow-btn">
                             ←
                         </button>
                     </Link>
-                    <h1 className="profile-title">
-                        {currentProfile ? currentProfile.name : "New Profile"}
-                    </h1>
+                    {!currentProfile ? (
+                        <>
+                            <input
+                                type="text"
+                                className="name-input"
+                                placeholder="Enter profile name"
+                                value={profileName}
+                                onChange={(e) => setProfileName(e.target.value)}
+                                autoFocus
+                                style={{ marginBottom: 0 }}
+                            />
+                            <button className="checkmark-btn" onClick={handleSaveName}>
+                                ✓
+                            </button>
+                        </>
+                    ) : isEditing ? (
+                        <>
+                            <input
+                                type="text"
+                                className="name-input"
+                                placeholder="Enter profile name"
+                                value={profileName}
+                                onChange={(e) => setProfileName(e.target.value)}
+                                autoFocus
+                                style={{ marginBottom: 0 }}
+                            />
+                            <button className="checkmark-btn" onClick={handleSaveName}>
+                                ✓
+                            </button>
+                        </>
+                    ) : (
+                        <h1 className="profile-title" onClick={() => setIsEditing(true)} style={{ cursor: 'pointer', margin: 0 }}>
+                            {currentProfile.name}
+                        </h1>
+                    )}
                 </div>
 
                 <div className="profile-section">
@@ -91,28 +123,6 @@ function Profiles()
                             <div className="profile-icon">👤</div>
                         </div>
                     </div>
-
-                    {currentProfile ? (
-                        isEditing ? (
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                                <input
-                                    type="text"
-                                    className="name-input"
-                                    placeholder="Enter profile name"
-                                    value={profileName}
-                                    onChange={(e) => setProfileName(e.target.value)}
-                                    autoFocus
-                                />
-                                <button className="checkmark-btn" onClick={handleSaveName}>
-                                    ✓
-                                </button>
-                            </div>
-                        ) : (
-                            <p className="profile-text" onClick={() => setIsEditing(true)} style={{ cursor: 'pointer' }}>
-                                {currentProfile.name}
-                            </p>
-                        )
-                    ) : null}
                 </div>
 
                 <div className="current-allergies-section">
@@ -143,10 +153,6 @@ function Profiles()
                             <p className="allergy-name">add new</p>
                         </div>
                     </div>
-                </div>
-
-                <div className="chevron-section">
-                    <div className="chevron-down">⌄</div>
                 </div>
             </div>
 

@@ -21,6 +21,7 @@ interface ProfileContextType {
   updateProfile: (id: string, updates: Partial<Profile>) => void;
   deleteProfile: (id: string) => void;
   setCurrentProfile: (id: string) => void;
+  clearCurrentProfile: () => void;
   addAllergyToProfile: (profileId: string, allergy: Allergy) => void;
   removeAllergyFromProfile: (profileId: string, allergyName: string) => void;
 }
@@ -117,6 +118,11 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
     saveCurrentProfileId(id);
   };
 
+  const clearCurrentProfile = () => {
+    setCurrentProfileId(null);
+    saveCurrentProfileId(null);
+  };
+
   const addAllergyToProfile = (profileId: string, allergy: Allergy) => {
     const updatedProfiles = profiles.map((p) => {
       if (p.id === profileId) {
@@ -154,6 +160,7 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
         updateProfile,
         deleteProfile,
         setCurrentProfile,
+        clearCurrentProfile,
         addAllergyToProfile,
         removeAllergyFromProfile,
       }}
