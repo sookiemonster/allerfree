@@ -1,8 +1,9 @@
-import { Box, Grid, Group, Select, Stack, Text, Title } from "@mantine/core";
+import { Box, Grid, ScrollArea, Select, Stack, Title } from "@mantine/core";
 import { flattenMenuItems, type DetectionResult } from "../../types";
 import DetectionResultCard from "./DetectionResultCard";
 import { useState, useMemo } from "react";
 import { itemIsSafe } from "./DetectionParsingUtils";
+import classes from "./Detection.module.css";
 
 interface DetectionResultPaneProps {
   detection_result: DetectionResult;
@@ -11,11 +12,15 @@ interface DetectionResultPaneProps {
 export default function DetectionResultPane({
   detection_result,
 }: DetectionResultPaneProps) {
-  const [profile, setProfile] = useState<string>(
+  const [profile, setProfile] = useState<string | null>(
     Object.keys(detection_result.results)[0]
   );
 
   const allitems = useMemo(() => {
+    if (!profile) {
+      return [];
+    }
+
     const items = flattenMenuItems(detection_result.results[profile]);
     items.sort((a, b) => Number(itemIsSafe(b)) - Number(itemIsSafe(a)));
     return items;
@@ -44,16 +49,13 @@ export default function DetectionResultPane({
             />
           </Grid.Col>
         </Grid>
-        <Stack
-          mah={"500px"}
-          style={{ overflowY: "scroll" }}
-          p={"sm"}
-          bdrs={"sm"}
-        >
-          {allitems.map((item) => (
-            <DetectionResultCard {...item} />
-          ))}
-        </Stack>
+        <ScrollArea mah={"500px"} scrollbars="y" pr={"xs"} classNames={classes}>
+          <Stack p={"sm"} bdrs={"sm"} mah={"500px"}>
+            {allitems.map((item) => (
+              <DetectionResultCard {...item} />
+            ))}
+          </Stack>
+        </ScrollArea>
       </Box>
     </>
   );

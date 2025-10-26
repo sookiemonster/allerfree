@@ -9,7 +9,7 @@ import Allergies from "./pages/Allergies";
 import Test from "./pages/Test";
 
 import { createTheme, MantineProvider } from "@mantine/core";
-import { flattenMenuItems, type DetectionResult } from "./types";
+import { type DetectionResult } from "./types";
 
 import { SAMPLE_JSON } from "./sample";
 import DetectionResultPane from "./components/DetectionResult/DetectionResultPane";

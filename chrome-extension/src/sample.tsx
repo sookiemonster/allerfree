@@ -252,7 +252,7 @@ export const SAMPLE_JSON = `
           "description": "",
           "items": [
             {
-              "name": "CHIPS",
+              "name": "AWDWUIDJH",
               "description": "",
               "symbols": [],
               "contains": [
@@ -260,7 +260,7 @@ export const SAMPLE_JSON = `
                   "allergen": "gluten",
                   "prediction": "VERY_UNLIKELY",
                   "explanation": "While corn chips are typically gluten-free, they may be fried in a shared fryer with gluten-containing items, or seasoned with gluten-containing spices. Some corn tortillas also contain a small amount of wheat.",
-                  "safe_to_eat": false
+                  "safe_to_eat": true
                 },
                 {
                   "allergen": "shellfish",
