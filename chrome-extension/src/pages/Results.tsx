@@ -123,9 +123,12 @@ function Results() {
 
   return (
     <>
-      <NavToggle isResults={isResults} onToggle={toggle} />
-
-      {isResults ? <h1>Results</h1> : <h1>Start Analysis Process</h1>}
+      {!isResults && (
+        <>
+          <h1>Start Analysis Process</h1>
+          <NavToggle isResults={isResults} onToggle={toggle} />
+        </>
+      )}
 
       {!isResults && (
         <div style={{ padding: 12, display: "grid", gap: 12 }}>

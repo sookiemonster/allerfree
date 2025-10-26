@@ -112,7 +112,7 @@ async function postDataToLocalhost(
 
 async function getToken() {
   try {
-    const url = "http://localhost:8080/requestToken";
+    const url = "http://localhost:8081/requestToken";
 
     const response = await fetch(url, {
       method: "POST",

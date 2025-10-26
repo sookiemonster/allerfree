@@ -17,12 +17,12 @@ function App() {
     <>
       <MantineProvider theme={theme}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/wdaw" element={<Home />} />
           <Route path="/results" element={<Results />} />
           <Route path="/profiles" element={<Profiles />} />
           <Route path="/allergies" element={<Allergies />} />
           <Route path="/test" element={<Test />} />
-          <Route path="/profileTest" element={<ProfileTest />} />
+          <Route path="/" element={<ProfileTest />} />
         </Routes>
       </MantineProvider>
     </>
