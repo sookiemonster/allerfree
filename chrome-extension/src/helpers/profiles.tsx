@@ -5,7 +5,9 @@ import type { Profile, Allergen } from "../types/profiles";
 
 export const PROFILES_STORAGE_KEY = "profiles.v1";
 
-// Stub to seed
+// ===================================
+// stub seedings
+// ===================================
 export const SAMPLE_PROFILES: ProfilesMap = {
     Kyle: {
         name: "Kyle",
@@ -35,15 +37,6 @@ export const SAMPLE_PROFILES: ProfilesMap = {
     },
 };
 
-export async function saveProfiles(profiles: ProfilesMap): Promise<void> {
-    await chrome.storage.local.set({ [PROFILES_STORAGE_KEY]: profiles });
-}
-
-export async function getAllProfiles(): Promise<ProfilesMap> {
-    const res = await chrome.storage.local.get(PROFILES_STORAGE_KEY);
-    return (res?.[PROFILES_STORAGE_KEY] ?? {}) as ProfilesMap;
-}
-
 /**
  * Seed storage with SAMPLE_PROFILES.
  * @param overwrite If false, skip seeding when profiles already exist.
@@ -59,6 +52,43 @@ export async function seedSampleProfiles(overwrite: boolean = false): Promise<bo
     return true;
 }
 
+// ===================================
+// helper and all profile grabs
+// ===================================
+export async function saveProfiles(profiles: ProfilesMap): Promise<void> {
+    await chrome.storage.local.set({ [PROFILES_STORAGE_KEY]: profiles });
+}
+
+export async function getAllProfiles(): Promise<ProfilesMap> {
+    const res = await chrome.storage.local.get(PROFILES_STORAGE_KEY);
+    return (res?.[PROFILES_STORAGE_KEY] ?? {}) as ProfilesMap;
+}
+
+// ===================================
+// singular profile grabs
+// ===================================
+/**
+ * Get a single profile by its map key (e.g., "Kelly").
+ * @param key   Profile map key.
+ * @returns     The Profile if found, otherwise undefined.
+ */
+export async function getProfile(key: string): Promise<Profile | undefined> {
+    const all = await getAllProfiles();
+    return all[key];
+}
+
+/**
+ * (Optional) Get-or-default helper.
+ * Returns an empty profile with the given name if not found.
+ */
+export async function getProfileOrDefault(key: string): Promise<Profile> {
+    const found = await getProfile(key);
+    return found ?? { name: key, allergens: [] };
+}
+
+// ===================================
+// additions
+// ===================================
 /**
  * Add a new profile to storage.
  * @param key        Map key used to store the profile (e.g., "Kyle").

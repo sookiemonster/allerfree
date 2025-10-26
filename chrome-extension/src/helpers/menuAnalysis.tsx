@@ -1,6 +1,7 @@
 import { transformUrl, convertUrlsToBase64 } from "../helpers/helperBase64";
 import type { ProfilesMap } from "../types/profiles";
 import { getAllProfiles } from "../helpers/profiles";
+import { getProfileOrDefault } from "../helpers/profiles";
 
 type ImagePayload = { base64: string; mime_type: string };
 
@@ -12,6 +13,29 @@ export async function buildMenuAnalysisStringResponse(pImages: string[] = []) {
         const images: ImagePayload[] = dataUrls.map(splitDataUrl);
 
         const profiles: ProfilesMap = await getAllProfiles();
+
+        return postDataToLocalhost(images, profiles);
+    } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : String(e);
+        return `Error creating Analysis Response: ${msg}`;
+    }
+}
+
+export async function buildMenuAnalysisStringResponseForNames(
+    pImages: string[] = [],
+    names: string[] = []
+) {
+    try {
+        const urls = pImages.map(transformUrl).filter((u): u is string => Boolean(u));
+        const dataUrls = await convertUrlsToBase64(urls);
+
+        const images: ImagePayload[] = dataUrls.map(splitDataUrl);
+
+        // Build a ProfilesMap containing only the requested names
+        const entries = await Promise.all(
+            names.map(async (name) => [name, await getProfileOrDefault(name)] as const)
+        );
+        const profiles: ProfilesMap = Object.fromEntries(entries);
 
         return postDataToLocalhost(images, profiles);
     } catch (e: unknown) {

@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { buildMenuAnalysisStringResponse } from "../helpers/menuAnalysis";
+import { buildMenuAnalysisStringResponseForNames } from "../helpers/menuAnalysis";
+import { getAllProfiles } from "../helpers/profiles";
+import type { ProfilesMap } from "../types/profiles";
 
 type PushMsg = { type: "MENU_IMAGES_PUSH"; images: string[] };
 type GetResult = { type: "MENU_IMAGES_RESULT"; images: string[] };
@@ -27,6 +30,9 @@ function Results() {
     const [analysisText, setAnalysisText] = useState<any>("");
     const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
 
+	const [profiles, setProfiles] = useState<ProfilesMap>({});
+    const [selected, setSelected] = useState<Set<string>>(new Set());
+
     const toggle = () => setIsResults((v) => !v);
 
     useEffect(() => {
@@ -49,24 +55,61 @@ function Results() {
         };
     }, []);
 
-    const getMenuAnalysis = async (): Promise<string | undefined> => {
+	useEffect(() => {
+        (async () => {
+            const all = await getAllProfiles();
+            setProfiles(all);
+            
+            setSelected(prev => {
+                const next = new Set<string>();
+                for (const k of prev) if (k in all) next.add(k);
+                return next;
+            });
+        })();
+    }, []);
+
+    const getMenuAnalysisAll = async (): Promise<void> => {
         setIsAnalyzing(true);
         try {
-            const analysis = await buildMenuAnalysisStringResponse(images);
-            // if (typeof analysis === "string" && analysis.length > 0) {
-                setAnalysisText(JSON.stringify(analysis, null, 2));
-                setIsResults(true); // jump to results on success
-            // }
-            return analysis;
+            const result = await buildMenuAnalysisStringResponse(images);
+            const text = typeof result === "string" ? result : JSON.stringify(result, null, 2);
+            setAnalysisText(text);
+            setIsResults(true);
         } catch (err) {
-            console.error("getMenuAnalysis failed:", err);
-            return undefined;
+            console.error("analyze (all) failed:", err);
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+	
+	const getMenuAnalysisForSelected = async (): Promise<void> => {
+        setIsAnalyzing(true);
+        try {
+            const names = Array.from(selected);
+            const result = await buildMenuAnalysisStringResponseForNames(images, names);
+            const text = typeof result === "string" ? result : JSON.stringify(result, null, 2);
+            setAnalysisText(text);
+            setIsResults(true);
+        } catch (err) {
+            console.error("analyze (selected) failed:", err);
         } finally {
             setIsAnalyzing(false);
         }
     };
 
-    const disabled = !portRef.current || images.length === 0 || isAnalyzing;
+	const toggleSelection = (name: string) => {
+        setSelected(prev => {
+            const next = new Set(prev);
+            if (next.has(name)) next.delete(name);
+            else next.add(name);
+            return next;
+        });
+    };
+
+	const names = Object.keys(profiles);
+
+    const canAnalyzeCommon = !!portRef.current && images.length > 0 && !isAnalyzing;
+    const canAnalyzeSelected = canAnalyzeCommon && selected.size > 0;
 
     return (
         <>
@@ -75,21 +118,69 @@ function Results() {
             {isResults ? <h1>Results</h1> : <h1>Start Analysis Process</h1>}
 
             {!isResults && (
-                <div style={{ padding: 12 }}>
+                <div style={{ padding: 12, display: "grid", gap: 12 }}>
+                    {/* Analyze ALL profiles */}
                     <div
                         style={{
                             display: "flex",
                             gap: 8,
                             alignItems: "center",
-                            marginBottom: 10,
                         }}
                     >
-                        <button onClick={getMenuAnalysis} disabled={disabled} aria-busy={isAnalyzing}>
-                            {isAnalyzing ? "Analyzing…" : "Analyze Menus"}
+                        <button
+                            onClick={getMenuAnalysisAll}
+                            disabled={!canAnalyzeCommon}
+                            aria-busy={isAnalyzing}
+                            title={images.length === 0 ? "No menu images found" : undefined}
+                        >
+                            {isAnalyzing ? "Analyzing…" : "Analyze Menus ~ All Profiles"}
                         </button>
                         <span style={{ fontSize: 12, color: "#555" }}>
-                            Number Of Menus Found: {images.length}
+                            Menus found: {images.length}
                         </span>
+                    </div>
+
+                    {/* Checklist of profiles + analyze selected */}
+                    <div style={{ paddingTop: 12 }}>
+                        <h2 style={{ marginBottom: 6, color: "#555", fontSize: 12 }}>
+							{names.length === 0 ? "No profiles found." : "Select profiles to analyze:"}
+						</h2>
+
+                        <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "grid", gap: 6 }}>
+                            {names.map((name) => (
+                                <li key={name} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                    <input
+                                        id={`prof-${name}`}
+                                        type="checkbox"
+                                        checked={selected.has(name)}
+                                        onChange={() => toggleSelection(name)}
+                                    />
+                                    <label htmlFor={`prof-${name}`} style={{ cursor: "pointer" }}>
+                                        {name}
+                                    </label>
+                                </li>
+                            ))}
+                        </ul>
+
+                        <div style={{ marginTop: 10 }}>
+                            <button
+                                onClick={getMenuAnalysisForSelected}
+                                disabled={!canAnalyzeSelected}
+                                aria-busy={isAnalyzing}
+                                title={
+                                    selected.size === 0
+                                        ? "Select at least one profile"
+                                        : images.length === 0
+                                        ? "No menu images found"
+                                        : undefined
+                                }
+                            >
+                                {isAnalyzing ? "Analyzing…" : "Analyze Menus ~ Selected Profiles"}
+                            </button>
+                            <span style={{ marginLeft: 8, fontSize: 12, color: "#555" }}>
+                                Selected: {selected.size}
+                            </span>
+                        </div>
                     </div>
                 </div>
             )}
