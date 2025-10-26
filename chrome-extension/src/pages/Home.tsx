@@ -23,35 +23,37 @@ function Home()
     return(
         <div className="home-page">
             <div className="home-content">
-                <img src="/wheat-icon.png" alt="Wheat icon" className="home-wheat-icon" />
-                <h1 className="home-title">Allerfree</h1>
+                <img src="/AllerFree_Logo.png" alt="AllerFree Logo" className="home-wheat-icon" />
+                <h1 className="home-title">allerfree.</h1>
 
-                <select
-                    className="profile-dropdown"
-                    value={selectedProfileId}
-                    onChange={(e) => setSelectedProfileId(e.target.value)}
-                >
-                    <option value="">Select a profile</option>
-                    {profiles.map((profile) => (
-                        <option key={profile.id} value={profile.id}>
-                            {profile.name}
-                        </option>
-                    ))}
-                </select>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <select
+                        className="profile-dropdown"
+                        value={selectedProfileId}
+                        onChange={(e) => setSelectedProfileId(e.target.value)}
+                    >
+                        <option value="">Select a profile</option>
+                        {profiles.map((profile) => (
+                            <option key={profile.id} value={profile.id}>
+                                {profile.name}
+                            </option>
+                        ))}
+                    </select>
+
+                    <button
+                        className="circle-arrow-btn"
+                        onClick={handleProceed}
+                        disabled={!selectedProfileId}
+                    >
+                        →
+                    </button>
+                </div>
 
                 <button
                     className="create-profile-btn"
                     onClick={handleCreateNew}
                 >
                     Create New Profile
-                </button>
-
-                <button
-                    className="circle-arrow-btn"
-                    onClick={handleProceed}
-                    disabled={!selectedProfileId}
-                >
-                    →
                 </button>
             </div>
         </div>

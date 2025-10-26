@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useProfiles } from "../contexts/ProfileContext";
 
 const availableAllergens = [
@@ -10,33 +10,16 @@ const availableAllergens = [
 
 function Profiles()
 {
-    const { currentProfile, addProfile, updateProfile, addAllergyToProfile } = useProfiles();
-    const [isEditing, setIsEditing] = useState(false);
-    const [profileName, setProfileName] = useState("");
+    const { profiles, currentProfile, setCurrentProfile, addAllergyToProfile, removeAllergyFromProfile } = useProfiles();
     const [showAllergenModal, setShowAllergenModal] = useState(false);
     const [showSeverityModal, setShowSeverityModal] = useState(false);
     const [selectedAllergen, setSelectedAllergen] = useState<{name: string, icon: string} | null>(null);
+    const [isEditingExisting, setIsEditingExisting] = useState(false);
 
-    useEffect(() => {
-        if (currentProfile) {
-            // Profile is selected, load its data
-            setProfileName(currentProfile.name);
-            setIsEditing(false);
-        } else {
-            // No profile selected, show default empty state
-            setProfileName("");
-            setIsEditing(false);
-        }
-    }, [currentProfile]);
-
-    const handleSaveName = () => {
-        if (profileName.trim()) {
-            if (currentProfile) {
-                updateProfile(currentProfile.id, { name: profileName.trim() });
-            } else {
-                addProfile(profileName.trim());
-            }
-            setIsEditing(false);
+    const handleProfileChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const profileId = e.target.value;
+        if (profileId) {
+            setCurrentProfile(profileId);
         }
     };
 
@@ -50,7 +33,12 @@ function Profiles()
     };
 
     const handleAllergenSelect = (allergen: {name: string, icon: string}) => {
+        const isAlreadyAdded = savedAllergies.some(a => a.name === allergen.name);
+        if (isAlreadyAdded) {
+            return; // Don't allow selecting already added allergens
+        }
         setSelectedAllergen(allergen);
+        setIsEditingExisting(false);
         setShowAllergenModal(false);
         setShowSeverityModal(true);
     };
@@ -70,7 +58,17 @@ function Profiles()
     const handleExistingAllergyClick = (allergy: { name: string, icon: string }) => {
         if (currentProfile) {
             setSelectedAllergen(allergy);
+            setIsEditingExisting(true);
             setShowSeverityModal(true);
+        }
+    };
+
+    const handleDeleteAllergy = () => {
+        if (currentProfile && selectedAllergen) {
+            removeAllergyFromProfile(currentProfile.id, selectedAllergen.name);
+            setShowSeverityModal(false);
+            setSelectedAllergen(null);
+            setIsEditingExisting(false);
         }
     };
 
@@ -87,41 +85,6 @@ function Profiles()
                             ←
                         </button>
                     </Link>
-                    {!currentProfile ? (
-                        <>
-                            <input
-                                type="text"
-                                className="name-input"
-                                placeholder="Enter profile name"
-                                value={profileName}
-                                onChange={(e) => setProfileName(e.target.value)}
-                                autoFocus
-                                style={{ marginBottom: 0 }}
-                            />
-                            <button className="checkmark-btn" onClick={handleSaveName}>
-                                ✓
-                            </button>
-                        </>
-                    ) : isEditing ? (
-                        <>
-                            <input
-                                type="text"
-                                className="name-input"
-                                placeholder="Enter profile name"
-                                value={profileName}
-                                onChange={(e) => setProfileName(e.target.value)}
-                                autoFocus
-                                style={{ marginBottom: 0 }}
-                            />
-                            <button className="checkmark-btn" onClick={handleSaveName}>
-                                ✓
-                            </button>
-                        </>
-                    ) : (
-                        <h1 className="profile-title" onClick={() => setIsEditing(true)} style={{ cursor: 'pointer', margin: 0 }}>
-                            {currentProfile.name}
-                        </h1>
-                    )}
                 </div>
 
                 <div className="profile-section">
@@ -132,8 +95,23 @@ function Profiles()
                     </div>
                 </div>
 
-                <div className="current-allergies-section">
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
                     <h2 className="current-allergies-title">Current Allergies</h2>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+                    <select
+                        className="profile-dropdown"
+                        value={currentProfile?.id || ""}
+                        onChange={handleProfileChange}
+                    >
+                        <option value="">Select a profile</option>
+                        {profiles.map((profile) => (
+                            <option key={profile.id} value={profile.id}>
+                                {profile.name}
+                            </option>
+                        ))}
+                    </select>
                 </div>
 
                 <div className="allergies-display">
@@ -172,18 +150,22 @@ function Profiles()
                     <div className="modal-content allergen-modal" onClick={(e) => e.stopPropagation()}>
                         <h3 className="modal-title">Select Allergen</h3>
                         <div className="allergen-modal-grid">
-                            {availableAllergens.map((allergen) => (
-                                <div
-                                    key={allergen.name}
-                                    className="allergen-modal-item"
-                                    onClick={() => handleAllergenSelect(allergen)}
-                                >
-                                    <div className="allergen-circle">
-                                        <div className="wheat-icon">{allergen.icon}</div>
+                            {availableAllergens.map((allergen) => {
+                                const isAlreadyAdded = savedAllergies.some(a => a.name === allergen.name);
+                                return (
+                                    <div
+                                        key={allergen.name}
+                                        className={`allergen-modal-item ${isAlreadyAdded ? 'disabled' : ''}`}
+                                        onClick={() => handleAllergenSelect(allergen)}
+                                        style={{ opacity: isAlreadyAdded ? 0.4 : 1, cursor: isAlreadyAdded ? 'not-allowed' : 'pointer' }}
+                                    >
+                                        <div className="allergen-circle">
+                                            <div className="wheat-icon">{allergen.icon}</div>
+                                        </div>
+                                        <p className="allergen-label">{allergen.name}</p>
                                     </div>
-                                    <p className="allergen-label">{allergen.name}</p>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
@@ -206,6 +188,14 @@ function Profiles()
                             <span className="severity-icon">❗</span>
                             Severe Allergy
                         </button>
+                        {isEditingExisting && (
+                            <button
+                                className="severity-btn delete"
+                                onClick={handleDeleteAllergy}
+                            >
+                                Delete Allergy
+                            </button>
+                        )}
                     </div>
                 </div>
             )}
