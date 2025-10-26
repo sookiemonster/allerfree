@@ -1,3 +1,3 @@
-import DetectionResultCard from "./DetectionResultCard";
+import DetectionResultCard from "./DetectionResult/DetectionResultCard";
 
 export { DetectionResultCard };

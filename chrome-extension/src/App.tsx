@@ -9,23 +9,19 @@ import Allergies from "./pages/Allergies";
 import Test from "./pages/Test";
 
 import { createTheme, MantineProvider } from "@mantine/core";
-import { DetectionResultCard } from "./components";
 import { flattenMenuItems, type DetectionResult } from "./types";
 
 import { SAMPLE_JSON } from "./sample";
-import DetectionResultPane from "./components/DetectionResultPane";
+import DetectionResultPane from "./components/DetectionResult/DetectionResultPane";
 
 const theme = createTheme({});
 
 function App() {
   const apiResponse: DetectionResult = JSON.parse(SAMPLE_JSON);
-  const allitems = flattenMenuItems(apiResponse.results.Thomas);
-  //   const items = apiResponse.results.Thomas.sections
-
   return (
     <>
       <MantineProvider theme={theme}>
-        <DetectionResultPane sections={apiResponse.results.Thomas.sections} />
+        <DetectionResultPane detection_result={apiResponse} />
       </MantineProvider>
     </>
   );

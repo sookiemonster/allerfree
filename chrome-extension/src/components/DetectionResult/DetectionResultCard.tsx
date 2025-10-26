@@ -5,19 +5,16 @@ import {
   Text,
   Title,
   Badge,
-  Divider,
   Space,
-  Collapse,
-  Button,
+  Accordion,
 } from "@mantine/core";
 import {
   formatAllergenName,
   formatRating,
   type AllergenPrediction,
   type MenuItem,
-} from "../types/DetectionResult";
+} from "../../types/DetectionResult";
 import { useMemo } from "react";
-import { useDisclosure } from "@mantine/hooks";
 
 function SafetyBadge({ is_safe }: { is_safe: boolean }) {
   return (
@@ -32,38 +29,6 @@ function SymbolBadge({ symbol }: { symbol: string }) {
     <Badge color="brown" radius="xs" size="xs" w={"xl"} variant="light">
       {symbol}
     </Badge>
-  );
-}
-
-function AllergenExplanation({
-  allergen,
-  explanation,
-  prediction,
-  safe_to_eat,
-}: AllergenPrediction) {
-  console.log(safe_to_eat);
-
-  return (
-    <>
-      <Stack gap={2}>
-        <Group gap={"xs"} justify="space-between">
-          <Text tt={"capitalize"} size="sm" fw={"bold"}>
-            {formatAllergenName(allergen)}
-          </Text>
-          <Text size="xs">
-            {
-              <Badge size="sm" radius={3} variant="transparent" c={"gray"}>
-                {formatRating(prediction)}
-              </Badge>
-            }
-          </Text>
-        </Group>
-        <Divider />
-        <Text size="xs" lineClamp={3}>
-          {explanation}
-        </Text>
-      </Stack>
-    </>
   );
 }
 
@@ -108,43 +73,46 @@ export default function DetectionResultCard({
             )}
           </Text>
           <Space h={"xs"} />
-          {CollapsibleExplanation(sortedPredictions)}
+          <AccordionExplanation sortedPredictions={sortedPredictions} />
         </Stack>
       </Card>
     </>
   );
 }
 
-function CollapsibleExplanation(sortedPredictions: AllergenPrediction[]) {
-  const [opened, { toggle }] = useDisclosure(false);
+interface ExplanationProps {
+  sortedPredictions: AllergenPrediction[];
+}
 
-  const firstPrediction = useMemo(() => {
-    const first_pred = sortedPredictions[0];
-    return <AllergenExplanation {...first_pred} />;
-  }, [sortedPredictions]);
-
-  const restOfPredictions = useMemo(() => {
-    return sortedPredictions.slice(1);
-  }, [sortedPredictions]);
+function AccordionExplanation({ sortedPredictions }: ExplanationProps) {
+  const firstElement = sortedPredictions[0].allergen;
 
   return (
     <>
-      {firstPrediction}
-      <Space h={"md"} />
-      {restOfPredictions.length > 0 && (
-        <>
-          <Collapse in={opened}>
-            <Stack gap={"md"} pb={"sm"}>
-              {restOfPredictions.map((pred) => (
-                <AllergenExplanation {...pred} />
-              ))}
-            </Stack>
-          </Collapse>
-          <Button variant="light" color="gray" onClick={toggle} size="xs">
-            {opened ? "Close" : "See More"}
-          </Button>
-        </>
-      )}
+      <Accordion chevronPosition="left" radius={0} defaultValue={firstElement}>
+        {sortedPredictions.map((pred) => (
+          <>
+            <Accordion.Item key={pred.allergen} value={pred.allergen}>
+              <Accordion.Control
+                icon={
+                  <Badge size="sm" radius={3} variant="transparent" c={"gray"}>
+                    {formatRating(pred.prediction)}
+                  </Badge>
+                }
+              >
+                <Text tt={"capitalize"} size="xs" lineClamp={3}>
+                  {formatAllergenName(pred.allergen)}
+                </Text>
+              </Accordion.Control>
+              <Accordion.Panel>
+                <Text size="xs" lineClamp={5}>
+                  {pred.explanation}
+                </Text>
+              </Accordion.Panel>
+            </Accordion.Item>
+          </>
+        ))}
+      </Accordion>
     </>
   );
 }
