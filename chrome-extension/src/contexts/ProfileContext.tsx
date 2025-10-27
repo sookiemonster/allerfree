@@ -2,7 +2,7 @@ import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
 
 export interface Allergy {
-  name: string;
+  name: "gluten" | "tree_nuts" | "shellfish";
   severity: "mild" | "severe";
   icon: string;
 }
@@ -127,7 +127,9 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const addAllergyToProfile = (profileId: string, allergy: Allergy) => {
     const updatedProfiles = profiles.map((p) => {
       if (p.id === profileId) {
-        const allergyIndex = p.allergies.findIndex((a) => a.name === allergy.name);
+        const allergyIndex = p.allergies.findIndex(
+          (a) => a.name === allergy.name
+        );
         if (allergyIndex !== -1) {
           // Allergy exists, update it
           const updatedAllergies = [...p.allergies];

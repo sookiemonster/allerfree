@@ -73,7 +73,10 @@ export default function Results() {
     portRef.current = port;
 
     port.onMessage.addListener((msg: PushMsg | GetResult) => {
-      if (msg.type === "MENU_IMAGES_PUSH" || msg.type === "MENU_IMAGES_RESULT") {
+      if (
+        msg.type === "MENU_IMAGES_PUSH" ||
+        msg.type === "MENU_IMAGES_RESULT"
+      ) {
         setImages(Array.isArray(msg.images) ? msg.images : []);
       }
     });
@@ -93,7 +96,7 @@ export default function Results() {
     setIsAnalyzing(true);
     try {
       const result = await buildMenuAnalysisStringResponse(images, apiProfiles);
-      setDetectionResult(result as DetectionResult);
+      setDetectionResult(result);
       setIsResults(true);
     } catch (err) {
       console.error("analyze (all) failed:", err);
@@ -108,7 +111,7 @@ export default function Results() {
       const chosen = new Set(selected);
       const filtered = apiProfiles.filter((p) => chosen.has(p.name));
       const result = await buildMenuAnalysisStringResponse(images, filtered);
-      setDetectionResult(result as DetectionResult);
+      setDetectionResult(result);
       setIsResults(true);
     } catch (err) {
       console.error("analyze (selected) failed:", err);
@@ -125,7 +128,8 @@ export default function Results() {
       return next;
     });
 
-  const canAnalyzeCommon = !!portRef.current && images.length > 0 && !isAnalyzing;
+  const canAnalyzeCommon =
+    !!portRef.current && images.length > 0 && !isAnalyzing;
   const canAnalyzeSelected = canAnalyzeCommon && selected.size > 0;
 
   return (
@@ -172,10 +176,7 @@ export default function Results() {
                       checked={selected.has(name)}
                       onChange={() => toggleSelection(name)}
                     />
-                    <label
-                      className="clickable"
-                      htmlFor={`prof-${name}`}
-                    >
+                    <label className="clickable" htmlFor={`prof-${name}`}>
                       {name}
                     </label>
                   </li>

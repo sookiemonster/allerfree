@@ -1,7 +1,7 @@
 import { Box, Grid, ScrollArea, Select, Stack, Title } from "@mantine/core";
 import { flattenMenuItems, type DetectionResult } from "../../types";
 import DetectionResultCard from "./DetectionResultCard";
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { itemIsSafe } from "./DetectionParsingUtils";
 import classes from "./Detection.module.css";
 
@@ -12,19 +12,35 @@ interface DetectionResultPaneProps {
 export default function DetectionResultPane({
   detection_result,
 }: DetectionResultPaneProps) {
-  const [profile, setProfile] = useState<string | null>(
-    Object.keys(detection_result.results)[0]
-  );
+  const [profile, setProfile] = useState<string | null>(null);
 
-  const allitems = useMemo(() => {
-    if (!profile) {
-      return [];
+  useEffect(() => {
+    if (!detection_result?.results) {
+      console.error(typeof detection_result);
+      console.error(JSON.stringify(detection_result, null, 2));
+      console.error("Failed to fetch detection results.");
+      return;
     }
 
-    const items = flattenMenuItems(detection_result.results[profile]);
-    items.sort((a, b) => Number(itemIsSafe(b)) - Number(itemIsSafe(a)));
-    return items;
-  }, [profile, detection_result.results]);
+    console.log("Identifying first profile.");
+    const updated_profile = Object.keys(detection_result.results)[0];
+    setProfile(updated_profile);
+  }, [detection_result, setProfile, profile]);
+
+  if (!profile) {
+    return <>No profile was selected.</>;
+  }
+
+  const allitems = flattenMenuItems(detection_result?.results[profile]) || [];
+  allitems.sort((a, b) => Number(itemIsSafe(b)) - Number(itemIsSafe(a)));
+
+  if (!detection_result?.results) {
+    return (
+      <>
+        An error occurred. {profile} {detection_result}
+      </>
+    );
+  }
 
   return (
     <>

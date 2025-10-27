@@ -1,7 +1,4 @@
 import { transformUrl, convertUrlsToBase64 } from "../helpers/helperBase64";
-// import type { ProfilesMap } from "../types/profiles";
-// import { getAllProfiles } from "../helpers/profiles";
-// import { getProfileOrDefault } from "../helpers/profiles";
 
 type ImagePayload = { base64: string; mime_type: string };
 import type { ApiProfile } from "./profileFormat";
@@ -11,7 +8,9 @@ export async function buildMenuAnalysisStringResponse(
   pProfiles: ApiProfile[]
 ) {
   try {
-    const urls = pImages.map(transformUrl).filter((u): u is string => Boolean(u));
+    const urls = pImages
+      .map(transformUrl)
+      .filter((u): u is string => Boolean(u));
     const dataUrls = await convertUrlsToBase64(urls);
     const images: ImagePayload[] = dataUrls.map(splitDataUrl);
 
@@ -58,7 +57,7 @@ async function postDataToLocalhost(
       images: pImages,
       profiles: pProfiles,
     };
-    console.log(postData);
+    console.log("Sending: ", postData);
 
     const response = await fetch(url, {
       method: "POST",
@@ -75,8 +74,13 @@ async function postDataToLocalhost(
       );
     }
 
-    const data = await response.json();
+    let data = await response.json();
     console.log("Server response:", data);
+
+    if (typeof data === "string") {
+      data = JSON.parse(data);
+    }
+
     return data;
   } catch (error) {
     console.error("Error posting data:", error);
