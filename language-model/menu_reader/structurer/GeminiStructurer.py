@@ -18,7 +18,7 @@ class GeminiStructurer(MenuStructurer):
         logger.info("Attempting to structure OCR with prompt: \n", prompt)
 
         image_param = types.Part.from_bytes(data=img.base64, mime_type=img.mime_type)
-        response = self.gemini_client.models.generate_content(
+        response = await self.gemini_client.aio.models.generate_content(
             model=GeminiStructurer.SELECTED_MODEL,
             contents=[prompt, image_param],
             config=types.GenerateContentConfig(

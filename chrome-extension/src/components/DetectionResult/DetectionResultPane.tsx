@@ -86,6 +86,11 @@ export default function DetectionResultPane({
 
         <ScrollArea mah={"350px"} scrollbars="y" pr={"xs"} classNames={classes}>
           <Stack p={"sm"} mah={"350px"}>
+            {allitems.length === 0 ? (
+              <>Hmmm, we didn't find any menu items. Try another restaurant!</>
+            ) : (
+              <></>
+            )}
             {allitems.map((item) => (
               <DetectionResultCard {...item} />
             ))}
