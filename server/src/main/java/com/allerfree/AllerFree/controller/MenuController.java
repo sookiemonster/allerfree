@@ -48,16 +48,14 @@ public class MenuController {
         HashMap<Integer, String> failed = new HashMap<Integer, String>();
         MenuResponse menuResults = new MenuResponse(); //Object to return to frontend
 
-        if (ad.getProfiles().size() == 0){
-            for (int i = 0; i < ad.getImages().size(); i++){
-                failed.put(i, "No profile to analyze with");
-            }
+        if (ad.getImages().size() == 0){
+            failed.put(-1, "No images to analyze");
             menuResults.setFailed(failed);
             return ResponseEntity.ok(menuResults);
         }
 
-        if (ad.getImages().size() == 0){
-            failed.put(-1, "No images to analyze");
+        if (ad.getProfiles().size() == 0){
+            failed.put(-2, "No profile to analyze with");
             menuResults.setFailed(failed);
             return ResponseEntity.ok(menuResults);
         }
@@ -67,6 +65,12 @@ public class MenuController {
             for (Allergy allergy : profile.getAllergens()){
                 allergySet.add(allergy.getAllergen());
             }
+        }
+        
+        if (allergySet.size() == 0){
+            failed.put(-3, "No allergies to analyze with");
+            menuResults.setFailed(failed);
+            return ResponseEntity.ok(menuResults);
         }
 
         Flux<Image> imageFlux = Flux.fromIterable(ad.getImages());
