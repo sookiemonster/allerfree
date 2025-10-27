@@ -1,10 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,600&family=Inconsolata:wght@400;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,600&family=Inconsolata:wght@400;600&display=swap");
 
 #root {
-  width: 300px;
-  height: 400px;
-  max-width: 300px;
-  max-height: 400px;
+  width: 400px;
+  height: 500px;
   margin: 0 auto;
   padding: 1.2rem;
   text-align: center;
@@ -83,14 +81,14 @@ body {
   border: none;
   border-radius: 20px;
   background-color: rgba(255, 255, 255, 0.3);
-  color: #8B4513;
+  color: #8b4513;
   font-size: 14px;
   margin-bottom: 25px;
   outline: none;
 }
 
 .name-input::placeholder {
-  color: #8B4513;
+  color: #8b4513;
   opacity: 0.7;
 }
 
@@ -138,7 +136,7 @@ body {
 
 .profile-icon {
   font-size: 30px;
-  color: #F5DEB3;
+  color: #f5deb3;
 }
 
 .add-photo-btn {
@@ -148,7 +146,7 @@ body {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 2px solid #CB7A44;
+  border: 2px solid #cb7a44;
   background-color: #333;
   color: white;
   font-size: 12px;
@@ -163,7 +161,7 @@ body {
   font-size: 16px;
   font-weight: 600;
   margin: 8px 0;
-  font-family: 'Bodoni Moda', serif;
+  font-family: "Bodoni Moda", serif;
 }
 
 .add-new-section {
@@ -176,7 +174,7 @@ body {
   height: 50px;
   border-radius: 50%;
   border: none;
-  background-color: #6B8E23;
+  background-color: #6b8e23;
   color: white;
   font-size: 24px;
   cursor: pointer;
@@ -205,7 +203,7 @@ body {
   transform: translateX(-50%);
   width: 500px;
   height: 450px;
-  background-color: #F5DEB3;
+  background-color: #f5deb3;
   border-radius: 50%;
   z-index: 1;
 }
@@ -223,7 +221,7 @@ body {
   transform: translateX(-50%);
   width: 500px;
   height: 500px;
-  background-color: #F5DEB3;
+  background-color: #f5deb3;
   border-radius: 50%;
   z-index: 1;
 }
@@ -234,7 +232,7 @@ body {
   font-weight: 600;
   margin-bottom: 15px;
   text-align: center;
-  font-family: 'Bodoni Moda', serif;
+  font-family: "Bodoni Moda", serif;
 }
 
 .selected-allergen {
@@ -252,7 +250,7 @@ body {
   max-width: 40px;
   max-height: 40px;
   border-radius: 50%;
-  background-color: #8B4513;
+  background-color: #8b4513;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -263,7 +261,7 @@ body {
 }
 
 .allergen-circle.selected {
-  background-color: #4A90E2;
+  background-color: #4a90e2;
   color: white;
   font-size: 14px;
   font-weight: 600;
@@ -312,7 +310,7 @@ body {
   color: #333;
   font-size: 12px;
   margin: 0;
-  font-family: 'Inconsolata', monospace;
+  font-family: "Inconsolata", monospace;
 }
 
 .allergen-circle {
@@ -353,7 +351,7 @@ body {
   cursor: pointer;
   transition: transform 0.2s ease;
   min-width: 160px;
-  font-family: 'Inconsolata', monospace;
+  font-family: "Inconsolata", monospace;
 }
 
 .severity-btn:hover {
@@ -361,18 +359,18 @@ body {
 }
 
 .severity-btn.mild {
-  background-color: #F5E6A8;
-  color: #8B6914;
+  background-color: #f5e6a8;
+  color: #8b6914;
 }
 
 .severity-btn.severe {
-  background-color: #F5B5B5;
-  color: #8B1414;
+  background-color: #f5b5b5;
+  color: #8b1414;
 }
 
 .severity-btn.delete {
-  background-color: #E0E0E0;
-  color: #8B1414;
+  background-color: #e0e0e0;
+  color: #8b1414;
 }
 
 .severity-icon {
@@ -384,7 +382,7 @@ body {
   font-size: 20px;
   font-weight: 600;
   margin: 0;
-  font-family: 'Bodoni Moda', serif;
+  font-family: "Bodoni Moda", serif;
 }
 
 .profile-selector {
@@ -436,7 +434,7 @@ body {
   max-width: 40px;
   max-height: 40px;
   border-radius: 50%;
-  background-color: #8B4513;
+  background-color: #8b4513;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -466,12 +464,12 @@ body {
 }
 
 .severity-indicator.severe {
-  background-color: #FF4444;
+  background-color: #ff4444;
   color: white;
 }
 
 .severity-indicator.mild {
-  background-color: #FFB84D;
+  background-color: #ffb84d;
   color: white;
 }
 
@@ -483,7 +481,7 @@ body {
   max-width: 40px;
   max-height: 40px;
   border-radius: 50%;
-  background-color: #6B8E23;
+  background-color: #6b8e23;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -499,7 +497,7 @@ body {
   color: #333;
   font-size: 12px;
   margin: 0;
-  font-family: 'Inconsolata', monospace;
+  font-family: "Inconsolata", monospace;
 }
 
 .current-allergies-section {
@@ -516,7 +514,7 @@ body {
   font-size: 24px;
   font-weight: 600;
   margin: 0;
-  font-family: 'Inconsolata', monospace;
+  font-family: "Inconsolata", monospace;
   text-align: center;
 }
 
@@ -556,11 +554,11 @@ body {
 }
 
 .home-title {
-  color: #FFD18C;
+  color: #ffd18c;
   font-size: 34px;
   font-weight: 600;
   margin: 0;
-  font-family: 'Bodoni Moda', serif;
+  font-family: "Bodoni Moda", serif;
 }
 
 .typing-cursor {
@@ -569,10 +567,12 @@ body {
 }
 
 @keyframes blink {
-  0%, 50% {
+  0%,
+  50% {
     opacity: 1;
   }
-  51%, 100% {
+  51%,
+  100% {
     opacity: 0;
   }
 }
@@ -601,11 +601,11 @@ body {
   font-size: 12px;
   cursor: pointer;
   outline: none;
-  font-family: 'Inconsolata', monospace;
+  font-family: "Inconsolata", monospace;
 }
 
 .profile-dropdown:focus {
-  border-color: #CB7A44;
+  border-color: #cb7a44;
 }
 
 .create-profile-btn {
@@ -620,11 +620,11 @@ body {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.5s ease;
-  font-family: 'Inconsolata', monospace;
+  font-family: "Inconsolata", monospace;
 }
 
 .create-profile-btn:hover {
-  background-color: #CB7A44;
+  background-color: #cb7a44;
   color: black;
   border: none;
 }
@@ -639,7 +639,6 @@ body {
   color: black;
 }
 
-
 .allergen-modal {
   background-color: rgba(255, 255, 255, 0.98);
   border-radius: 20px;
@@ -653,7 +652,7 @@ body {
   font-weight: 600;
   margin: 0 0 15px 0;
   text-align: center;
-  font-family: 'Inconsolata', monospace;
+  font-family: "Inconsolata", monospace;
 }
 
 .allergen-modal-grid {

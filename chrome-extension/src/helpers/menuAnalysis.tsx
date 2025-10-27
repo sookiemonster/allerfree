@@ -44,6 +44,16 @@ function splitDataUrl(dataUrl: string): ImagePayload {
   return out;
 }
 
+export const mapProfilesByName = (
+  profiles: ApiProfile[]
+): { [key: string]: ApiProfile } => {
+  return profiles.reduce((accumulator, currentProfile) => {
+    // Set the key on the accumulator object
+    accumulator[currentProfile.name] = currentProfile;
+    return accumulator;
+  }, {} as { [key: string]: ApiProfile }); // Start with an empty object
+};
+
 async function postDataToLocalhost(
   pImages: ImagePayload[],
   pProfiles: ApiProfile[]
@@ -55,7 +65,7 @@ async function postDataToLocalhost(
 
     const postData = {
       images: pImages,
-      profiles: pProfiles,
+      profiles: mapProfilesByName(pProfiles),
     };
     console.log("Sending: ", postData);
 

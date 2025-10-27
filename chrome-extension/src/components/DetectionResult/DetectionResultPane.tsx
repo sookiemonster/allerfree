@@ -13,6 +13,7 @@ export default function DetectionResultPane({
   detection_result,
 }: DetectionResultPaneProps) {
   const [profile, setProfile] = useState<string | null>(null);
+  const [allProfiles, setAllProfiles] = useState<string[]>([]);
 
   useEffect(() => {
     if (!detection_result?.results) {
@@ -23,11 +24,25 @@ export default function DetectionResultPane({
     }
 
     console.log("Identifying first profile.");
-    const updated_profile = Object.keys(detection_result.results)[0];
+    const detected_profiles = Object.keys(detection_result.results);
+    const updated_profile = detected_profiles[0];
     setProfile(updated_profile);
-  }, [detection_result, setProfile, profile]);
+    setAllProfiles(detected_profiles);
+  }, [detection_result]);
 
   if (!profile) {
+    <Select
+      data={allProfiles}
+      value={profile}
+      onChange={setProfile}
+      comboboxProps={{
+        position: "bottom",
+        middlewares: { flip: false, shift: false },
+        offset: 0,
+        zIndex: 999,
+      }}
+    />;
+
     return <>No profile was selected.</>;
   }
 
@@ -42,18 +57,20 @@ export default function DetectionResultPane({
     );
   }
 
+  console.log("Profiels", allProfiles);
+
   return (
     <>
       <Box /*bdrs={"sm"}*/>
         <Grid px={"lg"} align="center" py={"xs"}>
           <Grid.Col ta={"left"} span={8}>
-            <Title fs={"italic"} fw={"600"} c={"white"} order={4}>
+            <Title fs={"italic"} fw={"600"} c={"black"} order={4}>
               Here's What We Found
             </Title>
           </Grid.Col>
           <Grid.Col span={4}>
             <Select
-              data={Object.keys(detection_result.results)}
+              data={allProfiles}
               value={profile}
               allowDeselect={false}
               onChange={setProfile}
@@ -61,12 +78,14 @@ export default function DetectionResultPane({
                 position: "bottom",
                 middlewares: { flip: false, shift: false },
                 offset: 0,
+                zIndex: 999,
               }}
             />
           </Grid.Col>
         </Grid>
-        <ScrollArea mah={"500px"} scrollbars="y" pr={"xs"} classNames={classes}>
-          <Stack p={"sm"} /*bdrs={"sm"}*/ mah={"500px"}>
+
+        <ScrollArea mah={"350px"} scrollbars="y" pr={"xs"} classNames={classes}>
+          <Stack p={"sm"} mah={"350px"}>
             {allitems.map((item) => (
               <DetectionResultCard {...item} />
             ))}

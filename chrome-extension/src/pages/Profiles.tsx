@@ -8,337 +8,466 @@ import { useProfiles } from "../contexts/ProfileContext";
 //     { name: "sesame", icon: "/sesame.png" }
 // ];
 const availableAllergens = [
-  { name: "gluten",     icon: "/wheat.png" },
-  { name: "tree nuts",  icon: "/sesame.png" }, // reusing sesame art
-  { name: "shellfish",  icon: "/soy.png" },    // reusing soy art
+  { name: "gluten", icon: "/wheat.png" },
+  { name: "tree_nuts", icon: "/sesame.png" }, // reusing sesame art
+  { name: "shellfish", icon: "/soy.png" }, // reusing soy art
 ] as const;
 
 // Migration map from old emoji icons to new PNG paths
 const iconMigrationMap: { [key: string]: string } = {
-    "🌾": "/wheat.png",
-    "🫘": "/soy.png",
-    "⚪": "/sesame.png"
+  "🌾": "/wheat.png",
+  "🫘": "/soy.png",
+  "⚪": "/sesame.png",
 };
 
-function Profiles()
-{
-    const { profiles, currentProfile, setCurrentProfile, updateProfile, addProfile, addAllergyToProfile, removeAllergyFromProfile } = useProfiles();
-    const [showAllergenModal, setShowAllergenModal] = useState(false);
-    const [showSeverityModal, setShowSeverityModal] = useState(false);
-    const [selectedAllergen, setSelectedAllergen] = useState<{name: string, icon: string} | null>(null);
-    const [isEditingExisting, setIsEditingExisting] = useState(false);
-    const [isCreatingNew, setIsCreatingNew] = useState(!currentProfile);
-    const [newProfileName, setNewProfileName] = useState("");
-    const [isEditingName, setIsEditingName] = useState(false);
-    const [editedName, setEditedName] = useState("");
+function Profiles() {
+  const {
+    profiles,
+    currentProfile,
+    setCurrentProfile,
+    updateProfile,
+    addProfile,
+    addAllergyToProfile,
+    removeAllergyFromProfile,
+  } = useProfiles();
+  const [showAllergenModal, setShowAllergenModal] = useState(false);
+  const [showSeverityModal, setShowSeverityModal] = useState(false);
+  const [selectedAllergen, setSelectedAllergen] = useState<{
+    name: string;
+    icon: string;
+  } | null>(null);
+  const [isEditingExisting, setIsEditingExisting] = useState(false);
+  const [isCreatingNew, setIsCreatingNew] = useState(!currentProfile);
+  const [newProfileName, setNewProfileName] = useState("");
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editedName, setEditedName] = useState("");
 
-    // Migrate old emoji icons to PNG paths
-    useEffect(() => {
-        if (currentProfile) {
-            let needsUpdate = false;
-            const updatedAllergies = currentProfile.allergies.map(allergy => {
-                if (iconMigrationMap[allergy.icon]) {
-                    needsUpdate = true;
-                    return { ...allergy, icon: iconMigrationMap[allergy.icon] };
-                }
-                return allergy;
-            });
-
-            if (needsUpdate) {
-                updateProfile(currentProfile.id, { allergies: updatedAllergies });
-            }
+  // Migrate old emoji icons to PNG paths
+  useEffect(() => {
+    if (currentProfile) {
+      let needsUpdate = false;
+      const updatedAllergies = currentProfile.allergies.map((allergy) => {
+        if (iconMigrationMap[allergy.icon]) {
+          needsUpdate = true;
+          return { ...allergy, icon: iconMigrationMap[allergy.icon] };
         }
-    }, [currentProfile?.id]);
+        return allergy;
+      });
 
-    const handleProfileChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const profileId = e.target.value;
-        if (profileId) {
-            setCurrentProfile(profileId);
-            setIsCreatingNew(false);
-        }
-    };
+      if (needsUpdate) {
+        updateProfile(currentProfile.id, { allergies: updatedAllergies });
+      }
+    }
+  }, [currentProfile?.id]);
 
-    const handleCreateProfile = () => {
-        if (newProfileName.trim()) {
-            addProfile(newProfileName.trim());
-            setIsCreatingNew(false);
-            setNewProfileName("");
-        }
-    };
+  const handleProfileChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const profileId = e.target.value;
+    if (profileId) {
+      setCurrentProfile(profileId);
+      setIsCreatingNew(false);
+    }
+  };
 
-    const handleEditName = () => {
-        setEditedName(currentProfile?.name || "");
-        setIsEditingName(true);
-    };
+  const handleCreateProfile = () => {
+    if (newProfileName.trim()) {
+      addProfile(newProfileName.trim());
+      setIsCreatingNew(false);
+      setNewProfileName("");
+    }
+  };
 
-    const handleSaveEditedName = () => {
-        if (currentProfile && editedName.trim()) {
-            updateProfile(currentProfile.id, { name: editedName.trim() });
-            setIsEditingName(false);
-        }
-    };
+  const handleEditName = () => {
+    setEditedName(currentProfile?.name || "");
+    setIsEditingName(true);
+  };
 
-    const handleProfilePictureUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file && currentProfile) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                const base64String = reader.result as string;
-                updateProfile(currentProfile.id, { profilePicture: base64String });
-            };
-            reader.readAsDataURL(file);
-        }
-    };
+  const handleSaveEditedName = () => {
+    if (currentProfile && editedName.trim()) {
+      updateProfile(currentProfile.id, { name: editedName.trim() });
+      setIsEditingName(false);
+    }
+  };
 
-    const handleAddAllergyClick = () => {
-        console.log("Add allergy clicked, currentProfile:", currentProfile);
-        if (currentProfile) {
-            setShowAllergenModal(true);
-        } else {
-            alert("Please create a profile first by entering a name and clicking the checkmark.");
-        }
-    };
+  const handleProfilePictureUpload = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (file && currentProfile) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        updateProfile(currentProfile.id, { profilePicture: base64String });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-    const handleAllergenSelect = (allergen: {name: string, icon: string}) => {
-        const isAlreadyAdded = savedAllergies.some(a => a.name === allergen.name);
-        if (isAlreadyAdded) {
-            return; // Don't allow selecting already added allergens
-        }
-        setSelectedAllergen(allergen);
-        setIsEditingExisting(false);
-        setShowAllergenModal(false);
-        setShowSeverityModal(true);
-    };
+  const handleAddAllergyClick = () => {
+    console.log("Add allergy clicked, currentProfile:", currentProfile);
+    if (currentProfile) {
+      setShowAllergenModal(true);
+    } else {
+      alert(
+        "Please create a profile first by entering a name and clicking the checkmark."
+      );
+    }
+  };
 
-    const handleSeveritySelect = (severity: "mild" | "severe") => {
-        if (currentProfile && selectedAllergen) {
-            addAllergyToProfile(currentProfile.id, {
-                name: selectedAllergen.name,
-                icon: selectedAllergen.icon,
-                severity: severity
-            });
-            setShowSeverityModal(false);
-            setSelectedAllergen(null);
-        }
-    };
+  const handleAllergenSelect = (allergen: { name: string; icon: string }) => {
+    const isAlreadyAdded = savedAllergies.some((a) => a.name === allergen.name);
+    if (isAlreadyAdded) {
+      return; // Don't allow selecting already added allergens
+    }
+    setSelectedAllergen(allergen);
+    setIsEditingExisting(false);
+    setShowAllergenModal(false);
+    setShowSeverityModal(true);
+  };
 
-    const handleExistingAllergyClick = (allergy: { name: string, icon: string }) => {
-        if (currentProfile) {
-            setSelectedAllergen(allergy);
-            setIsEditingExisting(true);
-            setShowSeverityModal(true);
-        }
-    };
+  const handleSeveritySelect = (severity: "mild" | "severe") => {
+    if (currentProfile && selectedAllergen) {
+      addAllergyToProfile(currentProfile.id, {
+        name: selectedAllergen.name,
+        icon: selectedAllergen.icon,
+        severity: severity,
+      });
+      setShowSeverityModal(false);
+      setSelectedAllergen(null);
+    }
+  };
 
-    const handleDeleteAllergy = () => {
-        if (currentProfile && selectedAllergen) {
-            removeAllergyFromProfile(currentProfile.id, selectedAllergen.name);
-            setShowSeverityModal(false);
-            setSelectedAllergen(null);
-            setIsEditingExisting(false);
-        }
-    };
+  const handleExistingAllergyClick = (allergy: {
+    name: string;
+    icon: string;
+  }) => {
+    if (currentProfile) {
+      setSelectedAllergen(allergy);
+      setIsEditingExisting(true);
+      setShowSeverityModal(true);
+    }
+  };
 
-    const savedAllergies = currentProfile?.allergies || [];
+  const handleDeleteAllergy = () => {
+    if (currentProfile && selectedAllergen) {
+      removeAllergyFromProfile(currentProfile.id, selectedAllergen.name);
+      setShowSeverityModal(false);
+      setSelectedAllergen(null);
+      setIsEditingExisting(false);
+    }
+  };
 
-    return(
-        <div className="profiles-page">
-            <div className="profiles-background-circle"></div>
+  const savedAllergies = currentProfile?.allergies || [];
 
-            <div style={{ position: 'relative', zIndex: 2 }}>
-                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '15px', gap: '8px' }}>
-                    <Link to="/">
-                        <button className="simple-arrow-btn">
-                            ←
-                        </button>
-                    </Link>
-                </div>
+  return (
+    <div className="profiles-page">
+      <div className="profiles-background-circle"></div>
 
-                <div className="profile-section">
-                    <div className="profile-picture-container">
-                        <div className="profile-picture">
-                            {currentProfile?.profilePicture ? (
-                                <img src={currentProfile.profilePicture} alt="Profile" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                            ) : (
-                                <img src="/profile.png" alt="Default Profile" style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
-                            )}
-                        </div>
-                        {currentProfile && (
-                            <label htmlFor="profile-picture-upload" className="add-photo-btn">
-                                +
-                            </label>
-                        )}
-                        <input
-                            id="profile-picture-upload"
-                            type="file"
-                            accept="image/*"
-                            style={{ display: 'none' }}
-                            onChange={handleProfilePictureUpload}
-                        />
-                    </div>
-                </div>
+      <div style={{ position: "relative", zIndex: 2 }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            marginBottom: "15px",
+            gap: "8px",
+          }}
+        >
+          <Link to="/">
+            <button className="simple-arrow-btn">←</button>
+          </Link>
+        </div>
 
-                {isCreatingNew ? (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '20px' }}>
-                        <input
-                            type="text"
-                            className="name-input"
-                            placeholder="Enter profile name"
-                            value={newProfileName}
-                            onChange={(e) => setNewProfileName(e.target.value)}
-                            autoFocus
-                            style={{ marginBottom: 0, width: '180px' }}
-                        />
-                        <button className="circle-arrow-btn" onClick={handleCreateProfile}>
-                            ✓
-                        </button>
-                    </div>
-                ) : (
-                    <>
-                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
-                            <h2 className="current-allergies-title">Current Allergies</h2>
-                        </div>
+        <div className="profile-section">
+          <div className="profile-picture-container">
+            <div className="profile-picture">
+              {currentProfile?.profilePicture ? (
+                <img
+                  src={currentProfile.profilePicture}
+                  alt="Profile"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                <img
+                  src="/profile.png"
+                  alt="Default Profile"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
+                />
+              )}
+            </div>
+            {currentProfile && (
+              <label htmlFor="profile-picture-upload" className="add-photo-btn">
+                +
+              </label>
+            )}
+            <input
+              id="profile-picture-upload"
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              onChange={handleProfilePictureUpload}
+            />
+          </div>
+        </div>
 
-                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                            <select
-                                className="profile-dropdown"
-                                value={currentProfile?.id || ""}
-                                onChange={handleProfileChange}
-                            >
-                                <option value="">Select a profile</option>
-                                {profiles.map((profile) => (
-                                    <option key={profile.id} value={profile.id}>
-                                        {profile.name}
-                                    </option>
-                                ))}
-                            </select>
-                            {currentProfile && (
-                                <button
-                                    onClick={handleEditName}
-                                    style={{
-                                        background: 'none',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        padding: '4px',
-                                        display: 'flex',
-                                        alignItems: 'center'
-                                    }}
-                                >
-                                    <img src="/edit.png" alt="Edit" style={{ width: '16px', height: '16px' }} />
-                                </button>
-                            )}
-                        </div>
-                    </>
-                )}
-
-                <div className="allergies-display">
-                    <div className="allergies-carousel">
-                        {savedAllergies.map((allergy, index) => (
-                            <div key={index} className="allergy-item">
-                                <div
-                                    className="allergy-circle"
-                                    onClick={() => handleExistingAllergyClick({ name: allergy.name, icon: allergy.icon })}
-                                    style={{ cursor: 'pointer' }}
-                                >
-                                    <img src={allergy.icon} alt={allergy.name} className="allergy-icon" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
-                                    {allergy.severity === "severe" && (
-                                        <div className="severity-indicator severe">❗</div>
-                                    )}
-                                    {allergy.severity === "mild" && (
-                                        <div className="severity-indicator mild">⚠️</div>
-                                    )}
-                                </div>
-                                <p className="allergy-name">{allergy.name}</p>
-                            </div>
-                        ))}
-
-                        <div className="allergy-item">
-                            <div className="add-allergy-circle" onClick={handleAddAllergyClick}>
-                                <span>+</span>
-                            </div>
-                            <p className="allergy-name">new</p>
-                        </div>
-                    </div>
-                </div>
+        {isCreatingNew ? (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "10px",
+              marginBottom: "20px",
+            }}
+          >
+            <input
+              type="text"
+              className="name-input"
+              placeholder="Enter profile name"
+              value={newProfileName}
+              onChange={(e) => setNewProfileName(e.target.value)}
+              autoFocus
+              style={{ marginBottom: 0, width: "180px" }}
+            />
+            <button className="circle-arrow-btn" onClick={handleCreateProfile}>
+              ✓
+            </button>
+          </div>
+        ) : (
+          <>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginBottom: "8px",
+              }}
+            >
+              <h2 className="current-allergies-title">Current Allergies</h2>
             </div>
 
-            {showAllergenModal && (
-                <div className="modal-overlay" onClick={() => setShowAllergenModal(false)}>
-                    <div className="modal-content allergen-modal" onClick={(e) => e.stopPropagation()}>
-                        <h3 className="modal-title">Select Allergen</h3>
-                        <div className="allergen-modal-grid">
-                            {availableAllergens.map((allergen) => {
-                                const isAlreadyAdded = savedAllergies.some(a => a.name === allergen.name);
-                                return (
-                                    <div
-                                        key={allergen.name}
-                                        className={`allergen-modal-item ${isAlreadyAdded ? 'disabled' : ''}`}
-                                        onClick={() => handleAllergenSelect(allergen)}
-                                        style={{ opacity: isAlreadyAdded ? 0.4 : 1, cursor: isAlreadyAdded ? 'not-allowed' : 'pointer' }}
-                                    >
-                                        <div className="allergen-circle">
-                                            <img src={allergen.icon} alt={allergen.name} className="wheat-icon" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
-                                        </div>
-                                        <p className="allergen-label">{allergen.name}</p>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            )}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "8px",
+                marginBottom: "12px",
+              }}
+            >
+              <select
+                className="profile-dropdown"
+                value={currentProfile?.id || ""}
+                onChange={handleProfileChange}
+              >
+                <option value="">Select a profile</option>
+                {profiles.map((profile) => (
+                  <option key={profile.id} value={profile.id}>
+                    {profile.name}
+                  </option>
+                ))}
+              </select>
+              {currentProfile && (
+                <button
+                  onClick={handleEditName}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: "4px",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <img
+                    src="/edit.png"
+                    alt="Edit"
+                    style={{ width: "16px", height: "16px" }}
+                  />
+                </button>
+              )}
+            </div>
+          </>
+        )}
 
-            {showSeverityModal && (
-                <div className="modal-overlay" onClick={() => setShowSeverityModal(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                        <button
-                            className="severity-btn mild"
-                            onClick={() => handleSeveritySelect("mild")}
-                        >
-                            <span className="severity-icon">⚠️</span>
-                            Mild Allergy
-                        </button>
-                        <button
-                            className="severity-btn severe"
-                            onClick={() => handleSeveritySelect("severe")}
-                        >
-                            <span className="severity-icon">❗</span>
-                            Severe Allergy
-                        </button>
-                        {isEditingExisting && (
-                            <button
-                                className="severity-btn delete"
-                                onClick={handleDeleteAllergy}
-                            >
-                                Delete Allergy
-                            </button>
-                        )}
-                    </div>
+        <div className="allergies-display">
+          <div className="allergies-carousel">
+            {savedAllergies.map((allergy, index) => (
+              <div key={index} className="allergy-item">
+                <div
+                  className="allergy-circle"
+                  onClick={() =>
+                    handleExistingAllergyClick({
+                      name: allergy.name,
+                      icon: allergy.icon,
+                    })
+                  }
+                  style={{ cursor: "pointer" }}
+                >
+                  <img
+                    src={allergy.icon}
+                    alt={allergy.name}
+                    className="allergy-icon"
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      objectFit: "contain",
+                    }}
+                  />
+                  {allergy.severity === "severe" && (
+                    <div className="severity-indicator severe">❗</div>
+                  )}
+                  {allergy.severity === "mild" && (
+                    <div className="severity-indicator mild">⚠️</div>
+                  )}
                 </div>
-            )}
+                <p className="allergy-name">{allergy.name}</p>
+              </div>
+            ))}
 
-            {isEditingName && (
-                <div className="modal-overlay" onClick={() => setIsEditingName(false)}>
-                    <div className="modal-content allergen-modal" onClick={(e) => e.stopPropagation()} style={{ minWidth: '200px', padding: '15px' }}>
-                        <h3 className="modal-title" style={{ fontSize: '16px', marginBottom: '10px' }}>Edit Name</h3>
-                        <input
-                            type="text"
-                            className="name-input"
-                            value={editedName}
-                            onChange={(e) => setEditedName(e.target.value)}
-                            autoFocus
-                            style={{ marginBottom: '10px', width: '100%', padding: '8px 12px' }}
-                        />
-                        <button
-                            className="severity-btn"
-                            onClick={handleSaveEditedName}
-                            style={{ width: '100%', minWidth: 'auto', padding: '8px 16px', fontSize: '12px', backgroundColor: 'rgba(58, 104, 58, 0.75)', color: '#ffffff' }}
-                        >
-                            Save
-                        </button>
-                    </div>
-                </div>
-            )}
+            <div className="allergy-item">
+              <div
+                className="add-allergy-circle"
+                onClick={handleAddAllergyClick}
+              >
+                <span>+</span>
+              </div>
+              <p className="allergy-name">new</p>
+            </div>
+          </div>
         </div>
-    )
-} export default Profiles
+      </div>
+
+      {showAllergenModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowAllergenModal(false)}
+        >
+          <div
+            className="modal-content allergen-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="modal-title">Select Allergen</h3>
+            <div className="allergen-modal-grid">
+              {availableAllergens.map((allergen) => {
+                const isAlreadyAdded = savedAllergies.some(
+                  (a) => a.name === allergen.name
+                );
+                return (
+                  <div
+                    key={allergen.name}
+                    className={`allergen-modal-item ${
+                      isAlreadyAdded ? "disabled" : ""
+                    }`}
+                    onClick={() => handleAllergenSelect(allergen)}
+                    style={{
+                      opacity: isAlreadyAdded ? 0.4 : 1,
+                      cursor: isAlreadyAdded ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    <div className="allergen-circle">
+                      <img
+                        src={allergen.icon}
+                        alt={allergen.name}
+                        className="wheat-icon"
+                        style={{
+                          width: "20px",
+                          height: "20px",
+                          objectFit: "contain",
+                        }}
+                      />
+                    </div>
+                    <p className="allergen-label">{allergen.name}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSeverityModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowSeverityModal(false)}
+        >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="severity-btn mild"
+              onClick={() => handleSeveritySelect("mild")}
+            >
+              <span className="severity-icon">⚠️</span>
+              Mild Allergy
+            </button>
+            <button
+              className="severity-btn severe"
+              onClick={() => handleSeveritySelect("severe")}
+            >
+              <span className="severity-icon">❗</span>
+              Severe Allergy
+            </button>
+            {isEditingExisting && (
+              <button
+                className="severity-btn delete"
+                onClick={handleDeleteAllergy}
+              >
+                Delete Allergy
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {isEditingName && (
+        <div className="modal-overlay" onClick={() => setIsEditingName(false)}>
+          <div
+            className="modal-content allergen-modal"
+            onClick={(e) => e.stopPropagation()}
+            style={{ minWidth: "200px", padding: "15px" }}
+          >
+            <h3
+              className="modal-title"
+              style={{ fontSize: "16px", marginBottom: "10px" }}
+            >
+              Edit Name
+            </h3>
+            <input
+              type="text"
+              className="name-input"
+              value={editedName}
+              onChange={(e) => setEditedName(e.target.value)}
+              autoFocus
+              style={{
+                marginBottom: "10px",
+                width: "100%",
+                padding: "8px 12px",
+              }}
+            />
+            <button
+              className="severity-btn"
+              onClick={handleSaveEditedName}
+              style={{
+                width: "100%",
+                minWidth: "auto",
+                padding: "8px 16px",
+                fontSize: "12px",
+                backgroundColor: "rgba(58, 104, 58, 0.75)",
+                color: "#ffffff",
+              }}
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+export default Profiles;

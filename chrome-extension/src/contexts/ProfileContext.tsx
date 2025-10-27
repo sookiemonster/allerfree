@@ -2,7 +2,7 @@ import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
 
 export interface Allergy {
-  name: "gluten" | "tree_nuts" | "shellfish";
+  name: string;
   severity: "mild" | "severe";
   icon: string;
 }
