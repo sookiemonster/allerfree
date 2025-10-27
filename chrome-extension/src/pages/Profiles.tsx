@@ -2,11 +2,16 @@ import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useProfiles } from "../contexts/ProfileContext";
 
+// const availableAllergens = [
+//     { name: "gluten", icon: "/wheat.png" },
+//     { name: "soy", icon: "/soy.png" },
+//     { name: "sesame", icon: "/sesame.png" }
+// ];
 const availableAllergens = [
-    { name: "gluten", icon: "/wheat.png" },
-    { name: "soy", icon: "/soy.png" },
-    { name: "sesame", icon: "/sesame.png" }
-];
+  { name: "gluten",     icon: "/wheat.png" },
+  { name: "tree nuts",  icon: "/sesame.png" }, // reusing sesame art
+  { name: "shellfish",  icon: "/soy.png" },    // reusing soy art
+] as const;
 
 // Migration map from old emoji icons to new PNG paths
 const iconMigrationMap: { [key: string]: string } = {

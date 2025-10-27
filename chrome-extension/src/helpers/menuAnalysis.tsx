@@ -1,49 +1,22 @@
 import { transformUrl, convertUrlsToBase64 } from "../helpers/helperBase64";
-import type { ProfilesMap } from "../types/profiles";
-import { getAllProfiles } from "../helpers/profiles";
-import { getProfileOrDefault } from "../helpers/profiles";
+// import type { ProfilesMap } from "../types/profiles";
+// import { getAllProfiles } from "../helpers/profiles";
+// import { getProfileOrDefault } from "../helpers/profiles";
 
 type ImagePayload = { base64: string; mime_type: string };
+import type { ApiProfile } from "./profileFormat";
 
-export async function buildMenuAnalysisStringResponse(pImages: string[] = []) {
-  try {
-    const urls = pImages
-      .map(transformUrl)
-      .filter((u): u is string => Boolean(u));
-    const dataUrls = await convertUrlsToBase64(urls); // string[] or DataUrl[]
-
-    const images: ImagePayload[] = dataUrls.map(splitDataUrl);
-
-    const profiles: ProfilesMap = await getAllProfiles();
-
-    return postDataToLocalhost(images, profiles);
-  } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : String(e);
-    return `Error creating Analysis Response: ${msg}`;
-  }
-}
-
-export async function buildMenuAnalysisStringResponseForNames(
+export async function buildMenuAnalysisStringResponse(
   pImages: string[] = [],
-  names: string[] = []
+  pProfiles: ApiProfile[]
 ) {
   try {
-    const urls = pImages
-      .map(transformUrl)
-      .filter((u): u is string => Boolean(u));
+    const urls = pImages.map(transformUrl).filter((u): u is string => Boolean(u));
     const dataUrls = await convertUrlsToBase64(urls);
-
     const images: ImagePayload[] = dataUrls.map(splitDataUrl);
 
-    // Build a ProfilesMap containing only the requested names
-    const entries = await Promise.all(
-      names.map(
-        async (name) => [name, await getProfileOrDefault(name)] as const
-      )
-    );
-    const profiles: ProfilesMap = Object.fromEntries(entries);
-
-    return postDataToLocalhost(images, profiles);
+    const result = await postDataToLocalhost(images, pProfiles);
+    return result;
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
     return `Error creating Analysis Response: ${msg}`;
@@ -74,7 +47,7 @@ function splitDataUrl(dataUrl: string): ImagePayload {
 
 async function postDataToLocalhost(
   pImages: ImagePayload[],
-  pProfiles: ProfilesMap
+  pProfiles: ApiProfile[]
 ) {
   try {
     const tokenData = await getToken();
