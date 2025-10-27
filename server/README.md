@@ -7,5 +7,7 @@
 ## Run instructions
 Run server with
 ```
-./mvnw spring-boot:run
+mvn clean install
+mvn compile
+mvn spring-boot:run
 ```
