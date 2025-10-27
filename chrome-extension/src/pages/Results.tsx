@@ -11,7 +11,7 @@ import "./Results.css";
 type PushMsg = { type: "MENU_IMAGES_PUSH"; images: string[] };
 type GetResult = { type: "MENU_IMAGES_RESULT"; images: string[] };
 
-function NavToggle({
+function MiniNav({
   isResults,
   onToggle,
 }: {
@@ -19,9 +19,24 @@ function NavToggle({
   onToggle: () => void;
 }) {
   return (
-    <div className="results-nav">
-      <button className="btn btn--ghost" onClick={onToggle}>
-        {isResults ? "Back to Start" : "Go to Results"}
+    <div
+      className={
+        "results-nav-mini " +
+        (isResults ? "results-nav-mini--left" : "results-nav-mini--right")
+      }
+    >
+      <button className="nav-link" onClick={onToggle}>
+        {isResults ? (
+          <>
+            <span className="nav-link__arrow">←</span>
+            <span>Back to Analysis</span>
+          </>
+        ) : (
+          <>
+            <span>Go to Results</span>
+            <span className="nav-link__arrow">→</span>
+          </>
+        )}
       </button>
     </div>
   );
@@ -35,7 +50,7 @@ export default function Results() {
     useState<DetectionResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Profiles from Kelly's profile Context 
+  // Profiles from Context → API shape
   const { profiles } = useProfiles(); // Profile[]
   const apiProfiles = useMemo(() => ctxProfilesToApi(profiles), [profiles]);
 
@@ -115,14 +130,16 @@ export default function Results() {
 
   return (
     <div className="results-root">
-      <NavToggle isResults={isResults} onToggle={toggle} />
+      <MiniNav isResults={isResults} onToggle={toggle} />
 
+      {/* ANALYSIS VIEW (peach themed) */}
       {!isResults && (
         <div className="results-panel">
+          {/* Menus count + Analyze All */}
           <div className="results-row">
             <div>
-              <div className="results-title">Analyze all profiles</div>
-              <div className="results-muted">Menus found: {images.length}</div>
+              <div className="results-title">Menus found</div>
+              <div className="results-muted">{images.length}</div>
             </div>
             <button
               className="btn"
@@ -131,16 +148,16 @@ export default function Results() {
               aria-busy={isAnalyzing}
               title={images.length === 0 ? "No menu images found" : undefined}
             >
-              {isAnalyzing ? "Analyzing…" : "Analyze ~ All"}
+              {isAnalyzing ? "Analyzing…" : "Analyze All"}
             </button>
           </div>
 
+          {/* Brown divider to separate sections */}
+          <div className="results-divider" />
+
+          {/* Analyze selected profiles */}
           <div className="results-section">
-            <div className="results-title" style={{ marginBottom: 8 }}>
-              {names.length === 0
-                ? "No profiles found"
-                : "Analyze selected profiles"}
-            </div>
+            <div className="results-title">Analyze selected profiles</div>
 
             <ul className="results-list">
               {names.map((name) => {
@@ -156,8 +173,8 @@ export default function Results() {
                       onChange={() => toggleSelection(name)}
                     />
                     <label
+                      className="clickable"
                       htmlFor={`prof-${name}`}
-                      style={{ cursor: "pointer", userSelect: "none" }}
                     >
                       {name}
                     </label>
@@ -180,7 +197,7 @@ export default function Results() {
                     : undefined
                 }
               >
-                {isAnalyzing ? "Analyzing…" : "Analyze ~ Selected"}
+                {isAnalyzing ? "Analyzing…" : "Analyze Selected"}
               </button>
               <span className="results-muted">Selected: {selected.size}</span>
             </div>
@@ -188,6 +205,7 @@ export default function Results() {
         </div>
       )}
 
+      {/* RESULTS VIEW (unchanged layout, just the tiny nav above) */}
       {isResults && detection_result && (
         <DetectionResultPane detection_result={detection_result} />
       )}
