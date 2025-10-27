@@ -37,7 +37,7 @@ def validate_menu_stage(menu_data: Union[MenuData, LabeledAllergenMenu]) -> None
     is_invalid, reason = is_invalid_menu(menu_data)
 
     if is_invalid:
-        raise HTTPException(status_code=404, detail=reason)
+        raise HTTPException(status_code=400, detail=reason)
 
 
 @router.post("/menu_image/", tags=["detection"])
