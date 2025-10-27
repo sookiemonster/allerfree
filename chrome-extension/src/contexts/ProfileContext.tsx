@@ -127,7 +127,9 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
   const addAllergyToProfile = (profileId: string, allergy: Allergy) => {
     const updatedProfiles = profiles.map((p) => {
       if (p.id === profileId) {
-        const allergyIndex = p.allergies.findIndex((a) => a.name === allergy.name);
+        const allergyIndex = p.allergies.findIndex(
+          (a) => a.name === allergy.name
+        );
         if (allergyIndex !== -1) {
           // Allergy exists, update it
           const updatedAllergies = [...p.allergies];

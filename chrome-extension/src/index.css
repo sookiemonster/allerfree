@@ -1,11 +1,11 @@
 :root {
-  font-family: 'Inconsolata', monospace;
+  font-family: "Inconsolata", monospace;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #CB7A44;
+  background-color: #cb7a44;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -26,14 +26,10 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
-  width: 300px;
-  height: 400px;
-  min-width: 300px;
-  min-height: 400px;
-  max-width: 300px;
-  max-height: 400px;
+  width: 400px;
+  height: 500px;
   overflow: hidden;
-  background-image: url('/AllerFree_FrontPage.png');
+  background-image: url("/AllerFree_FrontPage.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

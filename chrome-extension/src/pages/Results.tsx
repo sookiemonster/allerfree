@@ -1,15 +1,17 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { buildMenuAnalysisStringResponse } from "../helpers/menuAnalysis";
-import { buildMenuAnalysisStringResponseForNames } from "../helpers/menuAnalysis";
-import { getAllProfiles } from "../helpers/profiles";
-import type { ProfilesMap } from "../types/profiles";
 import type { DetectionResult } from "../types";
 import DetectionResultPane from "../components/DetectionResult/DetectionResultPane";
+
+import { useProfiles } from "../contexts/ProfileContext";
+import { ctxProfilesToApi } from "../helpers/profileFormat";
+
+import "./Results.css";
 
 type PushMsg = { type: "MENU_IMAGES_PUSH"; images: string[] };
 type GetResult = { type: "MENU_IMAGES_RESULT"; images: string[] };
 
-function NavToggle({
+function MiniNav({
   isResults,
   onToggle,
 }: {
@@ -17,27 +19,55 @@ function NavToggle({
   onToggle: () => void;
 }) {
   return (
-    <div style={{ marginTop: 12 }}>
-      <button onClick={onToggle}>
-        {isResults ? "Go to Start Analysis Process" : "Go to Results"}
+    <div
+      className={
+        "results-nav-mini " +
+        (isResults ? "results-nav-mini--left" : "results-nav-mini--right")
+      }
+    >
+      <button className="nav-link" onClick={onToggle}>
+        {isResults ? (
+          <>
+            <span className="nav-link__arrow">←</span>
+            <span>Back to Analysis</span>
+          </>
+        ) : (
+          <>
+            <span>Go to Results</span>
+            <span className="nav-link__arrow">→</span>
+          </>
+        )}
       </button>
     </div>
   );
 }
 
-function Results() {
+export default function Results() {
   const portRef = useRef<chrome.runtime.Port | null>(null);
-  const [isResults, setIsResults] = useState<boolean>(false);
+  const [isResults, setIsResults] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [detection_result, setDetectionResult] =
     useState<DetectionResult | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const [profiles, setProfiles] = useState<ProfilesMap>({});
+  // Profiles from Context → API shape
+  const { profiles } = useProfiles(); // Profile[]
+  const apiProfiles = useMemo(() => ctxProfilesToApi(profiles), [profiles]);
+
+  // Selection state by name
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const names = useMemo(() => profiles.map((p) => p.name), [profiles]);
 
-  const toggle = () => setIsResults((v) => !v);
+  useEffect(() => {
+    setSelected((prev) => {
+      const allowed = new Set(names);
+      const next = new Set<string>();
+      for (const k of prev) if (allowed.has(k)) next.add(k);
+      return next;
+    });
+  }, [names]);
 
+  // Connect to SW for images
   useEffect(() => {
     const port = chrome.runtime.connect({ name: "popup" });
     portRef.current = port;
@@ -51,7 +81,6 @@ function Results() {
       }
     });
 
-    // Ask for the current snapshot immediately
     port.postMessage({ type: "GET_MENU_IMAGES" });
 
     return () => {
@@ -61,23 +90,12 @@ function Results() {
     };
   }, []);
 
-  useEffect(() => {
-    (async () => {
-      const all = await getAllProfiles();
-      setProfiles(all);
+  const toggle = () => setIsResults((v) => !v);
 
-      setSelected((prev) => {
-        const next = new Set<string>();
-        for (const k of prev) if (k in all) next.add(k);
-        return next;
-      });
-    })();
-  }, []);
-
-  const getMenuAnalysisAll = async (): Promise<void> => {
+  const getMenuAnalysisAll = async () => {
     setIsAnalyzing(true);
     try {
-      const result = await buildMenuAnalysisStringResponse(images);
+      const result = await buildMenuAnalysisStringResponse(images, apiProfiles);
       setDetectionResult(result);
       setIsResults(true);
     } catch (err) {
@@ -87,14 +105,12 @@ function Results() {
     }
   };
 
-  const getMenuAnalysisForSelected = async (): Promise<void> => {
+  const getMenuAnalysisForSelected = async () => {
     setIsAnalyzing(true);
     try {
-      const names = Array.from(selected);
-      const result = await buildMenuAnalysisStringResponseForNames(
-        images,
-        names
-      );
+      const chosen = new Set(selected);
+      const filtered = apiProfiles.filter((p) => chosen.has(p.name));
+      const result = await buildMenuAnalysisStringResponse(images, filtered);
       setDetectionResult(result);
       setIsResults(true);
     } catch (err) {
@@ -104,90 +120,73 @@ function Results() {
     }
   };
 
-  const toggleSelection = (name: string) => {
+  const toggleSelection = (name: string) =>
     setSelected((prev) => {
       const next = new Set(prev);
       if (next.has(name)) next.delete(name);
       else next.add(name);
       return next;
     });
-  };
-
-  const names = Object.keys(profiles);
 
   const canAnalyzeCommon =
     !!portRef.current && images.length > 0 && !isAnalyzing;
   const canAnalyzeSelected = canAnalyzeCommon && selected.size > 0;
 
   return (
-    <>
-      {!isResults && (
-        <>
-          <h1>Start Analysis Process</h1>
-          <NavToggle isResults={isResults} onToggle={toggle} />
-        </>
-      )}
+    <div className="results-root">
+      <MiniNav isResults={isResults} onToggle={toggle} />
 
+      {/* ANALYSIS VIEW (peach themed) */}
       {!isResults && (
-        <div style={{ padding: 12, display: "grid", gap: 12 }}>
-          {/* Analyze ALL profiles */}
-          <div
-            style={{
-              display: "flex",
-              gap: 8,
-              alignItems: "center",
-            }}
-          >
+        <div className="results-panel">
+          {/* Menus count + Analyze All */}
+          <div className="results-row">
+            <div>
+              <div className="results-title">Menus found</div>
+              <div className="results-muted">{images.length}</div>
+            </div>
             <button
+              className="btn"
               onClick={getMenuAnalysisAll}
               disabled={!canAnalyzeCommon}
               aria-busy={isAnalyzing}
               title={images.length === 0 ? "No menu images found" : undefined}
             >
-              {isAnalyzing ? "Analyzing…" : "Analyze Menus ~ All Profiles"}
+              {isAnalyzing ? "Analyzing…" : "Analyze All"}
             </button>
-            <span style={{ fontSize: 12, color: "#555" }}>
-              Menus found: {images.length}
-            </span>
           </div>
 
-          {/* Checklist of profiles + analyze selected */}
-          <div style={{ paddingTop: 12 }}>
-            <h2 style={{ marginBottom: 6, color: "#555", fontSize: 12 }}>
-              {names.length === 0
-                ? "No profiles found."
-                : "Select profiles to analyze:"}
-            </h2>
+          {/* Brown divider to separate sections */}
+          <div className="results-divider" />
 
-            <ul
-              style={{
-                listStyle: "none",
-                padding: 0,
-                margin: 0,
-                display: "grid",
-                gap: 6,
-              }}
-            >
-              {names.map((name) => (
-                <li
-                  key={name}
-                  style={{ display: "flex", alignItems: "center", gap: 8 }}
-                >
-                  <input
-                    id={`prof-${name}`}
-                    type="checkbox"
-                    checked={selected.has(name)}
-                    onChange={() => toggleSelection(name)}
-                  />
-                  <label htmlFor={`prof-${name}`} style={{ cursor: "pointer" }}>
-                    {name}
-                  </label>
-                </li>
-              ))}
+          {/* Analyze selected profiles */}
+          <div className="results-section">
+            <div className="results-title">Analyze selected profiles</div>
+
+            <ul className="results-list">
+              {names.map((name) => {
+                const selectedCls = selected.has(name)
+                  ? "results-item results-item--selected"
+                  : "results-item";
+                return (
+                  <li key={name} className={selectedCls}>
+                    <input
+                      id={`prof-${name}`}
+                      type="checkbox"
+                      checked={selected.has(name)}
+                      onChange={() => toggleSelection(name)}
+                    />
+                    <label className="clickable" htmlFor={`prof-${name}`}>
+                      {name}
+                    </label>
+                  </li>
+                );
+              })}
             </ul>
 
-            <div style={{ marginTop: 10 }}>
+            <div className="results-footer">
               <button
+                className="btn"
                 onClick={getMenuAnalysisForSelected}
                 disabled={!canAnalyzeSelected}
                 aria-busy={isAnalyzing}
@@ -199,23 +198,18 @@ function Results() {
                     : undefined
                 }
               >
-                {isAnalyzing
-                  ? "Analyzing…"
-                  : "Analyze Menus ~ Selected Profiles"}
+                {isAnalyzing ? "Analyzing…" : "Analyze Selected"}
               </button>
-              <span style={{ marginLeft: 8, fontSize: 12, color: "#555" }}>
-                Selected: {selected.size}
-              </span>
+              <span className="results-muted">Selected: {selected.size}</span>
             </div>
           </div>
         </div>
       )}
 
+      {/* RESULTS VIEW (unchanged layout, just the tiny nav above) */}
       {isResults && detection_result && (
         <DetectionResultPane detection_result={detection_result} />
       )}
-    </>
+    </div>
   );
 }
-
-export default Results;

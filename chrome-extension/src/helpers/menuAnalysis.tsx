@@ -1,49 +1,21 @@
 import { transformUrl, convertUrlsToBase64 } from "../helpers/helperBase64";
-import type { ProfilesMap } from "../types/profiles";
-import { getAllProfiles } from "../helpers/profiles";
-import { getProfileOrDefault } from "../helpers/profiles";
 
 type ImagePayload = { base64: string; mime_type: string };
+import type { ApiProfile } from "./profileFormat";
 
-export async function buildMenuAnalysisStringResponse(pImages: string[] = []) {
-  try {
-    const urls = pImages
-      .map(transformUrl)
-      .filter((u): u is string => Boolean(u));
-    const dataUrls = await convertUrlsToBase64(urls); // string[] or DataUrl[]
-
-    const images: ImagePayload[] = dataUrls.map(splitDataUrl);
-
-    const profiles: ProfilesMap = await getAllProfiles();
-
-    return postDataToLocalhost(images, profiles);
-  } catch (e: unknown) {
-    const msg = e instanceof Error ? e.message : String(e);
-    return `Error creating Analysis Response: ${msg}`;
-  }
-}
-
-export async function buildMenuAnalysisStringResponseForNames(
+export async function buildMenuAnalysisStringResponse(
   pImages: string[] = [],
-  names: string[] = []
+  pProfiles: ApiProfile[]
 ) {
   try {
     const urls = pImages
       .map(transformUrl)
       .filter((u): u is string => Boolean(u));
     const dataUrls = await convertUrlsToBase64(urls);
-
     const images: ImagePayload[] = dataUrls.map(splitDataUrl);
 
-    // Build a ProfilesMap containing only the requested names
-    const entries = await Promise.all(
-      names.map(
-        async (name) => [name, await getProfileOrDefault(name)] as const
-      )
-    );
-    const profiles: ProfilesMap = Object.fromEntries(entries);
-
-    return postDataToLocalhost(images, profiles);
+    const result = await postDataToLocalhost(images, pProfiles);
+    return result;
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
     return `Error creating Analysis Response: ${msg}`;
@@ -72,9 +44,19 @@ function splitDataUrl(dataUrl: string): ImagePayload {
   return out;
 }
 
+export const mapProfilesByName = (
+  profiles: ApiProfile[]
+): { [key: string]: ApiProfile } => {
+  return profiles.reduce((accumulator, currentProfile) => {
+    // Set the key on the accumulator object
+    accumulator[currentProfile.name] = currentProfile;
+    return accumulator;
+  }, {} as { [key: string]: ApiProfile }); // Start with an empty object
+};
+
 async function postDataToLocalhost(
   pImages: ImagePayload[],
-  pProfiles: ProfilesMap
+  pProfiles: ApiProfile[]
 ) {
   try {
     const tokenData = await getToken();
@@ -83,9 +65,9 @@ async function postDataToLocalhost(
 
     const postData = {
       images: pImages,
-      profiles: pProfiles,
+      profiles: mapProfilesByName(pProfiles),
     };
-    console.log(postData);
+    console.log("Sending: ", postData);
 
     const response = await fetch(url, {
       method: "POST",
@@ -102,8 +84,13 @@ async function postDataToLocalhost(
       );
     }
 
-    const data = await response.json();
+    let data = await response.json();
     console.log("Server response:", data);
+
+    if (typeof data === "string") {
+      data = JSON.parse(data);
+    }
+
     return data;
   } catch (error) {
     console.error("Error posting data:", error);
