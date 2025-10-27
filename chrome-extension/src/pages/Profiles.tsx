@@ -9,7 +9,7 @@ import { useProfiles } from "../contexts/ProfileContext";
 // ];
 const availableAllergens = [
   { name: "gluten", icon: "/wheat.png" },
-  { name: "tree_nuts", icon: "/sesame.png" }, // reusing sesame art
+  { name: "tree nuts", icon: "/sesame.png" }, // reusing sesame art
   { name: "shellfish", icon: "/soy.png" }, // reusing soy art
 ] as const;
 
