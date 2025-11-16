@@ -44,6 +44,7 @@ function MiniNav({
 
 export default function Results() {
   const portRef = useRef<chrome.runtime.Port | null>(null);
+  // const [tabId, setTabId] = useState<number | null>(null);
   const [isResults, setIsResults] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [detection_result, setDetectionResult] =
@@ -77,11 +78,23 @@ export default function Results() {
         msg.type === "MENU_IMAGES_PUSH" ||
         msg.type === "MENU_IMAGES_RESULT"
       ) {
+        console.log( msg.images ?  msg.images : [] )
         setImages(Array.isArray(msg.images) ? msg.images : []);
       }
     });
 
-    port.postMessage({ type: "GET_MENU_IMAGES" });
+    // fetch images based on tab this pop up is on
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const active = tabs[0];
+      const id = active?.id ?? null;
+      // setTabId(id);
+
+      port.postMessage({
+        type: "GET_MENU_IMAGES",
+        tabId: id ?? undefined,
+      } as any);
+    });
+
 
     return () => {
       try {
