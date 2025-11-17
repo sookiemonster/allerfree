@@ -16,6 +16,7 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import com.allerfree.AllerFree.service.JwtUtil;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 
 @Component
@@ -38,13 +39,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 // System.out.println("Adding user to security context");
                 if (jwtUtil.getUsername(token).equals("username")){ //Supposed to load user from database and compare with data stored in token -> but we don't actually have user accounts
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            "username",
+                            token,
                             null,
                             Collections.emptyList()); //Creates authToken based on username, no password, and empty list of authorities
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken); //Adds authToken to security context
                 }
-                    
+
                 // //See if user was added to security context
                 // Authentication authentication = SecurityContextHolder.getContext().getAuthentication(); 
                 // if (authentication != null && authentication.isAuthenticated()) {
@@ -64,7 +65,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             response.getWriter().write("Error: Something went wrong");
         }
-        
+
     }
 
     //Get the JWT from the request header
