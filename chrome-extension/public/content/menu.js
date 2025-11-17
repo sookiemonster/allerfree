@@ -114,4 +114,26 @@
     headerDiv.appendChild(btn);
     return true;
   }
+
+  // Allow the background service worker to request the current menu images
+  if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage) {
+    chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+      if (msg && msg.type === "REQUEST_MENU_IMAGES") {
+        try {
+          // Refresh from DOM to make sure we have the latest
+          menuImageLinks = grabMenuImages();
+          // Keep background listeners in sync (optional but nice)
+          sendMenuImagesToBackground(menuImageLinks);
+          sendResponse({ images: menuImageLinks });
+        } catch (_e) {
+          sendResponse({ images: [] });
+        }
+        // Synchronous response
+        return false;
+      }
+
+      // let other listeners run
+      return undefined;
+    });
+  }
 })(self);
