@@ -10,6 +10,9 @@ from common.custom_types import (
 )
 from menu_reader import read_menu
 from allergy_detector import detect_allergens, aggregate_allergies
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class MenuRequest(BaseModel):
@@ -44,6 +47,7 @@ def validate_menu_stage(menu_data: Union[MenuData, LabeledAllergenMenu]) -> None
 async def menu_image(
     request: MenuRequest,
 ) -> LabeledAllergenMenu:
+    logger.info("Received request ", request)
     validate_request_content(request)
 
     ocr_menu = await read_menu(request.image)
