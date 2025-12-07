@@ -1,26 +1,68 @@
 // service-worker.js  
-import { transformUrl, convertUrlsToBase64 } from "./helperBase64.js";
-import { getSampleProfileData } from "./profileData.js";
-
 import { openPopupWithRoute } from "./resultsPopupUtils.js";
-import { buildMenuAnalysisStringResponse } from "./menuAnalysis.js";
-import { getLatestImages, setLatestImages } from "./menuState.js"; 
 
 // Notify all connected popups
 const popupPorts = new Set();
-function notifyPopups() {
-  const payload = { type: "MENU_IMAGES_PUSH", images: getLatestImages() };
+/** Broadcast a snapshot of images to all connected popups. */
+function notifyPopups(images) {
+  const payload = {
+    type: "MENU_IMAGES_PUSH",
+    images: Array.isArray(images) ? images : [],
+  };
   for (const port of popupPorts) {
-    try { port.postMessage(payload); } catch {}
+    try {
+      port.postMessage(payload);
+    } catch {
+      // ignore broken ports
+    }
   }
+}
+
+/** Ask a specific tab's content script for its current menu images. */
+function fetchMenuImagesFromTab(tabId, done) {
+  try {
+    chrome.tabs.sendMessage(
+      tabId,
+      { type: "REQUEST_MENU_IMAGES" },
+      (response) => {
+        if (chrome.runtime.lastError) {
+          console.warn(
+            " REQUEST_MENU_IMAGES failed:",
+            chrome.runtime.lastError,
+          );
+          done([]);
+          return;
+        }
+
+        const images = Array.isArray(response?.images) ? response.images : [];
+        done(images);
+      },
+    );
+  } catch (err) {
+    console.error(" Failed to send REQUEST_MENU_IMAGES:", err);
+    done([]);
+  }
+}
+
+/** Resolve a tab id: prefer explicit msg.tabId; otherwise use active tab. */
+function resolveTabIdMaybe(tabId, cb) {
+  if (typeof tabId === "number") {
+    cb(tabId);
+    return;
+  }
+
+  chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+    const activeId = tabs && tabs.length > 0 ? tabs[0].id : undefined;
+    cb(typeof activeId === "number" ? activeId : undefined);
+  });
 }
 
 // Receive updates from content scripts
 chrome.runtime.onMessage.addListener((msg, _sender, _sendResponse) => {
   switch (msg?.type) {
     case "MENU_IMAGES_UPDATE": {
-      setLatestImages(Array.isArray(msg.images) ? msg.images : []);
-      notifyPopups();
+      const images = Array.isArray(msg.images) ? msg.images : [];
+      notifyPopups(images);
       break;
     }
 
@@ -48,58 +90,32 @@ chrome.runtime.onConnect.addListener((port) => {
   port.onMessage.addListener((msg) => {
     switch (msg?.type) {
       case "GET_MENU_IMAGES": {
-        port.postMessage({ type: "MENU_IMAGES_RESULT", images: getLatestImages() });
-        break;
-      }
-
-      case "GET_MENU_IMAGES_BASE64": {
-        const toConvert = (getLatestImages() || [])
-          .map(transformUrl)
-          .filter(Boolean);
-
-        convertUrlsToBase64(toConvert)
-          .then((dataUrls) => {
+        resolveTabIdMaybe(msg.tabId, (tabId) => {
+          if (typeof tabId !== "number") {
             port.postMessage({
-              type: "MENU_IMAGES_BASE64_RESULT",
-              dataUrls,
-              count: dataUrls.length
+              type: "MENU_IMAGES_RESULT",
+              images: [],
             });
-          })
-          .catch((err) => {
+            return;
+          }
+
+          fetchMenuImagesFromTab(tabId, (images) => {
             port.postMessage({
-              type: "MENU_IMAGES_BASE64_RESULT",
-              error: err.message
+              type: "MENU_IMAGES_RESULT",
+              images,
             });
           });
-        break;
-      }
-
-      case "GET_SAMPLE_PROFILE_DATA": {
-        port.postMessage({
-          type: "SAMPLE_PROFILE_DATA_RESULT",
-          ...getSampleProfileData(),
         });
         break;
       }
 
-
-
-
-      case "ANALYZE_MENU_STUB":{
-        (async () => {
-          try{
-            const text = await buildMenuAnalysisStringResponse();
-            port.postMessage({ type: "ANALYZE_MENU_RESULT", text });
-          } catch (e) {
-            port.postMessage({
-              type: "ANALYZE_MENU_RESULT",
-              text: `Error: ${e?.message || String(e)}`,
-            });
-          }
-          
-        })();
-        break;
-      }
+      // case "GET_SAMPLE_PROFILE_DATA": {
+      //   port.postMessage({
+      //     type: "SAMPLE_PROFILE_DATA_RESULT",
+      //     ...getSampleProfileData(),
+      //   });
+      //   break;
+      // }
 
       default:
         // no-op for unknown message types
