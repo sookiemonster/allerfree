@@ -5,9 +5,8 @@ from common.custom_types import (
     LabeledAllergenMenu,
     SupportedAllergen,
 )
-from logging import getLogger
-
-logger = getLogger(__name__)
+import common.log
+import uuid
 
 
 class GeminiDetector(Detector):
@@ -20,9 +19,11 @@ class GeminiDetector(Detector):
         self,
         menu: MenuData,
         allergen: SupportedAllergen,
+        identifier: str = str(uuid.uuid4()),
     ) -> LabeledAllergenMenu:
         prompt = await self._get_prompt(menu, allergen)
 
+        logger = common.log.get_logger(f"{__name__}", identifier)
         logger.info("Attempting to check %s with prompt: \n%s", allergen, prompt)
 
         response = await self.gemini_client.aio.models.generate_content(
@@ -34,8 +35,8 @@ class GeminiDetector(Detector):
             ),
         )
 
-        print("START RESPONSE TEXT")
-        print(response.text)
-        print("END RESPONSE TEXT")
+        logger.debug(f"START RESPONSE TEXT\n{response.text}\nEND RESPONSE TEXT")
+        labeled_menu = Detector._to_menu_schema(response.text)
+        logger.debug(f"LABELED MENU: {labeled_menu}")
 
-        return Detector._to_menu_schema(response.text)
+        return labeled_menu

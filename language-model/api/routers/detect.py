@@ -10,9 +10,8 @@ from common.custom_types import (
 )
 from menu_reader import read_menu
 from allergy_detector import detect_allergens, aggregate_allergies
-import logging
-
-logger = logging.getLogger(__name__)
+import common.log
+import uuid
 
 
 class MenuRequest(BaseModel):
@@ -47,10 +46,13 @@ def validate_menu_stage(menu_data: Union[MenuData, LabeledAllergenMenu]) -> None
 async def menu_image(
     request: MenuRequest,
 ) -> LabeledAllergenMenu:
+    logger = common.log.get_logger(__name__, str(uuid.uuid4()))
+
     logger.info("Received request ", request)
     validate_request_content(request)
 
     ocr_menu = await read_menu(request.image)
+    logger.info(f"OCR MENU RESULT: \n {ocr_menu}")
     validate_menu_stage(ocr_menu)
 
     labeled_menus = await detect_allergens(menu=ocr_menu, allergens=request.allergies)
@@ -58,4 +60,7 @@ async def menu_image(
     for menu in labeled_menus.values():
         validate_menu_stage(menu)
 
-    return aggregate_allergies(labeled_menus)
+    aggregate = aggregate_allergies(labeled_menus)
+    logger.info(f"Returning Final Aggregate:\n{aggregate}")
+
+    return aggregate
