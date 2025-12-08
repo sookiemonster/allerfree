@@ -16,7 +16,6 @@ import org.springframework.web.servlet.HandlerExceptionResolver;
 import com.allerfree.AllerFree.service.JwtUtil;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 
 @Component

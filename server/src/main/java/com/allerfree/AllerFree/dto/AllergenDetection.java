@@ -11,6 +11,8 @@ import java.util.List;
 @NoArgsConstructor
 @Data
 public class AllergenDetection {
+    private String restaurantName;
+    private String restaurantLocation;
     private List<Image> images;
     private HashMap<String, Profile> profiles;
 }

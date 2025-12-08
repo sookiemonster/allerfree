@@ -28,8 +28,10 @@ import com.allerfree.AllerFree.dto.MenuItem;
 import com.allerfree.AllerFree.dto.MenuOutput;
 import com.allerfree.AllerFree.dto.MenuRequest;
 import com.allerfree.AllerFree.dto.MenuResponse;
+import com.allerfree.AllerFree.dto.MenuResult;
 import com.allerfree.AllerFree.dto.MenuSection;
 import com.allerfree.AllerFree.dto.Profile;
+import com.allerfree.AllerFree.repository.MenuResultRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import reactor.core.publisher.Flux;
@@ -41,6 +43,13 @@ public class MenuController {
     private WebClient webClient;
 
     private final List<String> mimeTypes = Arrays.asList("image/jpeg", "image/png", "image/webp");
+    
+    private final Set<String> allAllergies = new HashSet<String>(Arrays.asList("gluten", "tree_nuts", "shellfish"));
+
+    private final MenuResultRepository menuRepo;
+    public MenuController(MenuResultRepository menuRepo) {
+        this.menuRepo = menuRepo;
+    }
 
     @PostMapping("/detect")
     public ResponseEntity<MenuResponse> detectAllergens(@RequestBody AllergenDetection ad){
@@ -73,7 +82,21 @@ public class MenuController {
             return ResponseEntity.ok(menuResults);
         }
 
+        //Query MongoDB Cluster for specific restaurant (with name + location)
+        System.out.println("Calling MongoDB Cluster");
+        MenuResult cached = menuRepo.findByRestaurantNameAndRestaurantLocation(ad.getRestaurantName(), ad.getRestaurantLocation());
+        if (cached != null){ //If we query something -> just skip to parseResponse
+            menuResults.setFailed(failed);
+            menuResults.setResults(parseResponse(cached.getResults(), ad.getProfiles()));
+            System.out.println("Done at : " + LocalTime.now());
+            return ResponseEntity.ok(menuResults);
+        }else{
+            System.out.println("MenuResult not found");
+        }
+        
+        //If we dont query -> call LLM
         Flux<Image> imageFlux = Flux.fromIterable(ad.getImages());
+        System.out.println("Calling LLM");
         Mono<List<MenuOutput>> results = imageFlux.flatMapSequential(image -> 
             {
                 int imgIndex = ad.getImages().indexOf(image);
@@ -84,7 +107,7 @@ public class MenuController {
                     failed.put(imgIndex, "Invalid mime type");
                     return Mono.empty(); // Skip failed request
                 }else{ //Attempt to send image to LLM API
-                    MenuRequest currentRequest = new MenuRequest(allergySet, image);
+                    MenuRequest currentRequest = new MenuRequest(allAllergies, image);
                     return webClient.post()
                                     .uri("/detect/menu_image/")
                                     .contentType(MediaType.APPLICATION_JSON)
@@ -106,6 +129,14 @@ public class MenuController {
                 }
             })
             .collectList(); //Collect all responses into a list
+
+        //Cache MenuResult into MongoDB Cluster after LLM call
+        System.out.println("Saving to MongoDB Cluster");
+        MenuResult toCache = new MenuResult();
+        toCache.setRestaurantName(ad.getRestaurantName());
+        toCache.setRestaurantLocation(ad.getRestaurantLocation());
+        toCache.setResults(results.block());
+        menuRepo.save(toCache);
 
         //Parse + Format Response
         menuResults.setFailed(failed);
