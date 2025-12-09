@@ -8,7 +8,7 @@ from common.custom_types import (
     is_invalid_menu,
     MenuData,
 )
-from menu_reader import read_menu
+from menu_reader import read_menu, read_menu_batch
 from allergy_detector import detect_allergens, aggregate_allergies
 import logging
 
@@ -18,6 +18,11 @@ logger = logging.getLogger(__name__)
 class MenuRequest(BaseModel):
     allergies: List[SupportedAllergen]
     image: ImageData
+
+
+class BatchedMenuRequest(BaseModel):
+    allergies: List[SupportedAllergen]
+    images: List[ImageData]
 
 
 class MenuResponse(BaseModel):
@@ -30,7 +35,7 @@ router = APIRouter(
 )
 
 
-def validate_request_content(request: MenuRequest) -> None:
+def validate_request_content(request: MenuRequest | BatchedMenuRequest) -> None:
     return
     raise HTTPException(status_code=404, detail="Error!")
 
@@ -54,6 +59,26 @@ async def menu_image(
     validate_menu_stage(ocr_menu)
 
     labeled_menus = await detect_allergens(menu=ocr_menu, allergens=request.allergies)
+
+    for menu in labeled_menus.values():
+        validate_menu_stage(menu)
+
+    return aggregate_allergies(labeled_menus)
+
+
+@router.post("/menu_image_batch/", tags=["detection"])
+async def menu_images(
+    request: BatchedMenuRequest,
+) -> LabeledAllergenMenu:
+    logger.info("Received request ", request)
+    validate_request_content(request)
+
+    structured_menu = await read_menu_batch(request.images)
+    validate_menu_stage(structured_menu)
+
+    labeled_menus = await detect_allergens(
+        menu=structured_menu, allergens=request.allergies
+    )
 
     for menu in labeled_menus.values():
         validate_menu_stage(menu)
