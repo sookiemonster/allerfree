@@ -1,4 +1,4 @@
-package com.allerfree.AllerFree.dto;
+package com.allerfree.AllerFree.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -6,10 +6,12 @@ import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
 
+import com.allerfree.AllerFree.dto.MenuPage;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class MenuResponse {
+public class DetectionResponse {
     private HashMap<Integer, String> failed;
-    private HashMap<String, MenuOutput> results;
+    private HashMap<String, MenuPage> results;
 }

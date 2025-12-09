@@ -5,11 +5,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
-import com.allerfree.AllerFree.repository.MenuResultRepository;
+import com.allerfree.AllerFree.repository.MenuRepository;
 
 @SpringBootApplication
 @EnableCaching
-@EnableMongoRepositories(basePackageClasses = MenuResultRepository.class)
+@EnableMongoRepositories(basePackageClasses = MenuRepository.class)
 public class AllerFreeApplication {
 
 	public static void main(String[] args) {

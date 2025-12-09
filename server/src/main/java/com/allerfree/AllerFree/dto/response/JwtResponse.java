@@ -1,4 +1,4 @@
-package com.allerfree.AllerFree.dto;
+package com.allerfree.AllerFree.dto.response;
 
 import lombok.Getter;
 import lombok.Setter;

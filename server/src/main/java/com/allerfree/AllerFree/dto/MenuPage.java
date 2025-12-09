@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class MenuOutput {
+public class MenuPage {
     private List<MenuSection> sections = new ArrayList<MenuSection>();
 
     public void combineSections(List<MenuSection> sec){
