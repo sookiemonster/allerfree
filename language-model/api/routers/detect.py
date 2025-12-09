@@ -11,7 +11,6 @@ from common.custom_types import (
 from menu_reader import read_menu, read_menu_batch
 from allergy_detector import detect_allergens, aggregate_allergies
 import logging
-import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +76,9 @@ async def menu_images(
     structured_menu = await read_menu_batch(request.images)
     validate_menu_stage(structured_menu)
 
-    labeled_menus = await detect_allergens(menu=ocr_menu, allergens=request.allergies)
+    labeled_menus = await detect_allergens(
+        menu=structured_menu, allergens=request.allergies
+    )
 
     for menu in labeled_menus.values():
         validate_menu_stage(menu)
