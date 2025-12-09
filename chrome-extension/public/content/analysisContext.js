@@ -229,4 +229,31 @@
     }
     // Let other listeners handle other message types
   });
+
+  /**
+   * keep jobsByRestaurant in sync with chrome.storage.local
+   * so all tabs and contexts see the same job state.
+   */
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== "local") return;
+
+    for (const [key, change] of Object.entries(changes)) {
+      if (!key.startsWith(STORAGE_PREFIX)) continue;
+
+      const restaurantKey = key.slice(STORAGE_PREFIX.length);
+      const { newValue } = change;
+
+      if (!newValue) {
+        // Key was removed; drop from in-memory cache as well.
+        jobsByRestaurant.delete(restaurantKey);
+        continue;
+      }
+
+      // Update this tab’s in-memory cache with the new job object.
+      jobsByRestaurant.set(restaurantKey, newValue);
+
+      // Optional: debug log
+      // console.log("[Allerfree] Job updated from storage:", restaurantKey, newValue);
+    }
+  });
 })(self);
