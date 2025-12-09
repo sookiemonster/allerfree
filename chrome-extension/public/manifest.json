@@ -27,6 +27,8 @@
         "content/menu-scrape.js",
         "content/restaurant.js",
         "content/menu.js",
+        "content/analysis.js",
+        "content/analysisContext.js",
         "content/index.js"
       ],
       "run_at": "document_idle",
