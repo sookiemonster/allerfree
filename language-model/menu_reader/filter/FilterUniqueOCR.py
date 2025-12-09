@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class FilterUniqueOCR:
-    def __init__(self, similarity_threshold=60):
+    def __init__(self, similarity_threshold=50):
         """
         :param similarity_threshold: int 0-100. How similar two strings must be
                                      to be considered the "same content".
@@ -36,6 +36,9 @@ class FilterUniqueOCR:
             return False
 
         score = fuzz.token_sort_ratio(clean_a, clean_b)
+        logger.debug(
+            f"Similarity of score: {score} || Is Similar: {score >= self.threshold} between:\nA: {a}, B:{b}"
+        )
         return score >= self.threshold
 
     def _get_longest_distinct_mask(self, ocr_texts: typing.List[str]):
