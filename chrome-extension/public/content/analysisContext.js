@@ -252,8 +252,32 @@
       // Update this tab’s in-memory cache with the new job object.
       jobsByRestaurant.set(restaurantKey, newValue);
 
-      // Optional: debug log
-      // console.log("[Allerfree] Job updated from storage:", restaurantKey, newValue);
+      ns.logAllAnalysisJobs();
     }
   });
+
+  // Debug helper: log all jobs from chrome.storage.local
+  ns.logAllAnalysisJobs = function () {
+    chrome.storage.local.get(null, (data) => {
+      if (chrome.runtime && chrome.runtime.lastError) {
+        console.warn(
+          "[Allerfree] Failed to read jobs from storage:",
+          chrome.runtime.lastError
+        );
+        return;
+      }
+
+      const allJobs = {};
+
+      for (const [key, value] of Object.entries(data)) {
+        if (!key.startsWith(STORAGE_PREFIX)) continue;
+
+        const restaurantKey = key.slice(STORAGE_PREFIX.length);
+        allJobs[restaurantKey] = value;
+      }
+
+      console.log("[Allerfree] All analysis jobs in storage:", allJobs);
+    });
+  };
+
 })(self);
