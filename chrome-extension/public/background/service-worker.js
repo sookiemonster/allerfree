@@ -108,14 +108,36 @@ chrome.runtime.onConnect.addListener((port) => {
         });
         break;
       }
+      case "START_ANALYSIS": {
+          const profiles = Array.isArray(msg.profiles) ? msg.profiles : [];
 
-      // case "GET_SAMPLE_PROFILE_DATA": {
-      //   port.postMessage({
-      //     type: "SAMPLE_PROFILE_DATA_RESULT",
-      //     ...getSampleProfileData(),
-      //   });
-      //   break;
-      // }
+          // use the active tab in the current window.
+          chrome.tabs.query(
+            { active: true, currentWindow: true },
+            (tabs) => {
+              const tab = tabs[0];
+              if (!tab || typeof tab.id !== "number") {
+                console.warn(
+                  "[Allerfree] START_ANALYSIS: no active tab found"
+                );
+                return;
+              }
+
+              try {
+                chrome.tabs.sendMessage(tab.id, {
+                  type: "start-analysis",
+                  profiles,
+                });
+              } catch (err) {
+                console.error(
+                  "[Allerfree] Failed to send start-analysis message:",
+                  err
+                );
+              }
+            }
+          );
+          break;
+        }
 
       default:
         // no-op for unknown message types

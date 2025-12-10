@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { buildMenuAnalysisStringResponse } from "../helpers/menuAnalysis";
+// import { buildMenuAnalysisStringResponse } from "../helpers/menuAnalysis";
 import type { DetectionResult } from "../types";
 import DetectionResultPane from "../components/DetectionResult/DetectionResultPane";
 
@@ -105,33 +105,48 @@ export default function Results() {
 
   const toggle = () => setIsResults((v) => !v);
 
-  const getMenuAnalysisAll = async () => {
-    setIsAnalyzing(true);
+  const getMenuAnalysisAll = () => {
+    if (!portRef.current) {
+      console.warn("[Allerfree] No popup port; cannot start analysis");
+      return;
+    }
+
+    // Optional: you can still set a spinner here if you want,
+    // but since we're not handling results yet, you might leave it alone
+    // setIsAnalyzing(true);
+
     try {
-      const result = await buildMenuAnalysisStringResponse(images, apiProfiles);
-      setDetectionResult(result);
-      setIsResults(true);
+      portRef.current.postMessage({
+        type: "START_ANALYSIS",
+        profiles: apiProfiles,
+      } as any);
+      console.log("[Allerfree] START_ANALYSIS (all) sent");
     } catch (err) {
-      console.error("analyze (all) failed:", err);
-    } finally {
-      setIsAnalyzing(false);
+      console.error("START_ANALYSIS (all) failed:", err);
+      // setIsAnalyzing(false);
     }
   };
 
-  const getMenuAnalysisForSelected = async () => {
-    setIsAnalyzing(true);
+  const getMenuAnalysisForSelected = () => {
+    if (!portRef.current) {
+      console.warn("[Allerfree] No popup port; cannot start analysis");
+      return;
+    }
+
+    const chosen = new Set(selected);
+    const filtered = apiProfiles.filter((p) => chosen.has(p.name));
+
     try {
-      const chosen = new Set(selected);
-      const filtered = apiProfiles.filter((p) => chosen.has(p.name));
-      const result = await buildMenuAnalysisStringResponse(images, filtered);
-      setDetectionResult(result);
-      setIsResults(true);
+      portRef.current.postMessage({
+        type: "START_ANALYSIS",
+        profiles: filtered,
+      } as any);
+      console.log("[Allerfree] START_ANALYSIS (selected) sent");
     } catch (err) {
-      console.error("analyze (selected) failed:", err);
-    } finally {
-      setIsAnalyzing(false);
+      console.error("START_ANALYSIS (selected) failed:", err);
     }
   };
+
 
   const toggleSelection = (name: string) =>
     setSelected((prev) => {

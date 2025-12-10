@@ -105,7 +105,8 @@
   async function postDataToLocalhost(pImages, pProfiles) {
     try {
       const tokenData = await getToken();
-      const url = "http://localhost:8081/detect";
+      // const url = "http://localhost:8081/detect";
+      const url = "http://localhost:8081/detectSample";
 
       const postData = {
         images: pImages || [],
