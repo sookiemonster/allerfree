@@ -169,3 +169,22 @@
   cursor: pointer;
   user-select: none;
 }
+
+.results-job-picker {
+  display: grid;
+  gap: 6px;
+}
+
+.results-job-select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--ink);
+  outline: none;
+}
+.results-job-select:focus {
+  box-shadow: 0 0 0 3px rgba(240, 161, 84, 0.25);
+  border-color: rgba(201, 119, 42, 0.6);
+}

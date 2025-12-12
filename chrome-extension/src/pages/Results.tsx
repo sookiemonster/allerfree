@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-// import { buildMenuAnalysisStringResponse } from "../helpers/menuAnalysis";
 import type { DetectionResult } from "../types";
 import DetectionResultPane from "../components/DetectionResult/DetectionResultPane";
 
@@ -7,6 +6,13 @@ import { useProfiles } from "../contexts/ProfileContext";
 import { ctxProfilesToApi } from "../helpers/profileFormat";
 
 import "./Results.css";
+
+import type { AnalysisJob, JobSummary } from "../types/AnalysisJob";
+import {
+  ANALYSIS_STORAGE_PREFIX,
+  storageKeyForRestaurantKey,
+  toJobSummary,
+} from "../types/AnalysisJob";
 
 type PushMsg = { type: "MENU_IMAGES_PUSH"; images: string[] };
 type GetResult = { type: "MENU_IMAGES_RESULT"; images: string[] };
@@ -42,17 +48,34 @@ function MiniNav({
   );
 }
 
+function coerceDetectionResult(value: unknown): DetectionResult | null {
+  if (!value || typeof value !== "object") return null;
+  const v = value as any;
+  if (!("results" in v) || !("failed" in v)) return null;
+  return v as DetectionResult;
+}
+
+function sortByUpdatedDesc(a: JobSummary, b: JobSummary) {
+  return (b.updatedAt || 0) - (a.updatedAt || 0);
+}
+
 export default function Results() {
   const portRef = useRef<chrome.runtime.Port | null>(null);
-  // const [tabId, setTabId] = useState<number | null>(null);
+
   const [isResults, setIsResults] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [detection_result, setDetectionResult] =
     useState<DetectionResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
+  // Jobs (summaries for dropdown) + selected job (full payload)
+  const [jobs, setJobs] = useState<JobSummary[]>([]);
+  const [selectedRestaurantKey, setSelectedRestaurantKey] = useState<string>("");
+  const selectedRestaurantKeyRef = useRef<string>("");
+  const [selectedJob, setSelectedJob] = useState<AnalysisJob | null>(null);
+
   // Profiles from Context → API shape
-  const { profiles } = useProfiles(); // Profile[]
+  const { profiles } = useProfiles();
   const apiProfiles = useMemo(() => ctxProfilesToApi(profiles), [profiles]);
 
   // Selection state by name
@@ -74,27 +97,20 @@ export default function Results() {
     portRef.current = port;
 
     port.onMessage.addListener((msg: PushMsg | GetResult) => {
-      if (
-        msg.type === "MENU_IMAGES_PUSH" ||
-        msg.type === "MENU_IMAGES_RESULT"
-      ) {
-        console.log( msg.images ?  msg.images : [] )
+      if (msg.type === "MENU_IMAGES_PUSH" || msg.type === "MENU_IMAGES_RESULT") {
         setImages(Array.isArray(msg.images) ? msg.images : []);
       }
     });
 
-    // fetch images based on tab this pop up is on
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const active = tabs[0];
       const id = active?.id ?? null;
-      // setTabId(id);
 
       port.postMessage({
         type: "GET_MENU_IMAGES",
         tabId: id ?? undefined,
       } as any);
     });
-
 
     return () => {
       try {
@@ -103,35 +119,146 @@ export default function Results() {
     };
   }, []);
 
-  const toggle = () => setIsResults((v) => !v);
+  // Initial load of success jobs for dropdown, plus choose a default selection
+  useEffect(() => {
+    chrome.storage.local.get(null, (data) => {
+      const found: { key: string; job: AnalysisJob }[] = [];
 
-  const getMenuAnalysisAll = () => {
-    if (!portRef.current) {
-      console.warn("[Allerfree] No popup port; cannot start analysis");
+      for (const [key, value] of Object.entries(data || {})) {
+        if (!key.startsWith(ANALYSIS_STORAGE_PREFIX)) continue;
+        if (!value) continue;
+
+        const job = value as AnalysisJob;
+        found.push({ key, job });
+      }
+
+      const successSummaries = found
+        .map((x) => x.job)
+        .filter((job) => job.status === "success")
+        .map(toJobSummary)
+        .sort(sortByUpdatedDesc);
+
+      setJobs(successSummaries);
+
+      // Auto-select most recent success job
+      if (successSummaries.length > 0) {
+        const rk = successSummaries[0].restaurantKey;
+        selectedRestaurantKeyRef.current = rk;
+        setSelectedRestaurantKey(rk);
+
+        const full = found.find((x) => x.job.restaurantKey === rk)?.job || null;
+        setSelectedJob(full);
+        setDetectionResult(coerceDetectionResult(full?.result));
+      } else {
+        selectedRestaurantKeyRef.current = "";
+        setSelectedRestaurantKey("");
+        setSelectedJob(null);
+        setDetectionResult(null);
+      }
+    });
+  }, []);
+
+  // Listen to chrome.storage changes (like analysisContext.js does)
+  useEffect(() => {
+    const handler: Parameters<typeof chrome.storage.onChanged.addListener>[0] = (
+      changes,
+      areaName
+    ) => {
+      if (areaName !== "local") return;
+
+      // Optional debug print similar to content script
+      console.log("[Allerfree] storage.onChanged", changes);
+
+      // Update dropdown summaries without storing all results in state
+      setJobs((prev) => {
+        let next = [...prev];
+        let changed = false;
+
+        for (const [key, change] of Object.entries(changes)) {
+          if (!key.startsWith(ANALYSIS_STORAGE_PREFIX)) continue;
+
+          const newJob = change.newValue as AnalysisJob | undefined;
+
+          const restaurantKey = key.slice(ANALYSIS_STORAGE_PREFIX.length);
+          const idx = next.findIndex((j) => j.restaurantKey === restaurantKey);
+
+          const isSuccess = !!newJob && newJob.status === "success";
+
+          if (!isSuccess) {
+            if (idx !== -1) {
+              next.splice(idx, 1);
+              changed = true;
+            }
+          } else {
+            const summary = toJobSummary(newJob);
+            if (idx === -1) {
+              next.push(summary);
+              changed = true;
+            } else {
+              next[idx] = summary;
+              changed = true;
+            }
+          }
+
+          // If the currently selected job changed, update the results UI
+          if (restaurantKey === selectedRestaurantKeyRef.current) {
+            if (!newJob) {
+              setSelectedJob(null);
+              setDetectionResult(null);
+            } else {
+              setSelectedJob(newJob);
+              setDetectionResult(coerceDetectionResult(newJob.result));
+            }
+          }
+        }
+
+        if (changed) next.sort(sortByUpdatedDesc);
+        return changed ? next : prev;
+      });
+    };
+
+    chrome.storage.onChanged.addListener(handler);
+    return () => chrome.storage.onChanged.removeListener(handler);
+  }, []);
+
+  // When user selects a different job, fetch only that one full job
+  const handleSelectJob = (restaurantKey: string) => {
+    selectedRestaurantKeyRef.current = restaurantKey;
+    setSelectedRestaurantKey(restaurantKey);
+
+    if (!restaurantKey) {
+      setSelectedJob(null);
+      setDetectionResult(null);
       return;
     }
 
-    // Optional: you can still set a spinner here if you want,
-    // but since we're not handling results yet, you might leave it alone
-    // setIsAnalyzing(true);
+    const key = storageKeyForRestaurantKey(restaurantKey);
+    chrome.storage.local.get(key, (data) => {
+      const job = (data?.[key] as AnalysisJob) || null;
+      setSelectedJob(job);
+      setDetectionResult(coerceDetectionResult(job?.result));
+    });
+  };
+
+  const toggle = () => setIsResults((v) => !v);
+
+  const getMenuAnalysisAll = () => {
+    if (!portRef.current) return;
 
     try {
       portRef.current.postMessage({
         type: "START_ANALYSIS",
         profiles: apiProfiles,
       } as any);
-      console.log("[Allerfree] START_ANALYSIS (all) sent");
+      setIsAnalyzing(true);
     } catch (err) {
       console.error("START_ANALYSIS (all) failed:", err);
-      // setIsAnalyzing(false);
+      setIsAnalyzing(false);
     }
   };
 
   const getMenuAnalysisForSelected = () => {
-    if (!portRef.current) {
-      console.warn("[Allerfree] No popup port; cannot start analysis");
-      return;
-    }
+    if (!portRef.current) return;
 
     const chosen = new Set(selected);
     const filtered = apiProfiles.filter((p) => chosen.has(p.name));
@@ -141,12 +268,20 @@ export default function Results() {
         type: "START_ANALYSIS",
         profiles: filtered,
       } as any);
-      console.log("[Allerfree] START_ANALYSIS (selected) sent");
+      setIsAnalyzing(true);
     } catch (err) {
       console.error("START_ANALYSIS (selected) failed:", err);
+      setIsAnalyzing(false);
     }
   };
 
+  // Stop spinner when selected job becomes success or error
+  useEffect(() => {
+    if (!selectedJob) return;
+    if (selectedJob.status === "success" || selectedJob.status === "error") {
+      setIsAnalyzing(false);
+    }
+  }, [selectedJob?.status]);
 
   const toggleSelection = (name: string) =>
     setSelected((prev) => {
@@ -164,10 +299,8 @@ export default function Results() {
     <div className="results-root">
       <MiniNav isResults={isResults} onToggle={toggle} />
 
-      {/* ANALYSIS VIEW (peach themed) */}
       {!isResults && (
         <div className="results-panel">
-          {/* Menus count + Analyze All */}
           <div className="results-row">
             <div>
               <div className="results-title">Menus found</div>
@@ -184,10 +317,8 @@ export default function Results() {
             </button>
           </div>
 
-          {/* Brown divider to separate sections */}
           <div className="results-divider" />
 
-          {/* Analyze selected profiles */}
           <div className="results-section">
             <div className="results-title">Analyze selected profiles</div>
 
@@ -234,9 +365,44 @@ export default function Results() {
         </div>
       )}
 
-      {/* RESULTS VIEW (unchanged layout, just the tiny nav above) */}
-      {isResults && detection_result && (
-        <DetectionResultPane detection_result={detection_result} />
+      {isResults && (
+        <div className="results-panel">
+          <div className="results-job-picker">
+            <div className="results-title">Restaurant results</div>
+
+            <select
+              className="results-job-select"
+              value={selectedRestaurantKey}
+              onChange={(e) => handleSelectJob(e.target.value)}
+            >
+              <option value="" disabled>
+                {jobs.length > 0
+                  ? "Select a restaurant"
+                  : "No successful jobs yet"}
+              </option>
+
+              {jobs.map((job) => (
+                <option key={job.restaurantKey} value={job.restaurantKey}>
+                  {job.restaurantName}
+                </option>
+              ))}
+            </select>
+
+            <div className="results-muted">
+              {jobs.length} successful job{jobs.length === 1 ? "" : "s"}
+            </div>
+          </div>
+
+          <div className="results-divider" />
+
+          {detection_result ? (
+            <DetectionResultPane detection_result={detection_result} />
+          ) : (
+            <div className="results-muted" style={{ padding: 8 }}>
+              Select a restaurant above to view results.
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
