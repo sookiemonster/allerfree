@@ -13,7 +13,6 @@
     try {
       const u = new URL(url);
 
-      // early exit if not google maps
       if (!u.hostname.includes("google.") || !u.pathname.includes("/maps")) {
         return null;
       }
@@ -24,9 +23,11 @@
       let lng = null;
 
       // Primary pattern: /maps/place/<Name>/@<lat>,<lng>
+      // (coords may be decimals; we normalize them to whole numbers below)
       const placeMatch = path.match(
-        /\/maps\/place\/([^/]+)\/@(-?\d+\.\d+),(-?\d+\.\d+)/
+        /\/maps\/place\/([^/]+)\/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/
       );
+
       if (placeMatch) {
         name = decodeURIComponent(placeMatch[1].replace(/\+/g, " "));
         lat = parseFloat(placeMatch[2]);
@@ -35,15 +36,14 @@
         // Fallback: still try to grab coords from an "/@lat,lng" segment
         const atIdx = path.indexOf("/@");
         if (atIdx >= 0) {
-          const afterAt = path.slice(atIdx + 2); // e.g. "40.123,-73.123,17z/..."
-          const coordMatch = afterAt.match(/(-?\d+\.\d+),(-?\d+\.\d+)/);
+          const afterAt = path.slice(atIdx + 2);
+          const coordMatch = afterAt.match(/(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/);
           if (coordMatch) {
             lat = parseFloat(coordMatch[1]);
             lng = parseFloat(coordMatch[2]);
           }
         }
 
-        // For the name, try query params first, then /maps/place/<Name>
         const qName = u.searchParams.get("q") || u.searchParams.get("query");
         if (qName) {
           name = decodeURIComponent(qName.replace(/\+/g, " "));
@@ -51,27 +51,27 @@
           const placeIdx = path.indexOf("/maps/place/");
           if (placeIdx >= 0) {
             const afterPlace = path.slice(placeIdx + "/maps/place/".length);
-            const frag = afterPlace.split("/")[0]; // up to next slash
-            if (frag) {
-              name = decodeURIComponent(frag.replace(/\+/g, " "));
-            }
+            const frag = afterPlace.split("/")[0];
+            if (frag) name = decodeURIComponent(frag.replace(/\+/g, " "));
           }
         }
       }
 
-      if (!name && lat == null && lng == null) {
-        return null;
-      }
+      if (!name && lat == null && lng == null) return null;
 
-      return {
-        name: name || "",
-        lat: typeof lat === "number" ? lat : null,
-        lng: typeof lng === "number" ? lng : null,
-      };
+      // Round to nearest whole number so decimal precision differences don’t create new keys
+      const roundCoord = (v) =>
+        typeof v === "number" && Number.isFinite(v) ? Math.round(v) : null;
+
+      lat = roundCoord(lat);
+      lng = roundCoord(lng);
+
+      return { name: name || "", lat, lng };
     } catch (_e) {
       return null;
     }
   }
+
 
   /**
    * Public helper: compute current restaurant metadata for this tab,
@@ -103,7 +103,6 @@
    */
   ns.clearRestaurantInfo = function () {
     currentRestaurant = null;
-		console.log("test")
 		console.log("[Allerfree] Restaurant info from URL:", currentRestaurant);
   };
 
