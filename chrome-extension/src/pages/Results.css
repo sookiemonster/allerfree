@@ -21,20 +21,22 @@
   position: relative;
   z-index: 10;
   color: var(--ink);
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial,
-    sans-serif;
+  font-family: "Inconsolata", monospace;
   background: linear-gradient(180deg, var(--peach) 0%, var(--peach-2) 100%);
   border-radius: 12px;
 }
 
-/* Mini nav at the top */
+/* Mini nav - positioned in bottom right */
 .results-nav-mini {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
   display: flex;
   align-items: center;
   gap: 6px;
-  margin: 2px 4px 8px 4px;
   font-size: 12px;
   color: var(--muted);
+  z-index: 9998;
 }
 /* NEW: alignment modifiers */
 .results-nav-mini--left {
@@ -93,27 +95,44 @@
   color: var(--muted);
 }
 
-/* NEW: CTA gradient (Analyze buttons) */
+/* Menus count section */
+.results-menus-count {
+  text-align: center;
+  padding: 8px 0;
+}
+
+/* Analyze buttons (matching create-profile-btn style) */
 .btn {
-  padding: 8px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--cta-border);
-  background: linear-gradient(180deg, var(--cta-start) 0%, var(--cta-end) 100%);
-  color: #fff;
+  padding: 5px 8px;
+  border-radius: 20px;
+  border: none;
+  background-color: rgba(58, 104, 58, 0.75);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
-  font-weight: 700;
-  letter-spacing: 0.2px;
-  transition: transform 40ms ease, opacity 140ms ease, filter 120ms ease;
+  transition: all 0.5s ease;
+  font-family: "Inconsolata", monospace;
 }
 .btn:hover {
-  filter: brightness(1.03);
+  background-color: #cb7a44;
+  color: black;
+  border: none;
 }
 .btn:active {
   transform: translateY(1px);
 }
 .btn:disabled {
-  opacity: 0.55;
+  opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* Full width button */
+.btn-full-width {
+  width: 100%;
+  margin-top: 8px;
+  display: block;
+  text-align: center;
 }
 
 /* Divider + list + footer (unchanged) */

@@ -107,12 +107,51 @@ export default function Results() {
 
   const getMenuAnalysisAll = async () => {
     setIsAnalyzing(true);
+
+    // Get restaurant name and add to queue
+    let restaurantName = "Restaurant";
+    chrome.tabs.query({ url: "https://www.google.com/maps/*" }, (tabs) => {
+      if (tabs && tabs.length > 0) {
+        // Request the restaurant name from content script
+        chrome.tabs.sendMessage(tabs[0].id!, {
+          type: "ADD_RESTAURANT",
+          state: "loading"
+        });
+      }
+    });
+
     try {
       const result = await buildMenuAnalysisStringResponse(images, apiProfiles);
       setDetectionResult(result);
       setIsResults(true);
+
+      // Update to success state
+      chrome.tabs.query({ url: "https://www.google.com/maps/*" }, (tabs) => {
+        if (tabs && tabs.length > 0) {
+          chrome.tabs.sendMessage(tabs[0].id!, {
+            type: "UPDATE_RESTAURANT_STATE",
+            state: "success"
+          });
+
+          // Remove after 1.5 seconds
+          setTimeout(() => {
+            chrome.tabs.sendMessage(tabs[0].id!, {
+              type: "REMOVE_RESTAURANT"
+            });
+          }, 1500);
+        }
+      });
     } catch (err) {
       console.error("analyze (all) failed:", err);
+
+      // Remove restaurant immediately on error
+      chrome.tabs.query({ url: "https://www.google.com/maps/*" }, (tabs) => {
+        if (tabs && tabs.length > 0) {
+          chrome.tabs.sendMessage(tabs[0].id!, {
+            type: "REMOVE_RESTAURANT"
+          });
+        }
+      });
     } finally {
       setIsAnalyzing(false);
     }
@@ -120,14 +159,51 @@ export default function Results() {
 
   const getMenuAnalysisForSelected = async () => {
     setIsAnalyzing(true);
+
+    // Add restaurant to queue
+    chrome.tabs.query({ url: "https://www.google.com/maps/*" }, (tabs) => {
+      if (tabs && tabs.length > 0) {
+        chrome.tabs.sendMessage(tabs[0].id!, {
+          type: "ADD_RESTAURANT",
+          state: "loading"
+        });
+      }
+    });
+
     try {
       const chosen = new Set(selected);
       const filtered = apiProfiles.filter((p) => chosen.has(p.name));
       const result = await buildMenuAnalysisStringResponse(images, filtered);
       setDetectionResult(result);
       setIsResults(true);
+
+      // Update to success state
+      chrome.tabs.query({ url: "https://www.google.com/maps/*" }, (tabs) => {
+        if (tabs && tabs.length > 0) {
+          chrome.tabs.sendMessage(tabs[0].id!, {
+            type: "UPDATE_RESTAURANT_STATE",
+            state: "success"
+          });
+
+          // Remove after 1.5 seconds
+          setTimeout(() => {
+            chrome.tabs.sendMessage(tabs[0].id!, {
+              type: "REMOVE_RESTAURANT"
+            });
+          }, 1500);
+        }
+      });
     } catch (err) {
       console.error("analyze (selected) failed:", err);
+
+      // Remove restaurant immediately on error
+      chrome.tabs.query({ url: "https://www.google.com/maps/*" }, (tabs) => {
+        if (tabs && tabs.length > 0) {
+          chrome.tabs.sendMessage(tabs[0].id!, {
+            type: "REMOVE_RESTAURANT"
+          });
+        }
+      });
     } finally {
       setIsAnalyzing(false);
     }
@@ -151,26 +227,16 @@ export default function Results() {
 
       {/* ANALYSIS VIEW (peach themed) */}
       {!isResults && (
-        <div className="results-panel">
-          {/* Menus count + Analyze All */}
-          <div className="results-row">
-            <div>
+        <>
+          <div className="results-panel">
+            {/* Menus count */}
+            <div className="results-menus-count">
               <div className="results-title">Menus found</div>
               <div className="results-muted">{images.length}</div>
             </div>
-            <button
-              className="btn"
-              onClick={getMenuAnalysisAll}
-              disabled={!canAnalyzeCommon}
-              aria-busy={isAnalyzing}
-              title={images.length === 0 ? "No menu images found" : undefined}
-            >
-              {isAnalyzing ? "Analyzing…" : "Analyze All"}
-            </button>
-          </div>
 
-          {/* Brown divider to separate sections */}
-          <div className="results-divider" />
+            {/* Brown divider to separate sections */}
+            <div className="results-divider" />
 
           {/* Analyze selected profiles */}
           <div className="results-section">
@@ -216,7 +282,19 @@ export default function Results() {
               <span className="results-muted">Selected: {selected.size}</span>
             </div>
           </div>
-        </div>
+          </div>
+
+          {/* Analyze All button - full width, centered */}
+          <button
+            className="btn btn-full-width"
+            onClick={getMenuAnalysisAll}
+            disabled={!canAnalyzeCommon}
+            aria-busy={isAnalyzing}
+            title={images.length === 0 ? "No menu images found" : undefined}
+          >
+            {isAnalyzing ? "Analyzing…" : "Analyze All"}
+          </button>
+        </>
       )}
 
       {/* RESULTS VIEW (unchanged layout, just the tiny nav above) */}

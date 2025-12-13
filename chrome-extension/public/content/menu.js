@@ -79,6 +79,23 @@
     return menuBtn.getAttribute("aria-selected") === "true";
   };
 
+  function getRestaurantName() {
+    // Try to get restaurant name from page title or h1
+    const h1 = document.querySelector('h1');
+    if (h1 && h1.textContent) {
+      return h1.textContent.trim();
+    }
+
+    // Fallback to document title
+    const title = document.title;
+    if (title && title !== 'Google Maps') {
+      // Remove " - Google Maps" from the end
+      return title.replace(/\s*-\s*Google Maps$/i, '').trim();
+    }
+
+    return "Analyzing Menu";
+  }
+
   function injectButton() {
     const menuDiv = getMenuRoot();
     if (!menuDiv) return false;
@@ -100,14 +117,10 @@
     btn.className = BTN_ID;
     btn.textContent = "Can I Eat Here?";
     btn.onclick = function () {
-      // const msg = menuImageLinks.length ? menuImageLinks.join("\n") : "(No menu images detected)";
-      // alert(msg);
-      // console.log("[MenuImages snapshot]", menuImageLinks);
-
-      // The extension's popup page and navigate to /results
-    chrome.runtime.sendMessage({
+      // Open the extension's popup page and navigate to /results
+      chrome.runtime.sendMessage({
         type: "OPEN_POPUP",
-        route: "#/results" 
+        route: "#/results"
       });
     };
 
@@ -129,6 +142,45 @@
           sendResponse({ images: [] });
         }
         // Synchronous response
+        return false;
+      }
+
+      if (msg && msg.type === "ADD_RESTAURANT") {
+        if (ns.addRestaurant) {
+          const restaurantName = msg.restaurantName || getRestaurantName();
+          const state = msg.state || "loading";
+          ns.addRestaurant(restaurantName, state);
+        }
+        return false;
+      }
+
+      if (msg && msg.type === "UPDATE_RESTAURANT_STATE") {
+        if (ns.updateRestaurantState && msg.restaurantName) {
+          ns.updateRestaurantState(msg.restaurantName, msg.state || "success");
+        }
+        return false;
+      }
+
+      if (msg && msg.type === "REMOVE_RESTAURANT") {
+        if (ns.removeRestaurant && msg.restaurantName) {
+          ns.removeRestaurant(msg.restaurantName);
+        }
+        return false;
+      }
+
+      if (msg && msg.type === "SHOW_RESTAURANT_LOADING") {
+        if (ns.addRestaurant) {
+          const restaurantName = msg.restaurantName || getRestaurantName();
+          const state = msg.state || "loading";
+          ns.addRestaurant(restaurantName, state);
+        }
+        return false;
+      }
+
+      if (msg && msg.type === "HIDE_RESTAURANT_LOADING") {
+        if (ns.clearAllRestaurants) {
+          ns.clearAllRestaurants();
+        }
         return false;
       }
 
