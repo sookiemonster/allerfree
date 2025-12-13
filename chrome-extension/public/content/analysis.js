@@ -160,7 +160,7 @@
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       console.error("[Allerfree] Error creating Analysis Response:", msg);
-      return `Error creating Analysis Response: ${msg}`;
+      throw new Error(`Error creating Analysis Response: ${msg}`);
     }
   };
 })(self);
