@@ -72,6 +72,20 @@
     });
   }
 
+  function storageGet(key) {
+    return new Promise((resolve) => {
+      chrome.storage.local.get(key, (data) => {
+        if (chrome.runtime && chrome.runtime.lastError) {
+          console.warn("[Allerfree] storageGet failed:", chrome.runtime.lastError);
+          resolve({});
+          return;
+        }
+        resolve(data || {});
+      });
+    });
+  }
+
+
   // Load existing job (if any) for the current restaurant from storage
   ns.loadAnalysisJobForCurrentRestaurant = function (callback) {
     const restaurant = getActiveRestaurant();
@@ -102,7 +116,7 @@
    *
    * Only input is profiles; jobId is derived from restaurantKey.
    */
-  ns.startAnalysisJob = function ({ profiles }) {
+  ns.startAnalysisJob = async function ({ profiles }) {
     const restaurant = getActiveRestaurant();
 
     if (!restaurant) {
@@ -120,6 +134,27 @@
 
     const restaurantKey = makeRestaurantKey(restaurant);
     const jobId = restaurantKey; // deterministic job ID based on restaurant
+
+    // lockout if a job is already running for this restaurantKey
+    let existing = jobsByRestaurant.get(restaurantKey) || null;
+
+    if (!existing) {
+      const key = storageKeyForRestaurantKey(restaurantKey);
+      const data = await storageGet(key);
+      existing = data[key] || null;
+      if (existing) jobsByRestaurant.set(restaurantKey, existing);
+    }
+
+    if (existing && existing.status === "running") {
+      console.warn("[Allerfree] Analysis already running for:", restaurantKey);
+      // chrome.runtime.sendMessage({
+      //   type: "analysis-already-running",
+      //   jobId,
+      //   restaurantKey,
+      //   restaurant,
+      // });
+      return; // early exit on multiple backend calls on the same restaurant
+    }
 
     const images =
       typeof ns.grabMenuImages === "function" ? ns.grabMenuImages() : [];
