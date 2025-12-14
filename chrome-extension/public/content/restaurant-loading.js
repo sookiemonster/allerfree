@@ -1,94 +1,315 @@
-// Restaurant loading overlay component
+// public/content/restaurant-loading.js
+//
+// Bottom-right queue overlay for jobs.
+//
+// Restaurant object shape (matches public/content/restaurant.js):
+// {
+//   name: string,
+//   coordinates: { lat: number, lng: number } | null,
+//   url: string
+// }
+//
+// Job storage shape (analysisContext.js stored under `allerfree_job:<restaurantKey>`):
+// {
+//   restaurant: { name, coordinates, url },
+//   status: "running" | "success" | "error",
+//   updatedAt: number,
+//   ... other fields like result/error
+// }
+//
+// Overlay internal queue item shape:
+// {
+//   restaurantKey: string,
+//   job: object,               // full job object (easy for future click behavior)
+//   state: "loading" | "success" | "error",
+//   updatedAt: number
+// }
+
 (function (g) {
   const ns = (g.__allerfree ||= {});
 
-  const LOADING_OVERLAY_ID = "allerfree-restaurant-loading";
-  const LOADING_CONTAINER_CLASS = "allerfree-loading-container";
-  const MAX_RESTAURANTS = 3;
+  const OVERLAY_ID = "allerfree-restaurant-loading";
+  const CONTAINER_CLASS = "allerfree-loading-container";
+  const MAX_ITEMS = 3;
 
-  // Internal queue of restaurants
-  let restaurantQueue = [];
+  /** @type {Array<{restaurantKey: string, job: any, state: string, updatedAt: number}>} */
+  let jobQueue = [];
 
-  // Add a restaurant to the queue (max 3)
-  ns.addRestaurant = function (name, state = "loading") {
-    // Remove if already exists
-    restaurantQueue = restaurantQueue.filter(r => r.name !== name);
+  function normalizeState(state) {
+    if (state === "success" || state === "error" || state === "loading") return state;
+    if (state === "running") return "loading";
+    return "loading";
+  }
 
-    // Add to end of queue
-    restaurantQueue.push({ name, state });
-
-    // Keep only last 3
-    if (restaurantQueue.length > MAX_RESTAURANTS) {
-      restaurantQueue = restaurantQueue.slice(-MAX_RESTAURANTS);
+  function coerceRestaurant(input) {
+    if (typeof input === "string") {
+      return { name: input, coordinates: null, url: "" };
     }
+    if (input && typeof input === "object") {
+      return {
+        name: String(input.name || ""),
+        coordinates:
+          input.coordinates &&
+          typeof input.coordinates === "object" &&
+          input.coordinates.lat != null &&
+          input.coordinates.lng != null
+            ? { lat: input.coordinates.lat, lng: input.coordinates.lng }
+            : null,
+        url: String(input.url || ""),
+      };
+    }
+    return { name: "", coordinates: null, url: "" };
+  }
+
+  // Only used as a fallback when a restaurantKey is not provided.
+  function makeRestaurantKeyFromRestaurant(restaurant) {
+    const namePart = String(restaurant?.name || "")
+      .trim()
+      .toLowerCase();
+
+    const coords =
+      restaurant?.coordinates &&
+      restaurant.coordinates.lat != null &&
+      restaurant.coordinates.lng != null
+        ? `${restaurant.coordinates.lat},${restaurant.coordinates.lng}`
+        : "no-coords";
+
+    return `${namePart}|${coords}`;
+  }
+
+  function coerceJob(input) {
+    // If it already looks like a job object from storage
+    if (input && typeof input === "object" && input.restaurant) {
+      const restaurant = coerceRestaurant(input.restaurant);
+      const restaurantKey =
+        String(input.restaurantKey || input.key || "").trim() ||
+        makeRestaurantKeyFromRestaurant(restaurant);
+
+      return {
+        restaurantKey,
+        job: {
+          ...input,
+          restaurant,
+          restaurantKey,
+          status: input.status || "running",
+          updatedAt: typeof input.updatedAt === "number" ? input.updatedAt : Date.now(),
+        },
+      };
+    }
+
+    // If it is a restaurant object or a string name
+    const restaurant = coerceRestaurant(input);
+    const restaurantKey = makeRestaurantKeyFromRestaurant(restaurant);
+
+    return {
+      restaurantKey,
+      job: {
+        restaurant,
+        restaurantKey,
+        status: "running",
+        updatedAt: Date.now(),
+      },
+    };
+  }
+
+  function setQueueAndRender(items) {
+    // keep last 3 by updatedAt
+    const normalized = (items || [])
+      .map((it) => {
+        const restaurantKey = String(it.restaurantKey || it.id || "").trim();
+        const job = it.job || it;
+
+        const jobObj = coerceJob(job);
+        const finalKey = restaurantKey || jobObj.restaurantKey;
+
+        const state = normalizeState(it.state || it.status || job.status || "loading");
+        const updatedAt =
+          typeof it.updatedAt === "number"
+            ? it.updatedAt
+            : typeof job.updatedAt === "number"
+              ? job.updatedAt
+              : Date.now();
+
+        return {
+          restaurantKey: finalKey,
+          job: {
+            ...jobObj.job,
+            status: job.status || jobObj.job.status,
+            updatedAt,
+          },
+          state,
+          updatedAt,
+        };
+      })
+      .filter((it) => it.restaurantKey);
+
+    normalized.sort((a, b) => (a.updatedAt || 0) - (b.updatedAt || 0));
+    jobQueue = normalized.slice(-MAX_ITEMS);
+
+    render();
+  }
+
+  // Public API (job-first)
+
+  ns.setJobQueue = function (items = []) {
+    setQueueAndRender(items);
+  };
+
+  ns.addJob = function (jobOrRestaurant, state = "loading", restaurantKeyOverride) {
+    const coerced = coerceJob(jobOrRestaurant);
+    const restaurantKey =
+      (typeof restaurantKeyOverride === "string" && restaurantKeyOverride) ||
+      coerced.restaurantKey;
+
+    // remove existing
+    jobQueue = jobQueue.filter((x) => x.restaurantKey !== restaurantKey);
+
+    jobQueue.push({
+      restaurantKey,
+      job: {
+        ...coerced.job,
+        restaurantKey,
+        status: coerced.job.status || "running",
+        updatedAt: Date.now(),
+      },
+      state: normalizeState(state),
+      updatedAt: Date.now(),
+    });
+
+    if (jobQueue.length > MAX_ITEMS) jobQueue = jobQueue.slice(-MAX_ITEMS);
+    render();
+  };
+
+  ns.updateJobState = function (restaurantKey, state) {
+    const key = String(restaurantKey || "").trim();
+    if (!key) return;
+
+    const item = jobQueue.find((x) => x.restaurantKey === key);
+    if (!item) return;
+
+    item.state = normalizeState(state);
+    item.updatedAt = Date.now();
+    item.job = { ...item.job, status: item.job.status, updatedAt: item.updatedAt };
 
     render();
   };
 
-  // Update a specific restaurant's state
-  ns.updateRestaurantState = function (name, state) {
-    const restaurant = restaurantQueue.find(r => r.name === name);
-    if (restaurant) {
-      restaurant.state = state;
-      render();
-    }
-  };
+  ns.removeJob = function (restaurantKey) {
+    const key = String(restaurantKey || "").trim();
+    if (!key) return;
 
-  // Remove a specific restaurant
-  ns.removeRestaurant = function (name) {
-    restaurantQueue = restaurantQueue.filter(r => r.name !== name);
+    jobQueue = jobQueue.filter((x) => x.restaurantKey !== key);
     render();
   };
 
-  // Clear all restaurants
+  // Backward compatibility (restaurant-named API)
+  // If you still call addRestaurant("Chipotle"), it will work.
+  ns.setRestaurantQueue = function (items = []) {
+    // items might be in the old { id, restaurant, state } format
+    const converted = (items || []).map((it) => {
+      if (it && typeof it === "object" && it.restaurant) {
+        return {
+          restaurantKey: it.id || it.restaurantKey,
+          state: it.state || it.status,
+          job: {
+            restaurant: it.restaurant,
+            restaurantKey: it.id || it.restaurantKey,
+            status: it.status || "running",
+            updatedAt: it.updatedAt || 0,
+          },
+          updatedAt: it.updatedAt || 0,
+        };
+      }
+      // if it is a string, treat it as restaurant name
+      return it;
+    });
+
+    ns.setJobQueue(converted);
+  };
+
+  ns.addRestaurant = function (restaurantOrName, state = "loading", restaurantKeyOverride) {
+    const restaurant = coerceRestaurant(restaurantOrName);
+    const restaurantKey =
+      (typeof restaurantKeyOverride === "string" && restaurantKeyOverride) ||
+      makeRestaurantKeyFromRestaurant(restaurant);
+
+    ns.addJob(
+      {
+        restaurant,
+        restaurantKey,
+        status: "running",
+        updatedAt: Date.now(),
+      },
+      state,
+      restaurantKey
+    );
+  };
+
+  ns.updateRestaurantState = function (restaurantKeyOrName, state) {
+    // If it's a plain name, it becomes a fallback key which can collide,
+    // but we keep this for backward compatibility.
+    const key =
+      typeof restaurantKeyOrName === "string" && restaurantKeyOrName.includes("|")
+        ? restaurantKeyOrName
+        : makeRestaurantKeyFromRestaurant(coerceRestaurant(restaurantKeyOrName));
+
+    ns.updateJobState(key, state);
+  };
+
+  ns.removeRestaurant = function (restaurantKeyOrName) {
+    const key =
+      typeof restaurantKeyOrName === "string" && restaurantKeyOrName.includes("|")
+        ? restaurantKeyOrName
+        : makeRestaurantKeyFromRestaurant(coerceRestaurant(restaurantKeyOrName));
+
+    ns.removeJob(key);
+  };
+
+  ns.getJobQueue = function () {
+    return jobQueue.slice();
+  };
+
   ns.clearAllRestaurants = function () {
-    restaurantQueue = [];
-    const existing = document.getElementById(LOADING_OVERLAY_ID);
-    if (existing) {
-      existing.remove();
-    }
+    jobQueue = [];
+    const existing = document.getElementById(OVERLAY_ID);
+    if (existing) existing.remove();
   };
 
-  // Legacy methods for backward compatibility
   ns.showRestaurantLoading = function (restaurants = []) {
-    restaurantQueue = restaurants.slice(0, MAX_RESTAURANTS);
-    render();
+    // legacy alias
+    ns.setRestaurantQueue(restaurants);
   };
 
   ns.hideRestaurantLoading = function () {
     ns.clearAllRestaurants();
   };
 
-  // Render the overlay
+  // Render
+
   function render() {
-    // Remove existing overlay
-    const existing = document.getElementById(LOADING_OVERLAY_ID);
-    if (existing) {
-      existing.remove();
-    }
+    const existing = document.getElementById(OVERLAY_ID);
+    if (existing) existing.remove();
 
-    // Don't render if queue is empty
-    if (restaurantQueue.length === 0) return;
+    if (jobQueue.length === 0) return;
 
-    const overlay = createLoadingOverlay(restaurantQueue);
+    const overlay = createOverlay(jobQueue);
     document.body.appendChild(overlay);
   }
 
-  function createLoadingOverlay(restaurants) {
+  function createOverlay(items) {
     const overlay = document.createElement("div");
-    overlay.id = LOADING_OVERLAY_ID;
+    overlay.id = OVERLAY_ID;
 
-    // Styles for the overlay - positioned in bottom right
     Object.assign(overlay.style, {
       position: "fixed",
       bottom: "20px",
       right: "20px",
       zIndex: "9999",
-      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
     });
 
     const container = document.createElement("div");
-    container.className = LOADING_CONTAINER_CLASS;
+    container.className = CONTAINER_CLASS;
 
     Object.assign(container.style, {
       display: "flex",
@@ -96,26 +317,16 @@
       gap: "12px",
       maxWidth: "320px",
       width: "auto",
-      minWidth: "280px"
+      minWidth: "280px",
     });
 
-    // Add restaurant cards if provided
-    if (restaurants.length > 0) {
-      restaurants.forEach(restaurant => {
-        const card = createRestaurantCard(restaurant);
-        container.appendChild(card);
-      });
-    } else {
-      // Show generic loading message if no restaurants provided
-      const card = createRestaurantCard({ name: "Loading restaurants..." });
-      container.appendChild(card);
-    }
+    items.forEach((item) => container.appendChild(createJobCard(item)));
 
     overlay.appendChild(container);
     return overlay;
   }
 
-  function createRestaurantCard(restaurant) {
+  function createJobCard(item) {
     const card = document.createElement("div");
 
     Object.assign(card.style, {
@@ -129,16 +340,33 @@
       fontSize: "14px",
       fontWeight: "500",
       gap: "12px",
-      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.3)"
+      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
+      cursor: "pointer",
+    });
+
+    const restaurant = item.job?.restaurant || { name: "Restaurant", url: "" };
+
+    // Expose key + url for future click behavior
+    card.dataset.allerfreeRestaurantKey = String(item.restaurantKey || "");
+    card.dataset.allerfreeRestaurantUrl = String(restaurant.url || "");
+
+    card.addEventListener("click", () => {
+      if (typeof ns.onJobQueueItemClick === "function") {
+        ns.onJobQueueItemClick({
+          restaurantKey: item.restaurantKey,
+          job: item.job,
+        });
+      }
     });
 
     const nameSpan = document.createElement("span");
     nameSpan.textContent = restaurant.name || "Restaurant";
     nameSpan.style.flex = "1";
 
-    // Show spinner or checkmark based on state
-    const state = restaurant.state || "loading";
-    const icon = state === "success" ? createCheckmark() : createSpinner();
+    const state = normalizeState(item.state || "loading");
+    const icon =
+      state === "success" ? createCheckmark() : state === "error" ? createErrorIcon() : createSpinner();
+
     card.appendChild(nameSpan);
     card.appendChild(icon);
 
@@ -155,10 +383,9 @@
       borderTop: "3px solid #fff",
       borderRadius: "50%",
       animation: "allerfree-spin 0.8s linear infinite",
-      flexShrink: "0"
+      flexShrink: "0",
     });
 
-    // Inject keyframes animation if not already present
     if (!document.getElementById("allerfree-spinner-styles")) {
       const style = document.createElement("style");
       style.id = "allerfree-spinner-styles";
@@ -185,10 +412,9 @@
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      flexShrink: "0"
+      flexShrink: "0",
     });
 
-    // Create SVG checkmark icon
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("viewBox", "0 0 24 24");
     svg.setAttribute("fill", "none");
@@ -208,4 +434,39 @@
     return checkmark;
   }
 
+  function createErrorIcon() {
+    const badge = document.createElement("div");
+
+    Object.assign(badge.style, {
+      width: "20px",
+      height: "20px",
+      borderRadius: "50%",
+      backgroundColor: "#ef4444",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: "0",
+    });
+
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "white");
+    svg.setAttribute("stroke-width", "3");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.style.width = "14px";
+    svg.style.height = "14px";
+
+    const path1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path1.setAttribute("d", "M18 6L6 18");
+    const path2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path2.setAttribute("d", "M6 6l12 12");
+
+    svg.appendChild(path1);
+    svg.appendChild(path2);
+    badge.appendChild(svg);
+
+    return badge;
+  }
 })(self);
