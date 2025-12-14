@@ -300,24 +300,16 @@ export default function Results() {
       <MiniNav isResults={isResults} onToggle={toggle} />
 
       {!isResults && (
-        <div className="results-panel">
-          <div className="results-row">
-            <div>
+        <>
+          <div className="results-panel">
+            {/* Menus count */}
+            <div className="results-menus-count">
               <div className="results-title">Menus found</div>
               <div className="results-muted">{images.length}</div>
             </div>
-            <button
-              className="btn"
-              onClick={getMenuAnalysisAll}
-              disabled={!canAnalyzeCommon}
-              aria-busy={isAnalyzing}
-              title={images.length === 0 ? "No menu images found" : undefined}
-            >
-              {isAnalyzing ? "Analyzing…" : "Analyze All"}
-            </button>
-          </div>
 
-          <div className="results-divider" />
+            {/* Brown divider to separate sections */}
+            <div className="results-divider" />
 
           <div className="results-section">
             <div className="results-title">Analyze selected profiles</div>
@@ -362,7 +354,19 @@ export default function Results() {
               <span className="results-muted">Selected: {selected.size}</span>
             </div>
           </div>
-        </div>
+          </div>
+
+          {/* Analyze All button - full width, centered */}
+          <button
+            className="btn btn-full-width"
+            onClick={getMenuAnalysisAll}
+            disabled={!canAnalyzeCommon}
+            aria-busy={isAnalyzing}
+            title={images.length === 0 ? "No menu images found" : undefined}
+          >
+            {isAnalyzing ? "Analyzing…" : "Analyze All"}
+          </button>
+        </>
       )}
 
       {isResults && (

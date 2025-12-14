@@ -29,6 +29,7 @@
         "content/menu.js",
         "content/analysis.js",
         "content/analysisContext.js",
+        "content/restaurant-loading.js",
         "content/index.js"
       ],
       "run_at": "document_idle",

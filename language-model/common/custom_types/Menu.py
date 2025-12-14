@@ -12,14 +12,12 @@ class MenuSymbol(StrEnum):
     VGA = "vegan"
 
 
-@dataclass
 class AllergenPrediction(BaseModel):
     allergen: str
     prediction: Literal["VERY_LIKELY", "MAY_CONTAIN", "VERY_UNLIKELY"]
     explanation: str
 
 
-@dataclass
 class MenuItem(BaseModel):
     name: str
     description: str
@@ -27,19 +25,16 @@ class MenuItem(BaseModel):
     contains: Optional[List[AllergenPrediction]] = None
 
 
-@dataclass
 class MenuSection(BaseModel):
     section: str
     description: str
     items: List[MenuItem]
 
 
-@dataclass
 class MenuData(BaseModel):
     sections: List[MenuSection]
 
 
-@dataclass
 class LabeledAllergenMenu(BaseModel):
     sections: List[MenuSection]
 
