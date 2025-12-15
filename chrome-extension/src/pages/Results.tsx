@@ -2,6 +2,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DetectionResult } from "../types";
 import DetectionResultPane from "../components/DetectionResult/DetectionResultPane";
+import AnalysisView from "../components/AnalysisView";
+
 
 import { useProfiles } from "../contexts/ProfileContext";
 import { ctxProfilesToApi } from "../helpers/profileFormat";
@@ -269,83 +271,20 @@ export default function Results() {
       <MiniNav isResults={isResults} onToggle={toggle} />
 
       {!isResults && (
-        <>
-          <div className="results-panel">
-            {/* Restaurant (left) + Menus found (right) */}
-            <div className="results-top-row">
-              <div className="results-restaurant-summary">
-                <div className="results-title">Restaurant</div>
-                <div className="results-muted results-restaurant-name">
-                  {restaurant?.name ? restaurant.name : "Unknown"}
-                </div>
-              </div>
-
-              <div className="results-menus-summary">
-                <div className="results-title">Menus found</div>
-                <div className="results-muted">{images.length}</div>
-              </div>
-            </div>
-
-            {/* Brown divider to separate sections */}
-            <div className="results-divider" />
-
-            <div className="results-section">
-              <div className="results-title">Analyze selected profiles</div>
-
-              <ul className="results-list">
-                {names.map((name) => {
-                  const selectedCls = selected.has(name)
-                    ? "results-item results-item--selected"
-                    : "results-item";
-                  return (
-                    <li key={name} className={selectedCls}>
-                      <input
-                        id={`prof-${name}`}
-                        type="checkbox"
-                        checked={selected.has(name)}
-                        onChange={() => toggleSelection(name)}
-                      />
-                      <label className="clickable" htmlFor={`prof-${name}`}>
-                        {name}
-                      </label>
-                    </li>
-                  );
-                })}
-              </ul>
-
-              <div className="results-footer">
-                <button
-                  className="btn"
-                  onClick={getMenuAnalysisForSelected}
-                  disabled={!canAnalyzeSelected}
-                  aria-busy={isAnalyzing}
-                  title={
-                    selected.size === 0
-                      ? "Select at least one profile"
-                      : images.length === 0
-                      ? "No menu images found"
-                      : undefined
-                  }
-                >
-                  {isAnalyzing ? "Analyzing…" : "Analyze Selected"}
-                </button>
-                <span className="results-muted">Selected: {selected.size}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Analyze All button - full width, centered */}
-          <button
-            className="btn btn-full-width"
-            onClick={getMenuAnalysisAll}
-            disabled={!canAnalyzeCommon}
-            aria-busy={isAnalyzing}
-            title={images.length === 0 ? "No menu images found" : undefined}
-          >
-            {isAnalyzing ? "Analyzing…" : "Analyze All"}
-          </button>
-        </>
+        <AnalysisView
+          restaurant={restaurant}
+          menuCount={images.length}
+          names={names}
+          selected={selected}
+          onToggleSelection={toggleSelection}
+          onAnalyzeSelected={getMenuAnalysisForSelected}
+          onAnalyzeAll={getMenuAnalysisAll}
+          isAnalyzing={isAnalyzing}
+          canAnalyzeSelected={canAnalyzeSelected}
+          canAnalyzeAll={canAnalyzeCommon}
+        />
       )}
+
 
       {isResults && (
         <div className="results-panel">
