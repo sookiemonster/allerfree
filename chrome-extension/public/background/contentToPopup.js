@@ -16,7 +16,6 @@ function notifyRestaurantInfo(restaurant) {
 
 // Receive updates from content scripts
 export function initContentToPopup({ openPopupWithRoute }) {
-    console.log("new modular ctp")
   chrome.runtime.onMessage.addListener((msg, _sender, _sendResponse) => {
     switch (msg?.type) {
       case "MENU_IMAGES_UPDATE": {

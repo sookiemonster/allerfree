@@ -7,7 +7,7 @@ import { ctxProfilesToApi } from "../helpers/profileFormat";
 
 import "./Results.css";
 
-import type { AnalysisJob, JobSummary } from "../types/AnalysisJob";
+import type { AnalysisJob, JobSummary, RestaurantInfo } from "../types/AnalysisJob";
 import {
   ANALYSIS_STORAGE_PREFIX,
   storageKeyForRestaurantKey,
@@ -16,6 +16,16 @@ import {
 
 type PushMsg = { type: "MENU_IMAGES_PUSH"; images: string[] };
 type GetResult = { type: "MENU_IMAGES_RESULT"; images: string[] };
+
+type RestaurantPushMsg = {
+  type: "RESTAURANT_INFO_PUSH";
+  restaurant: RestaurantInfo | null;
+};
+
+type RestaurantResultMsg = {
+  type: "RESTAURANT_INFO_RESULT";
+  restaurant: RestaurantInfo | null;
+};
 
 function MiniNav({
   isResults,
@@ -64,6 +74,7 @@ export default function Results() {
 
   const [isResults, setIsResults] = useState(false);
   const [images, setImages] = useState<string[]>([]);
+  const [restaurant, setRestaurant] = useState<RestaurantInfo | null>(null);
   const [detection_result, setDetectionResult] =
     useState<DetectionResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -92,24 +103,35 @@ export default function Results() {
   }, [names]);
 
   // Connect to SW for images
+  // Connect to SW for images + current restaurant
   useEffect(() => {
     const port = chrome.runtime.connect({ name: "popup" });
     portRef.current = port;
 
-    port.onMessage.addListener((msg: PushMsg | GetResult) => {
-      if (msg.type === "MENU_IMAGES_PUSH" || msg.type === "MENU_IMAGES_RESULT") {
-        setImages(Array.isArray(msg.images) ? msg.images : []);
+    port.onMessage.addListener(
+      (msg: PushMsg | GetResult | RestaurantPushMsg | RestaurantResultMsg) => {
+        if (msg.type === "MENU_IMAGES_PUSH" || msg.type === "MENU_IMAGES_RESULT") {
+          setImages(Array.isArray(msg.images) ? msg.images : []);
+          return;
+        }
+
+        if (
+          msg.type === "RESTAURANT_INFO_PUSH" ||
+          msg.type === "RESTAURANT_INFO_RESULT"
+        ) {
+          setRestaurant(msg.restaurant ?? null);
+        }
       }
-    });
+    );
 
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const active = tabs[0];
       const id = active?.id ?? null;
 
-      port.postMessage({
-        type: "GET_MENU_IMAGES",
-        tabId: id ?? undefined,
-      } as any);
+      port.postMessage({ type: "GET_MENU_IMAGES", tabId: id ?? undefined } as any);
+      port.postMessage(
+        { type: "GET_RESTAURANT_INFO", tabId: id ?? undefined } as any
+      );
     });
 
     return () => {
@@ -118,6 +140,7 @@ export default function Results() {
       } catch {}
     };
   }, []);
+
 
   // Initial load of success jobs for dropdown, plus choose a default selection
   useEffect(() => {
@@ -302,11 +325,21 @@ export default function Results() {
       {!isResults && (
         <>
           <div className="results-panel">
-            {/* Menus count */}
-            <div className="results-menus-count">
-              <div className="results-title">Menus found</div>
-              <div className="results-muted">{images.length}</div>
+            {/* Restaurant (left) + Menus found (right) */}
+            <div className="results-top-row">
+              <div className="results-restaurant-summary">
+                <div className="results-title">Restaurant</div>
+                <div className="results-muted results-restaurant-name">
+                  {restaurant?.name ? restaurant.name : "Unknown"}
+                </div>
+              </div>
+
+              <div className="results-menus-summary">
+                <div className="results-title">Menus found</div>
+                <div className="results-muted">{images.length}</div>
+              </div>
             </div>
+
 
             {/* Brown divider to separate sections */}
             <div className="results-divider" />

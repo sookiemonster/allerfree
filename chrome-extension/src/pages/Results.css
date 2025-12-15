@@ -95,11 +95,27 @@
   color: var(--muted);
 }
 
-/* Menus count section */
-.results-menus-count {
-  text-align: center;
+/* Restaurant + menus header row */
+.results-top-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 12px;
   padding: 8px 0;
 }
+
+.results-restaurant-summary,
+.results-menus-summary {
+  text-align: center;
+}
+
+.results-restaurant-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
 
 /* Analyze buttons (matching create-profile-btn style) */
 .btn {

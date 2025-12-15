@@ -59,7 +59,6 @@ function fetchRestaurantInfoFromTab(tabId, done) {
 
 // Popup connections
 export function initPopupToContent() {
-    console.log("new modular ptc")
   chrome.runtime.onConnect.addListener((port) => {
     if (port.name !== "popup") return;
 
