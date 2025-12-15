@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+// src/pages/Results.tsx
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DetectionResult } from "../types";
 import DetectionResultPane from "../components/DetectionResult/DetectionResultPane";
 
@@ -7,17 +8,19 @@ import { ctxProfilesToApi } from "../helpers/profileFormat";
 
 import "./Results.css";
 
-import type { AnalysisJob, JobSummary, RestaurantInfo} from "../types/AnalysisJob";
+import type { AnalysisJob, JobSummary, RestaurantInfo } from "../types/AnalysisJob";
 import {
   ANALYSIS_STORAGE_PREFIX,
   storageKeyForRestaurantKey,
   toJobSummary,
 } from "../types/AnalysisJob";
 
-import type {
-  ResultsPortInboundMessage,
-  ResultsPortOutboundMessage,
-} from "../types/ResultsMessages";
+import {
+  connectResultsPort,
+  disconnectResultsPort,
+  requestInitialResultsData,
+  startAnalysis,
+} from "../helpers/resultsPortMessaging";
 
 function MiniNav({
   isResults,
@@ -67,8 +70,7 @@ export default function Results() {
   const [isResults, setIsResults] = useState(false);
   const [images, setImages] = useState<string[]>([]);
   const [restaurant, setRestaurant] = useState<RestaurantInfo | null>(null);
-  const [detection_result, setDetectionResult] =
-    useState<DetectionResult | null>(null);
+  const [detection_result, setDetectionResult] = useState<DetectionResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // Jobs (summaries for dropdown) + selected job (full payload)
@@ -94,45 +96,29 @@ export default function Results() {
     });
   }, [names]);
 
-  // Connect to SW for images
   // Connect to SW for images + current restaurant
   useEffect(() => {
-    const port = chrome.runtime.connect({ name: "popup" });
-    portRef.current = port;
-
-    port.onMessage.addListener(
-      (msg: ResultsPortInboundMessage) => {
-        if (msg.type === "MENU_IMAGES_PUSH" || msg.type === "MENU_IMAGES_RESULT") {
-          setImages(Array.isArray(msg.images) ? msg.images : []);
-          return;
-        }
-
-        if (
-          msg.type === "RESTAURANT_INFO_PUSH" ||
-          msg.type === "RESTAURANT_INFO_RESULT"
-        ) {
-          setRestaurant(msg.restaurant ?? null);
-        }
+    const port = connectResultsPort((msg) => {
+      if (msg.type === "MENU_IMAGES_PUSH" || msg.type === "MENU_IMAGES_RESULT") {
+        setImages(Array.isArray(msg.images) ? msg.images : []);
+        return;
       }
-    );
 
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      const active = tabs[0];
-      const id = active?.id ?? null;
-
-      port.postMessage({ type: "GET_MENU_IMAGES", tabId: id ?? undefined } as ResultsPortOutboundMessage);
-      port.postMessage(
-        { type: "GET_RESTAURANT_INFO", tabId: id ?? undefined } as ResultsPortOutboundMessage
-      );
+      if (msg.type === "RESTAURANT_INFO_PUSH" || msg.type === "RESTAURANT_INFO_RESULT") {
+        setRestaurant(msg.restaurant ?? null);
+      }
     });
 
+    portRef.current = port;
+
+    // request initial images + restaurant for active tab
+    requestInitialResultsData(port);
+
     return () => {
-      try {
-        port.disconnect();
-      } catch {}
+      disconnectResultsPort(portRef.current);
+      portRef.current = null;
     };
   }, []);
-
 
   // Initial load of success jobs for dropdown, plus choose a default selection
   useEffect(() => {
@@ -177,14 +163,12 @@ export default function Results() {
   useEffect(() => {
     const handler: Parameters<typeof chrome.storage.onChanged.addListener>[0] = (
       changes,
-      areaName
+      areaName,
     ) => {
       if (areaName !== "local") return;
 
-      // Optional debug print similar to content script
       console.log("[Allerfree] storage.onChanged", changes);
 
-      // Update dropdown summaries without storing all results in state
       setJobs((prev) => {
         let next = [...prev];
         let changed = false;
@@ -257,37 +241,38 @@ export default function Results() {
 
   const toggle = () => setIsResults((v) => !v);
 
-  const getMenuAnalysisAll = () => {
+  const onStartAnalysisAll = useCallback(() => {
     if (!portRef.current) return;
 
     try {
-      portRef.current.postMessage({
-        type: "START_ANALYSIS",
-        profiles: apiProfiles,
-      } as ResultsPortOutboundMessage);
+      startAnalysis(portRef.current, apiProfiles);
       setIsAnalyzing(true);
     } catch (err) {
-      console.error("START_ANALYSIS (all) failed:", err);
+      console.error("[START_ANALYSIS (all)] failed:", err);
       setIsAnalyzing(false);
     }
+  }, [apiProfiles]);
+
+  const onStartAnalysisSelected = useCallback(() => {
+    if (!portRef.current) return;
+
+    const filtered = apiProfiles.filter((p) => selected.has(p.name));
+
+    try {
+      startAnalysis(portRef.current, filtered);
+      setIsAnalyzing(true);
+    } catch (err) {
+      console.error("[START_ANALYSIS (selected)] failed:", err);
+      setIsAnalyzing(false);
+    }
+  }, [apiProfiles, selected]);
+
+  const getMenuAnalysisAll = () => {
+    onStartAnalysisAll();
   };
 
   const getMenuAnalysisForSelected = () => {
-    if (!portRef.current) return;
-
-    const chosen = new Set(selected);
-    const filtered = apiProfiles.filter((p) => chosen.has(p.name));
-
-    try {
-      portRef.current.postMessage({
-        type: "START_ANALYSIS",
-        profiles: filtered,
-      } as any);
-      setIsAnalyzing(true);
-    } catch (err) {
-      console.error("START_ANALYSIS (selected) failed:", err);
-      setIsAnalyzing(false);
-    }
+    onStartAnalysisSelected();
   };
 
   // Stop spinner when selected job becomes success or error
@@ -306,8 +291,7 @@ export default function Results() {
       return next;
     });
 
-  const canAnalyzeCommon =
-    !!portRef.current && images.length > 0 && !isAnalyzing;
+  const canAnalyzeCommon = !!portRef.current && images.length > 0 && !isAnalyzing;
   const canAnalyzeSelected = canAnalyzeCommon && selected.size > 0;
 
   return (
@@ -332,53 +316,52 @@ export default function Results() {
               </div>
             </div>
 
-
             {/* Brown divider to separate sections */}
             <div className="results-divider" />
 
-          <div className="results-section">
-            <div className="results-title">Analyze selected profiles</div>
+            <div className="results-section">
+              <div className="results-title">Analyze selected profiles</div>
 
-            <ul className="results-list">
-              {names.map((name) => {
-                const selectedCls = selected.has(name)
-                  ? "results-item results-item--selected"
-                  : "results-item";
-                return (
-                  <li key={name} className={selectedCls}>
-                    <input
-                      id={`prof-${name}`}
-                      type="checkbox"
-                      checked={selected.has(name)}
-                      onChange={() => toggleSelection(name)}
-                    />
-                    <label className="clickable" htmlFor={`prof-${name}`}>
-                      {name}
-                    </label>
-                  </li>
-                );
-              })}
-            </ul>
+              <ul className="results-list">
+                {names.map((name) => {
+                  const selectedCls = selected.has(name)
+                    ? "results-item results-item--selected"
+                    : "results-item";
+                  return (
+                    <li key={name} className={selectedCls}>
+                      <input
+                        id={`prof-${name}`}
+                        type="checkbox"
+                        checked={selected.has(name)}
+                        onChange={() => toggleSelection(name)}
+                      />
+                      <label className="clickable" htmlFor={`prof-${name}`}>
+                        {name}
+                      </label>
+                    </li>
+                  );
+                })}
+              </ul>
 
-            <div className="results-footer">
-              <button
-                className="btn"
-                onClick={getMenuAnalysisForSelected}
-                disabled={!canAnalyzeSelected}
-                aria-busy={isAnalyzing}
-                title={
-                  selected.size === 0
-                    ? "Select at least one profile"
-                    : images.length === 0
-                    ? "No menu images found"
-                    : undefined
-                }
-              >
-                {isAnalyzing ? "Analyzing…" : "Analyze Selected"}
-              </button>
-              <span className="results-muted">Selected: {selected.size}</span>
+              <div className="results-footer">
+                <button
+                  className="btn"
+                  onClick={getMenuAnalysisForSelected}
+                  disabled={!canAnalyzeSelected}
+                  aria-busy={isAnalyzing}
+                  title={
+                    selected.size === 0
+                      ? "Select at least one profile"
+                      : images.length === 0
+                      ? "No menu images found"
+                      : undefined
+                  }
+                >
+                  {isAnalyzing ? "Analyzing…" : "Analyze Selected"}
+                </button>
+                <span className="results-muted">Selected: {selected.size}</span>
+              </div>
             </div>
-          </div>
           </div>
 
           {/* Analyze All button - full width, centered */}
@@ -405,9 +388,7 @@ export default function Results() {
               onChange={(e) => handleSelectJob(e.target.value)}
             >
               <option value="" disabled>
-                {jobs.length > 0
-                  ? "Select a restaurant"
-                  : "No successful jobs yet"}
+                {jobs.length > 0 ? "Select a restaurant" : "No successful jobs yet"}
               </option>
 
               {jobs.map((job) => (
