@@ -5,9 +5,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 
 import com.allerfree.AllerFree.repository.MenuRepository;
 
@@ -18,26 +20,24 @@ import com.allerfree.AllerFree.repository.MenuRepository;
 public class AllerFreeApplication {
 
 	@Primary
-	@Bean
-	public ThreadPoolTaskExecutor taskExecutor() {
+	@Bean(name = "async")
+	public AsyncTaskExecutor taskExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setCorePoolSize(10);
 		executor.setMaxPoolSize(20);
 		executor.setQueueCapacity(500);
-		executor.setThreadNamePrefix("AsyncThread-");
 		executor.initialize();
-		return executor;
+		return new DelegatingSecurityContextAsyncTaskExecutor(executor);
 	}
 
-	@Bean
-	public ThreadPoolTaskExecutor taskExecutorForLLM() {
+	@Bean(name = "taskExecutorForLLM")
+	public AsyncTaskExecutor taskExecutorForLLM() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setCorePoolSize(2);
 		executor.setMaxPoolSize(4);
 		executor.setQueueCapacity(250);
-		executor.setThreadNamePrefix("LLMAsyncThread-");
 		executor.initialize();
-		return executor;
+		return new DelegatingSecurityContextAsyncTaskExecutor(executor);
 	}
 
 	public static void main(String[] args) {

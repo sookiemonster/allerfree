@@ -8,6 +8,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +27,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 
 @RestController
-public class MenuController {    
+public class MenuController {
     @Autowired
     private MenuService menuService;
 
@@ -64,27 +65,9 @@ public class MenuController {
                             cachedDetect.setResults(menuService.parseResponse(cachedMenu.getResults(), req.getProfiles()));
                             return CompletableFuture.completedFuture(cachedDetect);
                         }else{ //entry not found -> call LLM
-                            CompletableFuture<LlmResponse> llmResponse = menuService.llmCall(req.getImages());
-                            return llmResponse.thenCompose(llmRes -> {
-                                return menuService.saveToCache(req.getRestaurantName(), req.getRestaurantLocation(), llmRes.getMenu())
-                                                .exceptionally(e -> {
-                                                    menuService.clearCacheOldest();
-                                                    return null;
-                                                }).thenApply(voidRes -> {
-                                                    DetectionResponse llmDetect = new DetectionResponse();
-                                                    llmDetect.setFailed(llmRes.getFailed());
-                                                    llmDetect.setResults(menuService.parseResponse(llmRes.getMenu(), req.getProfiles()));
-                                                    return llmDetect;
-                                                });
-                            });
+                            return menuService.callLLMandSave(req);
                         }
-                    }).exceptionally(e -> {
-                        menuService.clearCacheOldest();
-                        DetectionResponse failureRes = new DetectionResponse();
-                        failureRes.getFailed().put(-1, "An unexpected error occurred during processing: " + e.getMessage());
-                        return failureRes;
-                    })
-                    .thenApply(detectionResponse -> ResponseEntity.ok(detectionResponse));
+                    }).thenApply(detectionResponse -> ResponseEntity.ok(detectionResponse));
     }
 
     @GetMapping("seedDB")

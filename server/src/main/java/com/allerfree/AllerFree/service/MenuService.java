@@ -10,15 +10,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.stream.Collectors;
+
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.UncategorizedMongoDbException;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -49,21 +57,29 @@ public class MenuService {
     
     private final Set<String> allAllergies = new HashSet<String>(Arrays.asList("gluten", "tree_nuts", "shellfish"));
 
+    private final MongoTemplate mongoTemplate;
+
     private final MenuRepository menuRepo;
-    public MenuService(MenuRepository menuRepo) {
+    public MenuService(MenuRepository menuRepo, MongoTemplate mongoTemplate) {
         this.menuRepo = menuRepo;
+        this.mongoTemplate = mongoTemplate;
     }
 
     @Async
     //Check MongoDB cluster for existing menu document
     public CompletableFuture<Menu> checkCache(String restaurantName, Coordinate coords){
+        Menu cached = menuRepo.findByRestaurantNameAndRestaurantLocation(restaurantName, coords);
         return CompletableFuture.supplyAsync(() -> {
-            Menu cached = menuRepo.findByRestaurantNameAndRestaurantLocation(restaurantName, coords);
             //If we query something -> refresh creation time (so it persists if accessed frequently)
             if (cached != null){
-                cached.setCreationTime(new Date());   
-                menuRepo.save(cached);
+                Update update = new Update().set("creationTime", new Date())
+                                            .set("results", cached.getResults());
+                mongoTemplate.upsert(new Query(Criteria.where("restaurantName").is(restaurantName).and("restaurantLocation").is(coords)), 
+                                    update, Menu.class, "menus");
             }
+            return cached;
+        }).handle((result, e) -> {
+            clearCacheOldest();
             return cached;
         });
     }
@@ -72,20 +88,21 @@ public class MenuService {
     //Save Menu into MongoDB Cluster
     public CompletableFuture<Void> saveToCache(String restaurantName, Coordinate restaurantLocation, MenuPage results){
         //Create document in cluster
-        // System.out.println("Saving to MongoDB Cluster");
-        Menu toCache = new Menu();
-        toCache.setRestaurantName(restaurantName);
-        toCache.setRestaurantLocation(restaurantLocation);
-        toCache.setResults(results);
-        toCache.setCreationTime(new Date());
-        menuRepo.insert(toCache);
+        // System.out.println("Saving to MongoDB Cluster")
+        Update update = new Update().set("creationTime", new Date())
+                                    .set("results", results);
+        mongoTemplate.upsert(new Query(Criteria.where("restaurantName").is(restaurantName).and("restaurantLocation").is(restaurantLocation)), 
+                            update, Menu.class, "menus");
         return CompletableFuture.completedFuture(null);
     }
 
     @Async
     public void clearCacheOldest(){
         //Get 50 oldest documents and remove them
+        Query findOldestQuery = new Query();
+        findOldestQuery.with(Sort.by(Sort.Direction.ASC, "creationDate")).limit(100);
 
+        mongoTemplate.remove(findOldestQuery, "menus");
     }
 
     @Async("taskExecutorForLLM")
@@ -132,6 +149,21 @@ public class MenuService {
                         return res;
                     });
     }
+
+    @Async("taskExecutorForLLM")
+        public CompletableFuture<DetectionResponse> callLLMandSave(DetectionRequest req){
+            CompletableFuture<LlmResponse> llmResponse = llmCall(req.getImages());
+                            return llmResponse.thenCompose(llmRes -> {
+                                return saveToCache(req.getRestaurantName(), req.getRestaurantLocation(), llmRes.getMenu())
+                                                .handle((voidRes, e) -> {
+                                                    clearCacheOldest();
+                                                    DetectionResponse llmDetect = new DetectionResponse();
+                                                    llmDetect.setFailed(llmRes.getFailed());
+                                                    llmDetect.setResults(parseResponse(llmRes.getMenu(), req.getProfiles()));
+                                                    return llmDetect;
+                                                });
+                            });
+        }
     
     //Parses and formats aggregated responses from LLM API
         //Into a map where each profile gets its own menu
@@ -141,6 +173,10 @@ public class MenuService {
         HashMap<String, MenuPage> result = new HashMap<String, MenuPage>();
         for (String profName : profiles.keySet()){ //Seed map with profile names and empty menu outputs
             result.put(profName, new MenuPage());
+        }
+        
+        if (menuResponse == null){
+            return result;
         }
 
         HashSet<String> seenItems = new HashSet<String>(); //to handle duplicate menu images (and thus duplicate menu items)
@@ -188,8 +224,10 @@ public class MenuService {
             e.printStackTrace();
         }
 
-        for (int i = 0; i < 3750; i++){
-            saveToCache(Integer.toString(i), new Coordinate(0.0, 0.0), resultAsList);
+        for (int i = 1; i < 3750; i++){
+            double lat = i;
+            double lng = i;
+            saveToCache(Integer.toString(i), new Coordinate(lat, lng), resultAsList);
         }
     }
 

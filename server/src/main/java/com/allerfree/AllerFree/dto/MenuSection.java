@@ -5,15 +5,19 @@ import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
-@NoArgsConstructor
 @Data
 public class MenuSection {
-    private String sectionName;
+    private String section;
     private String description;
     private List<MenuItem> items;
+
+    public MenuSection(){
+        section = "";
+        description = "";
+        items = new ArrayList<MenuItem>();
+    }
 
     public void addMenuItem(MenuItem item, Allergy[] allergies){
         List<AllergenPrediction> personalizedContains = new ArrayList<AllergenPrediction>();

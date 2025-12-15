@@ -12,10 +12,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "menus")
 @CompoundIndex(name = "restaurant_unique_key", def = "{'restaurantName': 1, 'restaurantLocation': 1}", unique = true)
@@ -35,4 +33,11 @@ public class Menu {
     @NotNull
     @Indexed(expireAfter = "864000s") //10 days
     private Date creationTime; 
+
+    public Menu(){
+        restaurantName = "";
+        restaurantLocation = new Coordinate();
+        results = new MenuPage();
+        creationTime = new Date();
+    }
 }

@@ -14,6 +14,7 @@ public class LlmResponse {
     private HashMap<Integer, String> failed;
 
     public LlmResponse(){
+        menu = new MenuPage();
         failed = new HashMap<Integer, String>();
     }
 
