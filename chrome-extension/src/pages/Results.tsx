@@ -1,6 +1,6 @@
 // src/pages/Results.tsx
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { DetectionResult } from "../types";
+import type { DetectionResult, MenuData } from "../types";
 
 import { useProfiles } from "../contexts/ProfileContext";
 import { ctxProfilesToApi } from "../helpers/profileFormat";
@@ -56,6 +56,46 @@ function makeRestaurantKeyFromRestaurantInfo(
   return `${namePart}|${coords}`;
 }
 
+function isMenuData(value: any): value is MenuData {
+  return !!value && typeof value === "object" && Array.isArray(value.sections);
+}
+
+function isDetectionResult(value: any): value is DetectionResult {
+  if (!value || typeof value !== "object") return false;
+  const v = value as any;
+
+  if (!("failed" in v) || !("results" in v)) return false;
+  if (!v.results || typeof v.results !== "object" || Array.isArray(v.results))
+    return false;
+
+  // optional: ensure each profile entry looks like MenuData
+  for (const md of Object.values(v.results)) {
+    if (!isMenuData(md)) return false;
+  }
+
+  return true;
+}
+
+function normalizeToDetectionResult(
+  result: unknown,
+  profiles: any[] | undefined
+): DetectionResult | null {
+  if (isDetectionResult(result)) return result;
+
+  // Back-compat (your screenshot): result is MenuData, wrap it
+  if (isMenuData(result)) {
+    const profileName =
+      Array.isArray(profiles) && profiles.length === 1 && profiles[0]?.name
+        ? String(profiles[0].name)
+        : "default";
+
+    return { failed: {}, results: { [profileName]: result } };
+  }
+
+  return null;
+}
+
+
 export default function Results() {
   const portRef = useRef<chrome.runtime.Port | null>(null);
 
@@ -82,9 +122,14 @@ export default function Results() {
 
   // Derive detection result from selectedHistoryJob
   const selectedDetectionResult = useMemo(
-    () => coerceDetectionResult(selectedHistoryJob?.result),
+    () =>
+      normalizeToDetectionResult(
+        selectedHistoryJob?.result,
+        selectedHistoryJob?.profiles
+      ),
     [selectedHistoryJob]
   );
+
 
   // Track the active restaurant key (for analysis view spinner state)
   const activeRestaurantKeyRef = useRef<string>("");

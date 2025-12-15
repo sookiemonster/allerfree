@@ -7,6 +7,7 @@ export type RestaurantInfo = {
   coordinates?: { lat?: number; lng?: number };
   url?: string;
 };
+import type { DetectionResult } from "./DetectionResult";
 
 export type AnalysisJob = {
   jobId: string;
@@ -15,7 +16,7 @@ export type AnalysisJob = {
   status: JobStatus;
   profiles: any[];
   images: string[];
-  result?: unknown;
+  result: DetectionResult | null;
   error?: string | null;
   updatedAt: number;
 };
