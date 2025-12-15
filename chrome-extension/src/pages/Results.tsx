@@ -1,9 +1,9 @@
 // src/pages/Results.tsx
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DetectionResult } from "../types";
-import DetectionResultPane from "../components/DetectionResult/DetectionResultPane";
-import AnalysisView from "../components/AnalysisView";
 
+import AnalysisView from "../components/AnalysisView";
+import ResultsView from "../components/ResultsView";
 
 import { useProfiles } from "../contexts/ProfileContext";
 import { ctxProfilesToApi } from "../helpers/profileFormat";
@@ -287,42 +287,14 @@ export default function Results() {
 
 
       {isResults && (
-        <div className="results-panel">
-          <div className="results-job-picker">
-            <div className="results-title">Restaurant results</div>
-
-            <select
-              className="results-job-select"
-              value={selectedRestaurantKey}
-              onChange={(e) => handleSelectJob(e.target.value)}
-            >
-              <option value="" disabled>
-                {jobs.length > 0 ? "Select a restaurant" : "No successful jobs yet"}
-              </option>
-
-              {jobs.map((job) => (
-                <option key={job.restaurantKey} value={job.restaurantKey}>
-                  {job.restaurantName}
-                </option>
-              ))}
-            </select>
-
-            <div className="results-muted">
-              {jobs.length} successful job{jobs.length === 1 ? "" : "s"}
-            </div>
-          </div>
-
-          <div className="results-divider" />
-
-          {detection_result ? (
-            <DetectionResultPane detection_result={detection_result} />
-          ) : (
-            <div className="results-muted" style={{ padding: 8 }}>
-              Select a restaurant above to view results.
-            </div>
-          )}
-        </div>
+        <ResultsView
+          jobs={jobs}
+          selectedRestaurantKey={selectedRestaurantKey}
+          onSelectJob={handleSelectJob}
+          detectionResult={detection_result}
+        />
       )}
+
     </div>
   );
 }
