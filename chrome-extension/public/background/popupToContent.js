@@ -1,4 +1,4 @@
-import { addPopupPort } from "./ports.js";
+import { bindPopupPortToTab } from "./ports.js";
 
 /** Resolve a tab id: prefer explicit msg.tabId; otherwise use active tab. */
 function resolveTabIdMaybe(tabId, cb) {
@@ -62,9 +62,18 @@ export function initPopupToContent() {
   chrome.runtime.onConnect.addListener((port) => {
     if (port.name !== "popup") return;
 
-    addPopupPort(port);
+    // Best-effort initial binding (tab the popup was opened from)
+    chrome.tabs.query({ active: true, lastFocusedWindow: true }, (tabs) => {
+      const tabId = tabs?.[0]?.id;
+      bindPopupPortToTab(port, tabId);
+    });
 
     port.onMessage.addListener((msg) => {
+      // If popup included a tabId, keep the binding accurate
+      if (typeof msg?.tabId === "number") {
+        bindPopupPortToTab(port, msg.tabId);
+      }
+      
       switch (msg?.type) {
         case "GET_MENU_IMAGES": {
           resolveTabIdMaybe(msg.tabId, (tabId) => {

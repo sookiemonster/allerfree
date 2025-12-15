@@ -1,48 +1,36 @@
-import { broadcastToPopups } from "./ports.js";
+import { postToTabPopups } from "./ports.js";
 
-function notifyMenuImages(images) {
-  broadcastToPopups({
-    type: "MENU_IMAGES_PUSH",
-    images: Array.isArray(images) ? images : [],
-  });
-}
-
-function notifyRestaurantInfo(restaurant) {
-  broadcastToPopups({
-    type: "RESTAURANT_INFO_PUSH",
-    restaurant: restaurant ?? null,
-  });
-}
-
-// Receive updates from content scripts
 export function initContentToPopup({ openPopupWithRoute }) {
-  chrome.runtime.onMessage.addListener((msg, _sender, _sendResponse) => {
+  chrome.runtime.onMessage.addListener((msg, sender) => {
+    const tabId = sender?.tab?.id;
+
     switch (msg?.type) {
       case "MENU_IMAGES_UPDATE": {
-        const images = Array.isArray(msg.images) ? msg.images : [];
-        notifyMenuImages(images);
+        if (typeof tabId === "number") {
+          postToTabPopups(tabId, {
+            type: "MENU_IMAGES_PUSH",
+            images: Array.isArray(msg.images) ? msg.images : [],
+          });
+        }
         break;
       }
 
       case "RESTAURANT_INFO_UPDATE": {
-        // sent by ns.sendRestaurantInfoToBackground() in restaurant.js
-        notifyRestaurantInfo(msg.restaurant ?? null);
+        if (typeof tabId === "number") {
+          postToTabPopups(tabId, {
+            type: "RESTAURANT_INFO_PUSH",
+            restaurant: msg.restaurant ?? null,
+          });
+        }
         break;
       }
 
-      // open popup and navigate to results page
-      // triggered by "Can I Eat Here?" button
       case "OPEN_POPUP": {
-        const route = typeof msg.route === "string" ? msg.route : "";
-        openPopupWithRoute(route);
+        openPopupWithRoute(typeof msg.route === "string" ? msg.route : "");
         break;
       }
-
-      default:
-        // no-op
-        break;
     }
 
-    return false; // no async sendResponse
+    return false;
   });
 }
