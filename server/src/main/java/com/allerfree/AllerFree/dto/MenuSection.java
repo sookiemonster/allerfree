@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class MenuSection {
-    private String section;
+    private String sectionName;
     private String description;
     private List<MenuItem> items;
 

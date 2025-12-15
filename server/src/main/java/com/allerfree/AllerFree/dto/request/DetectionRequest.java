@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import java.util.HashMap;
 import java.util.List;
 
+import com.allerfree.AllerFree.dto.Coordinate;
 import com.allerfree.AllerFree.dto.Image;
 import com.allerfree.AllerFree.dto.Profile;
 
@@ -15,7 +16,7 @@ import com.allerfree.AllerFree.dto.Profile;
 @Data
 public class DetectionRequest {
     private String restaurantName;
-    private String restaurantLocation;
+    private Coordinate restaurantLocation;
     private List<Image> images;
     private HashMap<String, Profile> profiles;
 }

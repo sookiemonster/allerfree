@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,18 +17,22 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "menuResults")
+@Document(collection = "menus")
 @CompoundIndex(name = "restaurant_unique_key", def = "{'restaurantName': 1, 'restaurantLocation': 1}", unique = true)
 public class Menu {
 
     @Id
     private ObjectId id;
 
+    @NotNull
     private String restaurantName;
-    private String restaurantLocation;
+    @NotNull
+    private Coordinate restaurantLocation;
 
-    private List<MenuPage> results;
+    @NotNull
+    private MenuPage results;
 
-    @Indexed(expireAfter = "7d") // Documents expire 1 hour (3600 seconds) after the value in this field
+    @NotNull
+    @Indexed(expireAfter = "864000s") //10 days
     private Date creationTime; 
 }

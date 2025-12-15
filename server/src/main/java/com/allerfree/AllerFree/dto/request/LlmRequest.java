@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Set;
 
 import com.allerfree.AllerFree.dto.Image;
@@ -13,5 +14,5 @@ import com.allerfree.AllerFree.dto.Image;
 @Data
 public class LlmRequest {
     private Set<String> allergies;
-    private Image image;
+    private List<Image> images;
 }

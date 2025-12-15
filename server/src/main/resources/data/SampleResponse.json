@@ -1,7 +1,7 @@
 {
     "sections": [
         {
-            "section": "SHAREABLES",
+            "sectionName": "SHAREABLES",
             "description": "",
             "items": [
                 {
@@ -80,7 +80,7 @@
             ]
         },
         {
-            "section": "ALL DAY BREAKFAST",
+            "sectionName": "ALL DAY BREAKFAST",
             "description": "Vegan modifications: Substitute vegan cheese, substitute rice paper 'bacon', substitute tofu scramble, add Impossible™ sausage, add an egg, add avocado, substitute gluten-free bread.",
             "items": [
                 {
@@ -99,7 +99,7 @@
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "Waffles are baked goods, and the menu includes a 'FROM THE BAKERY' section which explicitly handles items with nuts. This poses a risk of cross-contamination."
+                            "explanation": "Waffles are baked goods, and the menu includes a 'FROM THE BAKERY' sectionName which explicitly handles items with nuts. This poses a risk of cross-contamination."
                         },
                         {
                             "allergen": "shellfish",
@@ -147,7 +147,7 @@
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "The sandwich includes a croissant, a baked good, and the menu explicitly handles nuts in its bakery section, indicating potential cross-contamination."
+                            "explanation": "The sandwich includes a croissant, a baked good, and the menu explicitly handles nuts in its bakery sectionName, indicating potential cross-contamination."
                         },
                         {
                             "allergen": "shellfish",
@@ -171,7 +171,7 @@
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "Bagels are baked goods, and the menu includes a 'FROM THE BAKERY' section which explicitly handles items with nuts, indicating potential cross-contamination."
+                            "explanation": "Bagels are baked goods, and the menu includes a 'FROM THE BAKERY' sectionName which explicitly handles items with nuts, indicating potential cross-contamination."
                         },
                         {
                             "allergen": "shellfish",
@@ -196,7 +196,7 @@
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "The dish includes a buttermilk biscuit, a baked good, and the menu explicitly handles nuts in its bakery section, indicating potential cross-contamination."
+                            "explanation": "The dish includes a buttermilk biscuit, a baked good, and the menu explicitly handles nuts in its bakery sectionName, indicating potential cross-contamination."
                         },
                         {
                             "allergen": "shellfish",
@@ -230,7 +230,7 @@
             ]
         },
         {
-            "section": "FROM THE BAKERY",
+            "sectionName": "FROM THE BAKERY",
             "description": "Assortment of 3 for $12. Take home bread loaves available!",
             "items": [
                 {
@@ -381,7 +381,7 @@
             ]
         },
         {
-            "section": "TOAST & SANDWICHES",
+            "sectionName": "TOAST & SANDWICHES",
             "description": "Substitute gluten-free bread, substitute vegan cheese, add rice paper 'bacon', add avocado.",
             "items": [
                 {
@@ -394,7 +394,7 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "The dish explicitly contains 'Seeded Bread', which is a common source of gluten. The section description also offers 'Substitute gluten-free bread', implying the default contains gluten."
+                            "explanation": "The dish explicitly contains 'Seeded Bread', which is a common source of gluten. The sectionName description also offers 'Substitute gluten-free bread', implying the default contains gluten."
                         },
                         {
                             "allergen": "tree_nuts",
@@ -445,7 +445,7 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "The dish explicitly contains 'Toasted Sourdough', which is a common source of gluten (wheat bread). The section description also offers 'Substitute gluten-free bread', implying the default contains gluten."
+                            "explanation": "The dish explicitly contains 'Toasted Sourdough', which is a common source of gluten (wheat bread). The sectionName description also offers 'Substitute gluten-free bread', implying the default contains gluten."
                         },
                         {
                             "allergen": "tree_nuts",
@@ -469,7 +469,7 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "The dish explicitly contains 'Sourdough', which is a common source of gluten (wheat bread). The section description also offers 'Substitute gluten-free bread', implying the default contains gluten."
+                            "explanation": "The dish explicitly contains 'Sourdough', which is a common source of gluten (wheat bread). The sectionName description also offers 'Substitute gluten-free bread', implying the default contains gluten."
                         },
                         {
                             "allergen": "tree_nuts",
@@ -493,7 +493,7 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "The dish explicitly contains 'Brioche Bun', which is made from wheat flour and is a common source of gluten. The section description also offers 'Substitute gluten-free bread', implying the default contains gluten."
+                            "explanation": "The dish explicitly contains 'Brioche Bun', which is made from wheat flour and is a common source of gluten. The sectionName description also offers 'Substitute gluten-free bread', implying the default contains gluten."
                         },
                         {
                             "allergen": "tree_nuts",
@@ -510,7 +510,7 @@
             ]
         },
         {
-            "section": "SALADS & BOWLS",
+            "sectionName": "SALADS & BOWLS",
             "description": "Add an egg, add tofu, add rice paper 'bacon', add avocado, add almond butter, peanut butter, or super nut butter, add tempeh.",
             "items": [
                 {
@@ -529,7 +529,7 @@
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "Granola is an ambiguous ingredient that often contains tree nuts. The 'SALADS & BOWLS' section description also lists 'add almond butter' which highlights the presence of nuts in the kitchen."
+                            "explanation": "Granola is an ambiguous ingredient that often contains tree nuts. The 'SALADS & BOWLS' sectionName description also lists 'add almond butter' which highlights the presence of nuts in the kitchen."
                         },
                         {
                             "allergen": "shellfish",
@@ -554,7 +554,7 @@
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "Granola is an ambiguous ingredient that often contains tree nuts. The 'SALADS & BOWLS' section description also lists 'add almond butter' which highlights the presence of nuts in the kitchen."
+                            "explanation": "Granola is an ambiguous ingredient that often contains tree nuts. The 'SALADS & BOWLS' sectionName description also lists 'add almond butter' which highlights the presence of nuts in the kitchen."
                         },
                         {
                             "allergen": "shellfish",
@@ -715,7 +715,7 @@
             ]
         },
         {
-            "section": "STONE OVEN PIZZAS",
+            "sectionName": "STONE OVEN PIZZAS",
             "description": "Substitute vegan mozzarella, cashew ricotta or burrata. Substitute gluten-free cauliflower crust. Add an egg.",
             "items": [
                 {
@@ -728,7 +728,7 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "Pizza crusts are typically made from wheat flour, a common source of gluten. The section description offers a 'Substitute gluten-free cauliflower crust', implying the default crust contains gluten."
+                            "explanation": "Pizza crusts are typically made from wheat flour, a common source of gluten. The sectionName description offers a 'Substitute gluten-free cauliflower crust', implying the default crust contains gluten."
                         },
                         {
                             "allergen": "tree_nuts",
@@ -753,7 +753,7 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "Pizza crusts are typically made from wheat flour, a common source of gluten. The section description offers a 'Substitute gluten-free cauliflower crust', implying the default crust contains gluten."
+                            "explanation": "Pizza crusts are typically made from wheat flour, a common source of gluten. The sectionName description offers a 'Substitute gluten-free cauliflower crust', implying the default crust contains gluten."
                         },
                         {
                             "allergen": "tree_nuts",
@@ -778,7 +778,7 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "Pizza crusts are typically made from wheat flour, a common source of gluten. The section description offers a 'Substitute gluten-free cauliflower crust', implying the default crust contains gluten."
+                            "explanation": "Pizza crusts are typically made from wheat flour, a common source of gluten. The sectionName description offers a 'Substitute gluten-free cauliflower crust', implying the default crust contains gluten."
                         },
                         {
                             "allergen": "tree_nuts",
@@ -802,7 +802,7 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "Pizza crusts are typically made from wheat flour, a common source of gluten. The section description offers a 'Substitute gluten-free cauliflower crust', implying the default crust contains gluten."
+                            "explanation": "Pizza crusts are typically made from wheat flour, a common source of gluten. The sectionName description offers a 'Substitute gluten-free cauliflower crust', implying the default crust contains gluten."
                         },
                         {
                             "allergen": "tree_nuts",
@@ -826,7 +826,7 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "Pizza crusts are typically made from wheat flour, a common source of gluten. The section description offers a 'Substitute gluten-free cauliflower crust', implying the default crust contains gluten."
+                            "explanation": "Pizza crusts are typically made from wheat flour, a common source of gluten. The sectionName description offers a 'Substitute gluten-free cauliflower crust', implying the default crust contains gluten."
                         },
                         {
                             "allergen": "tree_nuts",
@@ -851,7 +851,7 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "Pizza crusts are typically made from wheat flour, a common source of gluten. The section description offers a 'Substitute gluten-free cauliflower crust', implying the default crust contains gluten."
+                            "explanation": "Pizza crusts are typically made from wheat flour, a common source of gluten. The sectionName description offers a 'Substitute gluten-free cauliflower crust', implying the default crust contains gluten."
                         },
                         {
                             "allergen": "tree_nuts",
@@ -868,7 +868,7 @@
             ]
         },
         {
-            "section": "DESSERTS",
+            "sectionName": "DESSERTS",
             "description": "WE DO USE NUTS & GLUTEN IN HOUSE. WE ARE NOT LIABLE FOR ANY ALLERGIC REACTIONS.",
             "items": [
                 {
@@ -1000,7 +1000,7 @@
             ]
         },
         {
-            "section": "HOUSE-BAKED PASTRIES",
+            "sectionName": "HOUSE-BAKED PASTRIES",
             "description": "WE DO USE NUTS & GLUTEN IN HOUSE. WE ARE NOT LIABLE FOR ANY ALLERGIC REACTIONS.",
             "items": [
                 {
@@ -1013,7 +1013,7 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "Although marked GF, it's a 'house-baked pastry' in a section with a strong 'WE DO USE NUTS & GLUTEN IN HOUSE' warning. Baking environments are high risk for cross-contamination, making the GF claim unreliable."
+                            "explanation": "Although marked GF, it's a 'house-baked pastry' in a sectionName with a strong 'WE DO USE NUTS & GLUTEN IN HOUSE' warning. Baking environments are high risk for cross-contamination, making the GF claim unreliable."
                         },
                         {
                             "allergen": "tree_nuts",
@@ -1038,7 +1038,7 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "Banana bread is typically made with wheat flour, a common source of gluten, and it is not marked GF. Additionally, the section description states gluten is used in-house."
+                            "explanation": "Banana bread is typically made with wheat flour, a common source of gluten, and it is not marked GF. Additionally, the sectionName description states gluten is used in-house."
                         },
                         {
                             "allergen": "tree_nuts",
@@ -1062,7 +1062,7 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "Cookies are typically made with wheat flour, a common source of gluten, and it is not marked GF. Additionally, the section description states gluten is used in-house."
+                            "explanation": "Cookies are typically made with wheat flour, a common source of gluten, and it is not marked GF. Additionally, the sectionName description states gluten is used in-house."
                         },
                         {
                             "allergen": "tree_nuts",
@@ -1086,7 +1086,7 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "Croissants are made with wheat flour, a common source of gluten, and it is not marked GF. Additionally, the section description states gluten is used in-house."
+                            "explanation": "Croissants are made with wheat flour, a common source of gluten, and it is not marked GF. Additionally, the sectionName description states gluten is used in-house."
                         },
                         {
                             "allergen": "tree_nuts",
@@ -1111,7 +1111,7 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "Cakes are typically made with wheat flour, a common source of gluten, and it is not marked GF. Additionally, the section description states gluten is used in-house."
+                            "explanation": "Cakes are typically made with wheat flour, a common source of gluten, and it is not marked GF. Additionally, the sectionName description states gluten is used in-house."
                         },
                         {
                             "allergen": "tree_nuts",
@@ -1137,7 +1137,7 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "Although marked GF, it's a 'house-baked pastry' in a section with a strong 'WE DO USE NUTS & GLUTEN IN HOUSE' warning. Baking environments are high risk for cross-contamination, making the GF claim unreliable."
+                            "explanation": "Although marked GF, it's a 'house-baked pastry' in a sectionName with a strong 'WE DO USE NUTS & GLUTEN IN HOUSE' warning. Baking environments are high risk for cross-contamination, making the GF claim unreliable."
                         },
                         {
                             "allergen": "tree_nuts",
@@ -1154,7 +1154,7 @@
             ]
         },
         {
-            "section": "WELLNESS LATTES",
+            "sectionName": "WELLNESS LATTES",
             "description": "WE DO USE NUTS & GLUTEN IN HOUSE. WE ARE NOT LIABLE FOR ANY ALLERGIC REACTIONS.",
             "items": [
                 {
@@ -1314,7 +1314,7 @@
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "The general section description warns that nuts are used in-house, creating a risk of cross-contamination for beverages, especially those prepared in the same area as nut milks."
+                            "explanation": "The general sectionName description warns that nuts are used in-house, creating a risk of cross-contamination for beverages, especially those prepared in the same area as nut milks."
                         },
                         {
                             "allergen": "shellfish",
@@ -1336,7 +1336,7 @@
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "The general section description warns that nuts are used in-house, creating a risk of cross-contamination for beverages, especially those prepared in the same area as nut milks."
+                            "explanation": "The general sectionName description warns that nuts are used in-house, creating a risk of cross-contamination for beverages, especially those prepared in the same area as nut milks."
                         },
                         {
                             "allergen": "shellfish",
@@ -1348,7 +1348,7 @@
             ]
         },
         {
-            "section": "TEAS",
+            "sectionName": "TEAS",
             "description": "WE DO USE NUTS & GLUTEN IN HOUSE. WE ARE NOT LIABLE FOR ANY ALLERGIC REACTIONS.",
             "items": [
                 {
@@ -1364,7 +1364,7 @@
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "The general section description warns that nuts are used in-house, creating a risk of cross-contamination for beverages, as tea preparation areas might handle nut-containing products or milks."
+                            "explanation": "The general sectionName description warns that nuts are used in-house, creating a risk of cross-contamination for beverages, as tea preparation areas might handle nut-containing products or milks."
                         },
                         {
                             "allergen": "shellfish",
@@ -1386,7 +1386,7 @@
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "The general section description warns that nuts are used in-house, creating a risk of cross-contamination for beverages, as tea preparation areas might handle nut-containing products or milks."
+                            "explanation": "The general sectionName description warns that nuts are used in-house, creating a risk of cross-contamination for beverages, as tea preparation areas might handle nut-containing products or milks."
                         },
                         {
                             "allergen": "shellfish",
@@ -1408,7 +1408,7 @@
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "The general section description warns that nuts are used in-house, creating a risk of cross-contamination for beverages, as tea preparation areas might handle nut-containing products or milks."
+                            "explanation": "The general sectionName description warns that nuts are used in-house, creating a risk of cross-contamination for beverages, as tea preparation areas might handle nut-containing products or milks."
                         },
                         {
                             "allergen": "shellfish",
@@ -1420,7 +1420,7 @@
             ]
         },
         {
-            "section": "COFFEES",
+            "sectionName": "COFFEES",
             "description": "WE DO USE NUTS & GLUTEN IN HOUSE. WE ARE NOT LIABLE FOR ANY ALLERGIC REACTIONS.",
             "items": [
                 {
@@ -1436,7 +1436,7 @@
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "The general section description warns that nuts are used in-house, creating a risk of cross-contamination for coffee, especially from shared equipment for milk or flavorings."
+                            "explanation": "The general sectionName description warns that nuts are used in-house, creating a risk of cross-contamination for coffee, especially from shared equipment for milk or flavorings."
                         },
                         {
                             "allergen": "shellfish",
@@ -1458,7 +1458,7 @@
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "The general section description warns that nuts are used in-house, creating a risk of cross-contamination for coffee, especially from shared equipment for milk or flavorings."
+                            "explanation": "The general sectionName description warns that nuts are used in-house, creating a risk of cross-contamination for coffee, especially from shared equipment for milk or flavorings."
                         },
                         {
                             "allergen": "shellfish",
@@ -1480,7 +1480,7 @@
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "The general section description warns that nuts are used in-house, creating a risk of cross-contamination for coffee, especially from shared equipment for milk or flavorings."
+                            "explanation": "The general sectionName description warns that nuts are used in-house, creating a risk of cross-contamination for coffee, especially from shared equipment for milk or flavorings."
                         },
                         {
                             "allergen": "shellfish",
@@ -1502,7 +1502,7 @@
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "The general section description warns that nuts are used in-house, creating a risk of cross-contamination, as these drinks are often made with alternative milks (like almond or oat) and share steaming equipment."
+                            "explanation": "The general sectionName description warns that nuts are used in-house, creating a risk of cross-contamination, as these drinks are often made with alternative milks (like almond or oat) and share steaming equipment."
                         },
                         {
                             "allergen": "shellfish",
@@ -1524,7 +1524,7 @@
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "The general section description warns that nuts are used in-house, creating a risk of cross-contamination for coffee, especially from shared equipment for milk or flavorings."
+                            "explanation": "The general sectionName description warns that nuts are used in-house, creating a risk of cross-contamination for coffee, especially from shared equipment for milk or flavorings."
                         },
                         {
                             "allergen": "shellfish",
@@ -1558,7 +1558,7 @@
             ]
         },
         {
-            "section": "SEASONAL JUICE",
+            "sectionName": "SEASONAL JUICE",
             "description": "",
             "items": [
                 {
@@ -1586,7 +1586,7 @@
             ]
         },
         {
-            "section": "SEASONAL LATTE",
+            "sectionName": "SEASONAL LATTE",
             "description": "",
             "items": [
                 {
@@ -1616,7 +1616,7 @@
             ]
         },
         {
-            "section": "COLD PRESSED JUICES",
+            "sectionName": "COLD PRESSED JUICES",
             "description": "",
             "items": [
                 {
@@ -1842,7 +1842,7 @@
             ]
         },
         {
-            "section": "ELIXIR SHOTS",
+            "sectionName": "ELIXIR SHOTS",
             "description": "",
             "items": [
                 {
@@ -1936,7 +1936,7 @@
             ]
         },
         {
-            "section": "COFFEES",
+            "sectionName": "COFFEES",
             "description": "",
             "items": [
                 {
@@ -2100,7 +2100,7 @@
             ]
         },
         {
-            "section": "WELLNESS LATTES & TEAS",
+            "sectionName": "WELLNESS LATTES & TEAS",
             "description": "",
             "items": [
                 {
@@ -2336,7 +2336,7 @@
             ]
         },
         {
-            "section": "SMOOTHIES",
+            "sectionName": "SMOOTHIES",
             "description": "",
             "items": [
                 {
@@ -2458,7 +2458,7 @@
             ]
         },
         {
-            "section": "COCKTAILS",
+            "sectionName": "COCKTAILS",
             "description": "",
             "items": [
                 {
@@ -2662,7 +2662,7 @@
             ]
         },
         {
-            "section": "WINES",
+            "sectionName": "WINES",
             "description": "(S) Sustainable / (CS) Certified Sustainable / (PO) Practicing Organic / (CO) Certified Organic / (BD) Biodynamic",
             "items": [
                 {
@@ -3037,7 +3037,7 @@
             ]
         },
         {
-            "section": "CRAFT BEERS",
+            "sectionName": "CRAFT BEERS",
             "description": "",
             "items": [
                 {
@@ -3200,7 +3200,7 @@
             ]
         },
         {
-            "section": "COLD-PRESSED SPRITZ",
+            "sectionName": "COLD-PRESSED SPRITZ",
             "description": "Any of our juices + House Sparkling. Flight 4 x 4oz",
             "items": [
                 {
@@ -3382,7 +3382,7 @@
             ]
         },
         {
-            "section": "HAPPY HOUR",
+            "sectionName": "HAPPY HOUR",
             "description": "Everyday from 4pm-6pm",
             "items": [
                 {
@@ -3393,12 +3393,12 @@
                         {
                             "allergen": "gluten",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "This refers to the cocktail section, where some items like Bloody Mary were flagged as 'MAY_CONTAIN' due to potential hidden gluten in mixers."
+                            "explanation": "This refers to the cocktail sectionName, where some items like Bloody Mary were flagged as 'MAY_CONTAIN' due to potential hidden gluten in mixers."
                         },
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "This is a general category for 'House Cocktails'. Without specific ingredient lists, there's a possibility that one of them could contain nut liqueurs (e.g., Amaretto, Frangelico) or nut-based syrups like orgeat, similar to the 'Spumoni Espresso Martini' in the main cocktail section."
+                            "explanation": "This is a general category for 'House Cocktails'. Without specific ingredient lists, there's a possibility that one of them could contain nut liqueurs (e.g., Amaretto, Frangelico) or nut-based syrups like orgeat, similar to the 'Spumoni Espresso Martini' in the main cocktail sectionName."
                         },
                         {
                             "allergen": "shellfish",
@@ -3420,7 +3420,7 @@
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "While most wines are tree nut-free, one of the house wines could potentially be a variety that mentions 'almonds' in its flavor profile, such as the 'Trebbiano' listed in the main Wine section, which explicitly states 'Bitter Almonds on Finish'."
+                            "explanation": "While most wines are tree nut-free, one of the house wines could potentially be a variety that mentions 'almonds' in its flavor profile, such as the 'Trebbiano' listed in the main Wine sectionName, which explicitly states 'Bitter Almonds on Finish'."
                         },
                         {
                             "allergen": "shellfish",
@@ -3476,7 +3476,7 @@
             ]
         },
         {
-            "section": "BAR SNACKS",
+            "sectionName": "BAR SNACKS",
             "description": "",
             "items": [
                 {
@@ -3532,7 +3532,7 @@
             ]
         },
         {
-            "section": "STARTERS",
+            "sectionName": "STARTERS",
             "description": "",
             "items": [
                 {
@@ -3685,7 +3685,7 @@
             ]
         },
         {
-            "section": "VEGGIES & LEAVES",
+            "sectionName": "VEGGIES & LEAVES",
             "description": "",
             "items": [
                 {
@@ -3866,7 +3866,7 @@
             ]
         },
         {
-            "section": "ENTRÉES",
+            "sectionName": "ENTRÉES",
             "description": "",
             "items": [
                 {
@@ -3996,7 +3996,7 @@
             ]
         },
         {
-            "section": "STONE OVEN PIZZAS",
+            "sectionName": "STONE OVEN PIZZAS",
             "description": "SUB VEGAN MOZZERELLA, CASHEW RICOTTA OR BURRATA (D) option available. SUB GF CAULIFLOWER CRUST option available. WE ARE NOT LIABLE FOR ALLERGIES. PLEASE ALERT US IF YOU HAVE ANY ALLERGIES AS WE DO HAVE NUTS & GLUTEN IN HOUSE.",
             "items": [
                 {
@@ -4009,12 +4009,12 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "The section description implies that pizzas come on a default crust that likely contains gluten. Pizza crust is a common source of gluten."
+                            "explanation": "The sectionName description implies that pizzas come on a default crust that likely contains gluten. Pizza crust is a common source of gluten."
                         },
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "The description for the pizza section explicitly states 'CASHEW RICOTTA' is an available substitute, confirming tree nut presence in the kitchen. This poses a cross-contamination risk for all pizzas, even if this specific one does not list nuts."
+                            "explanation": "The description for the pizza sectionName explicitly states 'CASHEW RICOTTA' is an available substitute, confirming tree nut presence in the kitchen. This poses a cross-contamination risk for all pizzas, even if this specific one does not list nuts."
                         },
                         {
                             "allergen": "shellfish",
@@ -4034,12 +4034,12 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "The section description implies that pizzas come on a default crust that likely contains gluten. Pizza crust is a common source of gluten."
+                            "explanation": "The sectionName description implies that pizzas come on a default crust that likely contains gluten. Pizza crust is a common source of gluten."
                         },
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "The description for the pizza section explicitly states 'CASHEW RICOTTA' is an available substitute, confirming tree nut presence in the kitchen. This poses a cross-contamination risk for all pizzas, even if this specific one does not list nuts."
+                            "explanation": "The description for the pizza sectionName explicitly states 'CASHEW RICOTTA' is an available substitute, confirming tree nut presence in the kitchen. This poses a cross-contamination risk for all pizzas, even if this specific one does not list nuts."
                         },
                         {
                             "allergen": "shellfish",
@@ -4058,12 +4058,12 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "The section description implies that pizzas come on a default crust that likely contains gluten. Pizza crust is a common source of gluten."
+                            "explanation": "The sectionName description implies that pizzas come on a default crust that likely contains gluten. Pizza crust is a common source of gluten."
                         },
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "The description for the pizza section explicitly states 'CASHEW RICOTTA' is an available substitute, confirming tree nut presence in the kitchen. This poses a cross-contamination risk for all pizzas, even if this specific one does not list nuts."
+                            "explanation": "The description for the pizza sectionName explicitly states 'CASHEW RICOTTA' is an available substitute, confirming tree nut presence in the kitchen. This poses a cross-contamination risk for all pizzas, even if this specific one does not list nuts."
                         },
                         {
                             "allergen": "shellfish",
@@ -4082,12 +4082,12 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "The section description implies that pizzas come on a default crust that likely contains gluten. Pizza crust is a common source of gluten."
+                            "explanation": "The sectionName description implies that pizzas come on a default crust that likely contains gluten. Pizza crust is a common source of gluten."
                         },
                         {
                             "allergen": "tree_nuts",
                             "prediction": "MAY_CONTAIN",
-                            "explanation": "The description for the pizza section explicitly states 'CASHEW RICOTTA' is an available substitute, confirming tree nut presence in the kitchen. This poses a cross-contamination risk for all pizzas, even if this specific one does not list nuts."
+                            "explanation": "The description for the pizza sectionName explicitly states 'CASHEW RICOTTA' is an available substitute, confirming tree nut presence in the kitchen. This poses a cross-contamination risk for all pizzas, even if this specific one does not list nuts."
                         },
                         {
                             "allergen": "shellfish",
@@ -4106,12 +4106,12 @@
                         {
                             "allergen": "gluten",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "The section description implies that pizzas come on a default crust that likely contains gluten. Pizza crust is a common source of gluten."
+                            "explanation": "The sectionName description implies that pizzas come on a default crust that likely contains gluten. Pizza crust is a common source of gluten."
                         },
                         {
                             "allergen": "tree_nuts",
                             "prediction": "VERY_LIKELY",
-                            "explanation": "The description explicitly lists 'CASHEW RICOTTA', which is made from cashews, a type of tree nut. The base description for the section also mentions 'CASHEW RICOTTA' as an option."
+                            "explanation": "The description explicitly lists 'CASHEW RICOTTA', which is made from cashews, a type of tree nut. The base description for the sectionName also mentions 'CASHEW RICOTTA' as an option."
                         },
                         {
                             "allergen": "shellfish",

@@ -19,7 +19,7 @@ public class MenuPage {
 
     public void addNewSection(MenuSection section){
         List<MenuItem> empty = new ArrayList<MenuItem>();
-        MenuSection sec = new MenuSection(section.getSection(), section.getDescription(), empty);
+        MenuSection sec = new MenuSection(section.getSectionName(), section.getDescription(), empty);
         sections.add(sec);
     }
 }
