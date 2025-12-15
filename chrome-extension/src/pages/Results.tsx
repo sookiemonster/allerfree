@@ -5,6 +5,7 @@ import DetectionResultPane from "../components/DetectionResult/DetectionResultPa
 
 import { useProfiles } from "../contexts/ProfileContext";
 import { ctxProfilesToApi } from "../helpers/profileFormat";
+import MiniNav from "../components/MiniNav";
 
 import "./Results.css";
 
@@ -21,37 +22,6 @@ import {
   requestInitialResultsData,
   startAnalysis,
 } from "../helpers/resultsPortMessaging";
-
-function MiniNav({
-  isResults,
-  onToggle,
-}: {
-  isResults: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <div
-      className={
-        "results-nav-mini " +
-        (isResults ? "results-nav-mini--left" : "results-nav-mini--right")
-      }
-    >
-      <button className="nav-link" onClick={onToggle}>
-        {isResults ? (
-          <>
-            <span className="nav-link__arrow">←</span>
-            <span>Back to Analysis</span>
-          </>
-        ) : (
-          <>
-            <span>Go to Results</span>
-            <span className="nav-link__arrow">→</span>
-          </>
-        )}
-      </button>
-    </div>
-  );
-}
 
 function coerceDetectionResult(value: unknown): DetectionResult | null {
   if (!value || typeof value !== "object") return null;
