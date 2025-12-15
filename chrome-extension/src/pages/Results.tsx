@@ -2,12 +2,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DetectionResult } from "../types";
 
-import AnalysisView from "../components/AnalysisView";
-import ResultsView from "../components/ResultsView";
-
 import { useProfiles } from "../contexts/ProfileContext";
 import { ctxProfilesToApi } from "../helpers/profileFormat";
-import MiniNav from "../components/MiniNav";
 
 import "./Results.css";
 
@@ -25,6 +21,10 @@ import {
   startAnalysis,
 } from "../helpers/resultsPortMessaging";
 
+import MiniNav from "../components/MiniNav";
+import AnalysisView from "../components/AnalysisView";
+import ResultsView from "../components/ResultsView";
+
 function coerceDetectionResult(value: unknown): DetectionResult | null {
   if (!value || typeof value !== "object") return null;
   const v = value as any;
@@ -36,48 +36,89 @@ function sortByUpdatedDesc(a: JobSummary, b: JobSummary) {
   return (b.updatedAt || 0) - (a.updatedAt || 0);
 }
 
+/**
+ * Must match the restaurantKey construction used in contentScriptAnalysisContext.js:
+ * `${name.toLowerCase()}|${lat},${lng}` or `${name.toLowerCase()}|no-coords`
+ */
+function makeRestaurantKeyFromRestaurantInfo(
+  restaurant: RestaurantInfo | null
+): string {
+  if (!restaurant) return "";
+
+  const namePart = String(restaurant.name || "").trim().toLowerCase();
+  const coordsAny = (restaurant as any).coordinates;
+
+  const coords =
+    coordsAny && coordsAny.lat != null && coordsAny.lng != null
+      ? `${coordsAny.lat},${coordsAny.lng}`
+      : "no-coords";
+
+  return `${namePart}|${coords}`;
+}
+
 export default function Results() {
   const portRef = useRef<chrome.runtime.Port | null>(null);
 
-  const [isResults, setIsResults] = useState(false);
-  const [images, setImages] = useState<string[]>([]);
-  const [restaurant, setRestaurant] = useState<RestaurantInfo | null>(null);
-  const [detection_result, setDetectionResult] = useState<DetectionResult | null>(null);
+  // Which view are we in?
+  const [isResultsView, setIsResultsView] = useState(false);
+
+  // Analysis view: data for the active Google Maps tab
+  const [menuImages, setMenuImages] = useState<string[]>([]);
+  const [activeRestaurantInfo, setActiveRestaurantInfo] =
+    useState<RestaurantInfo | null>(null);
+
+  // Analysis view: spinner/disabled state driven by the *active restaurant's* job status
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Jobs (summaries for dropdown) + selected job (full payload)
-  const [jobs, setJobs] = useState<JobSummary[]>([]);
-  const [selectedRestaurantKey, setSelectedRestaurantKey] = useState<string>("");
-  const selectedRestaurantKeyRef = useRef<string>("");
-  const [selectedJob, setSelectedJob] = useState<AnalysisJob | null>(null);
+  // Results view: job history (completed jobs) + selected job for viewing
+  const [historyJobs, setHistoryJobs] = useState<JobSummary[]>([]);
+  const [selectedJobKey, setSelectedJobKey] = useState<string>("");
+  const selectedJobKeyRef = useRef<string>("");
+  const [selectedHistoryJob, setSelectedHistoryJob] = useState<AnalysisJob | null>(
+    null
+  );
+  const [selectedDetectionResult, setSelectedDetectionResult] =
+    useState<DetectionResult | null>(null);
+
+  // Track the active restaurant key (for analysis view spinner state)
+  const activeRestaurantKeyRef = useRef<string>("");
 
   // Profiles from Context → API shape
   const { profiles } = useProfiles();
   const apiProfiles = useMemo(() => ctxProfilesToApi(profiles), [profiles]);
 
   // Selection state by name
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const names = useMemo(() => profiles.map((p) => p.name), [profiles]);
+  const [selectedNames, setSelectedNames] = useState<Set<string>>(new Set());
+  const profileNames = useMemo(() => profiles.map((p) => p.name), [profiles]);
 
   useEffect(() => {
-    setSelected((prev) => {
-      const allowed = new Set(names);
+    setSelectedNames((prev) => {
+      const allowed = new Set(profileNames);
       const next = new Set<string>();
       for (const k of prev) if (allowed.has(k)) next.add(k);
       return next;
     });
-  }, [names]);
+  }, [profileNames]);
+
+  // Keep active restaurant key in sync with activeRestaurantInfo
+  useEffect(() => {
+    activeRestaurantKeyRef.current =
+      makeRestaurantKeyFromRestaurantInfo(activeRestaurantInfo);
+  }, [activeRestaurantInfo]);
 
   // Connect to SW for images + current restaurant
   useEffect(() => {
     const port = connectResultsPort((msg) => {
       if (msg.type === "MENU_IMAGES_PUSH" || msg.type === "MENU_IMAGES_RESULT") {
-        setImages(Array.isArray(msg.images) ? msg.images : []);
+        setMenuImages(Array.isArray(msg.images) ? msg.images : []);
         return;
       }
 
-      if (msg.type === "RESTAURANT_INFO_PUSH" || msg.type === "RESTAURANT_INFO_RESULT") {
-        setRestaurant(msg.restaurant ?? null);
+      if (
+        msg.type === "RESTAURANT_INFO_PUSH" ||
+        msg.type === "RESTAURANT_INFO_RESULT"
+      ) {
+        setActiveRestaurantInfo(msg.restaurant ?? null);
       }
     });
 
@@ -91,6 +132,22 @@ export default function Results() {
       portRef.current = null;
     };
   }, []);
+
+  // Whenever the active restaurant changes, pull its job from storage and set isAnalyzing
+  useEffect(() => {
+    const restaurantKey = makeRestaurantKeyFromRestaurantInfo(activeRestaurantInfo);
+
+    if (!restaurantKey) {
+      setIsAnalyzing(false);
+      return;
+    }
+
+    const storageKey = storageKeyForRestaurantKey(restaurantKey);
+    chrome.storage.local.get(storageKey, (data) => {
+      const job = (data?.[storageKey] as AnalysisJob | undefined) || null;
+      setIsAnalyzing(job?.status === "running");
+    });
+  }, [activeRestaurantInfo]);
 
   // Initial load of success jobs for dropdown, plus choose a default selection
   useEffect(() => {
@@ -111,48 +168,59 @@ export default function Results() {
         .map(toJobSummary)
         .sort(sortByUpdatedDesc);
 
-      setJobs(successSummaries);
+      setHistoryJobs(successSummaries);
 
       // Auto-select most recent success job
       if (successSummaries.length > 0) {
         const rk = successSummaries[0].restaurantKey;
-        selectedRestaurantKeyRef.current = rk;
-        setSelectedRestaurantKey(rk);
+        selectedJobKeyRef.current = rk;
+        setSelectedJobKey(rk);
 
         const full = found.find((x) => x.job.restaurantKey === rk)?.job || null;
-        setSelectedJob(full);
-        setDetectionResult(coerceDetectionResult(full?.result));
+        setSelectedHistoryJob(full);
+        setSelectedDetectionResult(coerceDetectionResult(full?.result));
       } else {
-        selectedRestaurantKeyRef.current = "";
-        setSelectedRestaurantKey("");
-        setSelectedJob(null);
-        setDetectionResult(null);
+        selectedJobKeyRef.current = "";
+        setSelectedJobKey("");
+        setSelectedHistoryJob(null);
+        setSelectedDetectionResult(null);
       }
     });
   }, []);
 
-  // Listen to chrome.storage changes (like analysisContext.js does)
+  // Listen to chrome.storage changes:
+  // - keep historyJobs (success-only) in sync
+  // - keep selectedHistoryJob + selectedDetectionResult in sync
+  // - keep isAnalyzing in sync for the ACTIVE restaurant job
   useEffect(() => {
     const handler: Parameters<typeof chrome.storage.onChanged.addListener>[0] = (
       changes,
-      areaName,
+      areaName
     ) => {
       if (areaName !== "local") return;
 
-      console.log("[Allerfree] storage.onChanged", changes);
+      const activeStorageKey = storageKeyForRestaurantKey(
+        activeRestaurantKeyRef.current
+      );
 
-      setJobs((prev) => {
+      // Update history job summaries
+      setHistoryJobs((prev) => {
         let next = [...prev];
         let changed = false;
 
         for (const [key, change] of Object.entries(changes)) {
+          // Keep analysis spinner in sync for the active restaurant
+          if (key === activeStorageKey) {
+            const newJob = change.newValue as AnalysisJob | undefined;
+            setIsAnalyzing(!!newJob && newJob.status === "running");
+          }
+
           if (!key.startsWith(ANALYSIS_STORAGE_PREFIX)) continue;
 
           const newJob = change.newValue as AnalysisJob | undefined;
-
           const restaurantKey = key.slice(ANALYSIS_STORAGE_PREFIX.length);
-          const idx = next.findIndex((j) => j.restaurantKey === restaurantKey);
 
+          const idx = next.findIndex((j) => j.restaurantKey === restaurantKey);
           const isSuccess = !!newJob && newJob.status === "success";
 
           if (!isSuccess) {
@@ -171,14 +239,14 @@ export default function Results() {
             }
           }
 
-          // If the currently selected job changed, update the results UI
-          if (restaurantKey === selectedRestaurantKeyRef.current) {
+          // If the currently selected HISTORY job changed, update the Results UI
+          if (restaurantKey === selectedJobKeyRef.current) {
             if (!newJob) {
-              setSelectedJob(null);
-              setDetectionResult(null);
+              setSelectedHistoryJob(null);
+              setSelectedDetectionResult(null);
             } else {
-              setSelectedJob(newJob);
-              setDetectionResult(coerceDetectionResult(newJob.result));
+              setSelectedHistoryJob(newJob);
+              setSelectedDetectionResult(coerceDetectionResult(newJob.result));
             }
           }
         }
@@ -192,26 +260,26 @@ export default function Results() {
     return () => chrome.storage.onChanged.removeListener(handler);
   }, []);
 
-  // When user selects a different job, fetch only that one full job
-  const handleSelectJob = (restaurantKey: string) => {
-    selectedRestaurantKeyRef.current = restaurantKey;
-    setSelectedRestaurantKey(restaurantKey);
+  // When user selects a different HISTORY job, fetch only that one full job
+  const handleSelectHistoryJob = (restaurantKey: string) => {
+    selectedJobKeyRef.current = restaurantKey;
+    setSelectedJobKey(restaurantKey);
 
     if (!restaurantKey) {
-      setSelectedJob(null);
-      setDetectionResult(null);
+      setSelectedHistoryJob(null);
+      setSelectedDetectionResult(null);
       return;
     }
 
     const key = storageKeyForRestaurantKey(restaurantKey);
     chrome.storage.local.get(key, (data) => {
       const job = (data?.[key] as AnalysisJob) || null;
-      setSelectedJob(job);
-      setDetectionResult(coerceDetectionResult(job?.result));
+      setSelectedHistoryJob(job);
+      setSelectedDetectionResult(coerceDetectionResult(job?.result));
     });
   };
 
-  const toggle = () => setIsResults((v) => !v);
+  const toggleView = () => setIsResultsView((v) => !v);
 
   const onStartAnalysisAll = useCallback(() => {
     if (!portRef.current) return;
@@ -228,7 +296,7 @@ export default function Results() {
   const onStartAnalysisSelected = useCallback(() => {
     if (!portRef.current) return;
 
-    const filtered = apiProfiles.filter((p) => selected.has(p.name));
+    const filtered = apiProfiles.filter((p) => selectedNames.has(p.name));
 
     try {
       startAnalysis(portRef.current, filtered);
@@ -237,64 +305,46 @@ export default function Results() {
       console.error("[START_ANALYSIS (selected)] failed:", err);
       setIsAnalyzing(false);
     }
-  }, [apiProfiles, selected]);
-
-  const getMenuAnalysisAll = () => {
-    onStartAnalysisAll();
-  };
-
-  const getMenuAnalysisForSelected = () => {
-    onStartAnalysisSelected();
-  };
-
-  // Stop spinner when selected job becomes success or error
-  useEffect(() => {
-    if (!selectedJob) return;
-    if (selectedJob.status === "success" || selectedJob.status === "error") {
-      setIsAnalyzing(false);
-    }
-  }, [selectedJob?.status]);
+  }, [apiProfiles, selectedNames]);
 
   const toggleSelection = (name: string) =>
-    setSelected((prev) => {
+    setSelectedNames((prev) => {
       const next = new Set(prev);
       if (next.has(name)) next.delete(name);
       else next.add(name);
       return next;
     });
 
-  const canAnalyzeCommon = !!portRef.current && images.length > 0 && !isAnalyzing;
-  const canAnalyzeSelected = canAnalyzeCommon && selected.size > 0;
+  const canAnalyzeCommon = !!portRef.current && menuImages.length > 0 && !isAnalyzing;
+  const canAnalyzeSelected = canAnalyzeCommon && selectedNames.size > 0;
 
   return (
     <div className="results-root">
-      <MiniNav isResults={isResults} onToggle={toggle} />
+      <MiniNav isResults={isResultsView} onToggle={toggleView} />
 
-      {!isResults && (
+      {!isResultsView && (
         <AnalysisView
-          restaurant={restaurant}
-          menuCount={images.length}
-          names={names}
-          selected={selected}
+          restaurant={activeRestaurantInfo}
+          menuCount={menuImages.length}
+          names={profileNames}
+          selected={selectedNames}
           onToggleSelection={toggleSelection}
-          onAnalyzeSelected={getMenuAnalysisForSelected}
-          onAnalyzeAll={getMenuAnalysisAll}
+          onAnalyzeSelected={onStartAnalysisSelected}
+          onAnalyzeAll={onStartAnalysisAll}
           isAnalyzing={isAnalyzing}
           canAnalyzeSelected={canAnalyzeSelected}
           canAnalyzeAll={canAnalyzeCommon}
         />
       )}
 
-
-      {isResults && (
+      {isResultsView && (
         <ResultsView
-          jobs={jobs}
-          selectedRestaurantKey={selectedRestaurantKey}
-          onSelectJob={handleSelectJob}
-          detectionResult={detection_result}
+          jobs={historyJobs}
+          selectedRestaurantKey={selectedJobKey}
+          onSelectJob={handleSelectHistoryJob}
+          detectionResult={selectedDetectionResult}
         />
       )}
-
     </div>
   );
 }
