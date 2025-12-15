@@ -7,25 +7,17 @@ import { ctxProfilesToApi } from "../helpers/profileFormat";
 
 import "./Results.css";
 
-import type { AnalysisJob, JobSummary, RestaurantInfo } from "../types/AnalysisJob";
+import type { AnalysisJob, JobSummary, RestaurantInfo} from "../types/AnalysisJob";
 import {
   ANALYSIS_STORAGE_PREFIX,
   storageKeyForRestaurantKey,
   toJobSummary,
 } from "../types/AnalysisJob";
 
-type PushMsg = { type: "MENU_IMAGES_PUSH"; images: string[] };
-type GetResult = { type: "MENU_IMAGES_RESULT"; images: string[] };
-
-type RestaurantPushMsg = {
-  type: "RESTAURANT_INFO_PUSH";
-  restaurant: RestaurantInfo | null;
-};
-
-type RestaurantResultMsg = {
-  type: "RESTAURANT_INFO_RESULT";
-  restaurant: RestaurantInfo | null;
-};
+import type {
+  ResultsPortInboundMessage,
+  ResultsPortOutboundMessage,
+} from "../types/ResultsMessages";
 
 function MiniNav({
   isResults,
@@ -109,7 +101,7 @@ export default function Results() {
     portRef.current = port;
 
     port.onMessage.addListener(
-      (msg: PushMsg | GetResult | RestaurantPushMsg | RestaurantResultMsg) => {
+      (msg: ResultsPortInboundMessage) => {
         if (msg.type === "MENU_IMAGES_PUSH" || msg.type === "MENU_IMAGES_RESULT") {
           setImages(Array.isArray(msg.images) ? msg.images : []);
           return;
@@ -128,9 +120,9 @@ export default function Results() {
       const active = tabs[0];
       const id = active?.id ?? null;
 
-      port.postMessage({ type: "GET_MENU_IMAGES", tabId: id ?? undefined } as any);
+      port.postMessage({ type: "GET_MENU_IMAGES", tabId: id ?? undefined } as ResultsPortOutboundMessage);
       port.postMessage(
-        { type: "GET_RESTAURANT_INFO", tabId: id ?? undefined } as any
+        { type: "GET_RESTAURANT_INFO", tabId: id ?? undefined } as ResultsPortOutboundMessage
       );
     });
 
@@ -272,7 +264,7 @@ export default function Results() {
       portRef.current.postMessage({
         type: "START_ANALYSIS",
         profiles: apiProfiles,
-      } as any);
+      } as ResultsPortOutboundMessage);
       setIsAnalyzing(true);
     } catch (err) {
       console.error("START_ANALYSIS (all) failed:", err);
