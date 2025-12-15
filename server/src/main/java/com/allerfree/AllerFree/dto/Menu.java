@@ -1,7 +1,6 @@
 package com.allerfree.AllerFree.dto;
 
 import java.util.Date;
-import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;

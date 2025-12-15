@@ -1,6 +1,5 @@
 package com.allerfree.AllerFree.service;
 
-import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -9,14 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
-import java.util.stream.Collectors;
 
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.UncategorizedMongoDbException;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -26,11 +22,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.access.method.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.allerfree.AllerFree.dto.Allergy;
 import com.allerfree.AllerFree.dto.Coordinate;
 import com.allerfree.AllerFree.dto.Image;
 import com.allerfree.AllerFree.dto.MenuItem;
@@ -44,7 +38,6 @@ import com.allerfree.AllerFree.dto.response.DetectionResponse;
 import com.allerfree.AllerFree.dto.response.LlmResponse;
 import com.allerfree.AllerFree.repository.MenuRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mongodb.MongoException;
 
 import reactor.core.publisher.Mono;
 
@@ -65,7 +58,7 @@ public class MenuService {
         this.mongoTemplate = mongoTemplate;
     }
 
-    @Async
+    @Async("asyncExec")
     //Check MongoDB cluster for existing menu document
     public CompletableFuture<Menu> checkCache(String restaurantName, Coordinate coords){
         Menu cached = menuRepo.findByRestaurantNameAndRestaurantLocation(restaurantName, coords);
@@ -84,7 +77,7 @@ public class MenuService {
         });
     }
 
-    @Async
+    @Async("asyncExec")
     //Save Menu into MongoDB Cluster
     public CompletableFuture<Void> saveToCache(String restaurantName, Coordinate restaurantLocation, MenuPage results){
         //Create document in cluster
@@ -96,7 +89,7 @@ public class MenuService {
         return CompletableFuture.completedFuture(null);
     }
 
-    @Async
+    @Async("asyncExec")
     public void clearCacheOldest(){
         //Get 50 oldest documents and remove them
         Query findOldestQuery = new Query();
@@ -154,12 +147,15 @@ public class MenuService {
         public CompletableFuture<DetectionResponse> callLLMandSave(DetectionRequest req){
             CompletableFuture<LlmResponse> llmResponse = llmCall(req.getImages());
                             return llmResponse.thenCompose(llmRes -> {
+                                DetectionResponse llmDetect = new DetectionResponse();
+                                llmDetect.setFailed(llmRes.getFailed());
+                                llmDetect.setResults(parseResponse(llmRes.getMenu(), req.getProfiles()));
+                                if (llmRes.getMenu() == null){
+                                    return CompletableFuture.completedFuture(llmDetect);
+                                }
                                 return saveToCache(req.getRestaurantName(), req.getRestaurantLocation(), llmRes.getMenu())
                                                 .handle((voidRes, e) -> {
                                                     clearCacheOldest();
-                                                    DetectionResponse llmDetect = new DetectionResponse();
-                                                    llmDetect.setFailed(llmRes.getFailed());
-                                                    llmDetect.setResults(parseResponse(llmRes.getMenu(), req.getProfiles()));
                                                     return llmDetect;
                                                 });
                             });
