@@ -74,11 +74,17 @@ export default function Results() {
   const [historyJobs, setHistoryJobs] = useState<JobSummary[]>([]);
   const [selectedJobKey, setSelectedJobKey] = useState<string>("");
   const selectedJobKeyRef = useRef<string>("");
+
+  // Keep the full job as the source of truth for "Results" view
   const [selectedHistoryJob, setSelectedHistoryJob] = useState<AnalysisJob | null>(
     null
   );
-  const [selectedDetectionResult, setSelectedDetectionResult] =
-    useState<DetectionResult | null>(null);
+
+  // Derive detection result from selectedHistoryJob
+  const selectedDetectionResult = useMemo(
+    () => coerceDetectionResult(selectedHistoryJob?.result),
+    [selectedHistoryJob]
+  );
 
   // Track the active restaurant key (for analysis view spinner state)
   const activeRestaurantKeyRef = useRef<string>("");
@@ -178,19 +184,17 @@ export default function Results() {
 
         const full = found.find((x) => x.job.restaurantKey === rk)?.job || null;
         setSelectedHistoryJob(full);
-        setSelectedDetectionResult(coerceDetectionResult(full?.result));
       } else {
         selectedJobKeyRef.current = "";
         setSelectedJobKey("");
         setSelectedHistoryJob(null);
-        setSelectedDetectionResult(null);
       }
     });
   }, []);
 
   // Listen to chrome.storage changes:
   // - keep historyJobs (success-only) in sync
-  // - keep selectedHistoryJob + selectedDetectionResult in sync
+  // - keep selectedHistoryJob in sync
   // - keep isAnalyzing in sync for the ACTIVE restaurant job
   useEffect(() => {
     const handler: Parameters<typeof chrome.storage.onChanged.addListener>[0] = (
@@ -203,7 +207,6 @@ export default function Results() {
         activeRestaurantKeyRef.current
       );
 
-      // Update history job summaries
       setHistoryJobs((prev) => {
         let next = [...prev];
         let changed = false;
@@ -241,13 +244,7 @@ export default function Results() {
 
           // If the currently selected HISTORY job changed, update the Results UI
           if (restaurantKey === selectedJobKeyRef.current) {
-            if (!newJob) {
-              setSelectedHistoryJob(null);
-              setSelectedDetectionResult(null);
-            } else {
-              setSelectedHistoryJob(newJob);
-              setSelectedDetectionResult(coerceDetectionResult(newJob.result));
-            }
+            setSelectedHistoryJob(newJob ?? null);
           }
         }
 
@@ -267,7 +264,6 @@ export default function Results() {
 
     if (!restaurantKey) {
       setSelectedHistoryJob(null);
-      setSelectedDetectionResult(null);
       return;
     }
 
@@ -275,7 +271,6 @@ export default function Results() {
     chrome.storage.local.get(key, (data) => {
       const job = (data?.[key] as AnalysisJob) || null;
       setSelectedHistoryJob(job);
-      setSelectedDetectionResult(coerceDetectionResult(job?.result));
     });
   };
 
