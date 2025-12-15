@@ -37,7 +37,14 @@
       "all_frames": false,
       "css": ["button.css"]
     }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["data/SampleResponse.json"],
+      "matches": ["https://www.google.com/*"]
+    }
   ]
+
 }
   
 

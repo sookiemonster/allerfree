@@ -104,9 +104,16 @@
 
   async function postDataToLocalhost(pImages, pProfiles) {
     try {
+      // DEV MODE: return the packaged sample response instead of calling backend.
+      const sampleUrl = chrome.runtime.getURL("data/SampleResponse.json");
+      const res = await fetch(sampleUrl);
+      if (!res.ok) {
+        throw new Error(`Failed to load sample: ${res.status} ${res.statusText}`);
+      }
+      return await res.json();
+
       const tokenData = await getToken();
-      // const url = "http://localhost:8081/detect";
-      const url = "http://localhost:8081/detectSample";
+      const url = "http://localhost:8081/detect";
 
       const postData = {
         images: pImages || [],
