@@ -141,7 +141,7 @@
           // Refresh from DOM to make sure we have the latest
           menuImageLinks = grabMenuImages();
           // Keep background listeners in sync (optional but nice)
-          sendMenuImagesToBackground(menuImageLinks);
+          // sendMenuImagesToBackground(menuImageLinks);
           sendResponse({ images: menuImageLinks });
         } catch (_e) {
           sendResponse({ images: [] });
@@ -149,45 +149,6 @@
         // Synchronous response
         return false;
       }
-
-      // if (msg && msg.type === "ADD_RESTAURANT") {
-      //   if (ns.addRestaurant) {
-      //     const restaurantName = msg.restaurantName || getRestaurantName();
-      //     const state = msg.state || "loading";
-      //     ns.addRestaurant(restaurantName, state);
-      //   }
-      //   return false;
-      // }
-
-      // if (msg && msg.type === "UPDATE_RESTAURANT_STATE") {
-      //   if (ns.updateRestaurantState && msg.restaurantName) {
-      //     ns.updateRestaurantState(msg.restaurantName, msg.state || "success");
-      //   }
-      //   return false;
-      // }
-
-      // if (msg && msg.type === "REMOVE_RESTAURANT") {
-      //   if (ns.removeRestaurant && msg.restaurantName) {
-      //     ns.removeRestaurant(msg.restaurantName);
-      //   }
-      //   return false;
-      // }
-
-      // if (msg && msg.type === "SHOW_RESTAURANT_LOADING") {
-      //   if (ns.addRestaurant) {
-      //     const restaurantName = msg.restaurantName || getRestaurantName();
-      //     const state = msg.state || "loading";
-      //     ns.addRestaurant(restaurantName, state);
-      //   }
-      //   return false;
-      // }
-
-      // if (msg && msg.type === "HIDE_RESTAURANT_LOADING") {
-      //   if (ns.clearAllRestaurants) {
-      //     ns.clearAllRestaurants();
-      //   }
-      //   return false;
-      // }
 
       // let other listeners run
       return undefined;

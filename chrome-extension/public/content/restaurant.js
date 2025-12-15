@@ -121,39 +121,41 @@
 
       console.log("[Allerfree] Restaurant info from URL:", restaurant);
 
-      // If/when you want to actually send this to the service worker,
-      // uncomment this block:
-      //
-      // chrome.runtime?.sendMessage({
-      //   type: "RESTAURANT_INFO_UPDATE",
-      //   restaurant,
-      //   url: location.href,
-      // });
+      // send all restaurant info updates to the service worker
+      
+      chrome.runtime?.sendMessage({
+        type: "RESTAURANT_INFO_UPDATE",
+        restaurant,
+        url: location.href,
+      });
     } catch (_e) {
       // ignore
     }
   };
 
   /**
-   * Optional: allow the background to request restaurant info.
+   * allow the background to request restaurant info.
    * Left fully commented out so there is no messaging for now.
    */
 
-  // if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage) {
-  //   chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-  //     if (msg && msg.type === "REQUEST_RESTAURANT_INFO") {
-  //       try {
-  //         const info = ns.getRestaurantInfo ? ns.getRestaurantInfo() : null;
-  //         sendResponse({ restaurant: info });
-  //       } catch (_e) {
-  //         sendResponse({ restaurant: null });
-  //       }
-  //       // synchronous response
-  //       return false;
-  //     }
-  //
-  //     // let other listeners run
-  //     return undefined;
-  //   });
-  // }
+  if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage) {
+    chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+      if (msg && msg.type === "REQUEST_RESTAURANT_INFO") {
+        try {
+          const info =
+            (ns.getCurrentRestaurant && ns.getCurrentRestaurant()) ||
+            (ns.getRestaurantInfo && ns.getRestaurantInfo()) ||
+            null;
+
+          sendResponse({ restaurant: info });
+        } catch (_e) {
+          sendResponse({ restaurant: null });
+        }
+        return false; // synchronous response
+      }
+
+      return undefined;
+    });
+  }
+
 })(self);
