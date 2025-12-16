@@ -3,7 +3,7 @@
   const ns = (g.__allerfree ||= {});
   const {
     BTN_ID, TIMINGS, debounce, buildMenuSignature, sendMenuImagesToBackground,
-    getMenuRoot, grabMenuImages
+    getMenuRoot, grabMenuImages, sendRestaurantInfoToBackground, clearRestaurantInfo,
   } = ns;
 
   // State
@@ -20,12 +20,16 @@
       lastMenuSig = null;
       menuImageLinks = [];
       sendMenuImagesToBackground(menuImageLinks);
+      clearRestaurantInfo(); 
       return;
     }
 
     // refresh images on any menu mutation
     menuImageLinks = grabMenuImages();
     sendMenuImagesToBackground(menuImageLinks);
+
+    // update maenu data as well
+    sendRestaurantInfoToBackground();
 
     if (sig === lastMenuSig && document.getElementById(BTN_ID)) return;
 
@@ -65,6 +69,7 @@
     // Re-run grabMenuImages; if menu/carousel missing, it yields []
     menuImageLinks = grabMenuImages();
     sendMenuImagesToBackground(menuImageLinks);
+    clearRestaurantInfo();
   };
 
   ns.isMenuTabSelected = function () {
@@ -78,6 +83,23 @@
     if (!menuBtn) return false;
     return menuBtn.getAttribute("aria-selected") === "true";
   };
+
+  function getRestaurantName() {
+    // Try to get restaurant name from page title or h1
+    const h1 = document.querySelector('h1');
+    if (h1 && h1.textContent) {
+      return h1.textContent.trim();
+    }
+
+    // Fallback to document title
+    const title = document.title;
+    if (title && title !== 'Google Maps') {
+      // Remove " - Google Maps" from the end
+      return title.replace(/\s*-\s*Google Maps$/i, '').trim();
+    }
+
+    return "Analyzing Menu";
+  }
 
   function injectButton() {
     const menuDiv = getMenuRoot();
@@ -100,14 +122,10 @@
     btn.className = BTN_ID;
     btn.textContent = "Can I Eat Here?";
     btn.onclick = function () {
-      // const msg = menuImageLinks.length ? menuImageLinks.join("\n") : "(No menu images detected)";
-      // alert(msg);
-      // console.log("[MenuImages snapshot]", menuImageLinks);
-
-      // The extension's popup page and navigate to /results
-    chrome.runtime.sendMessage({
+      // Open the extension's popup page and navigate to /results
+      chrome.runtime.sendMessage({
         type: "OPEN_POPUP",
-        route: "#/results" 
+        route: "#/results"
       });
     };
 
@@ -123,7 +141,7 @@
           // Refresh from DOM to make sure we have the latest
           menuImageLinks = grabMenuImages();
           // Keep background listeners in sync (optional but nice)
-          sendMenuImagesToBackground(menuImageLinks);
+          // sendMenuImagesToBackground(menuImageLinks);
           sendResponse({ images: menuImageLinks });
         } catch (_e) {
           sendResponse({ images: [] });

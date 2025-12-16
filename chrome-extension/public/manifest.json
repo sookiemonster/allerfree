@@ -1,4 +1,3 @@
-
 {
     "manifest_version" : 3,
     "version" : "1.0.0",
@@ -26,14 +25,26 @@
         "content/utils.js",
         "content/dom.js",
         "content/menu-scrape.js",
+        "content/restaurant.js",
         "content/menu.js",
+        "content/analysis.js",
+        "content/analysisContext.js",
+        "content/restaurant-loading.js",
+        "content/job-overlay-renderer.js",
         "content/index.js"
       ],
       "run_at": "document_idle",
       "all_frames": false,
       "css": ["button.css"]
     }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["data/SampleResponse.json"],
+      "matches": ["https://www.google.com/*"]
+    }
   ]
+
 }
   
 
