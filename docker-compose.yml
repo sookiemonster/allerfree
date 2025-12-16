@@ -22,6 +22,9 @@ services:
     build:
       context: ./server
     image: ghcr.io/sookiemonster/allerfree-server:deployment
+    env_file:
+      - .env.server
+
     environment:
       - MODEL_URL=http://language-model:8000
 
