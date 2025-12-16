@@ -8,8 +8,8 @@ on:
 jobs:
   build-model-image:
     name: Build/Push Language Model Image
-    environment: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
-    concurrency: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
+    # environment: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
+    # concurrency: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
     runs-on: ubuntu-latest
 
     permissions:
@@ -73,8 +73,8 @@ jobs:
 
   build-server-image:
     name: Build/Push Springboot Server Image
-    environment: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
-    concurrency: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
+    # environment: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
+    # concurrency: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
     runs-on: ubuntu-latest
 
     permissions:
