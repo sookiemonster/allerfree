@@ -102,7 +102,7 @@
     }
   }
 
-  async function postDataToLocalhost(pImages, pProfiles) {
+  async function postDataToLocalhost(restaurant, pImages, pProfiles) {
     try {
       // // DEV MODE: return the packaged sample response instead of calling backend.
       // const sampleUrl = chrome.runtime.getURL("data/SampleResponse.json");
@@ -116,6 +116,8 @@
       const url = "http://localhost:8081/detect";
 
       const postData = {
+        restaurantName: restaurant.name,
+        restaurantLocation: restaurant.coordinates,
         images: pImages || [],
         profiles: mapProfilesByName(pProfiles || []),
       };
@@ -153,7 +155,7 @@
    *
    * This mirrors src/helpers/menuAnalysis.tsx but runs in the content script.
    */
-  ns.buildMenuAnalysisStringResponse = async function (pImages, pProfiles) {
+  ns.buildMenuAnalysisStringResponse = async function (restaurant, pImages, pProfiles) {
     try {
       const urls = (pImages || [])
         .map(transformUrl)
@@ -162,7 +164,7 @@
       const dataUrls = await convertUrlsToBase64(urls);
       const images = dataUrls.map(splitDataUrl);
 
-      const result = await postDataToLocalhost(images, pProfiles || []);
+      const result = await postDataToLocalhost(restaurant, images, pProfiles || []);
       return result;
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);

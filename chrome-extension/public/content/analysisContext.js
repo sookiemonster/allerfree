@@ -199,7 +199,7 @@
     }
 
     ns
-      .buildMenuAnalysisStringResponse(images, profiles || [])
+      .buildMenuAnalysisStringResponse(getActiveRestaurant(), images, profiles || [])
       .then((result) => {
         const prev = jobsByRestaurant.get(restaurantKey) || baseJob;
         const nextJob = {
