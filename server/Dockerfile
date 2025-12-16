@@ -1,15 +1,14 @@
 # Build JAR file
-FROM eclipse-temurin:25-jdk-maven AS builder
-WORKDIR /app
+FROM maven:4.0.0-rc-5-amazoncorretto-25-al2023 AS builder
+WORKDIR /build
+
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
+
 COPY src ./src
 RUN mvn package -DskipTests -B
-ARG JAR_FILE=target/AllerFree-0.0.1-SNAPSHOT.jar
 
-# Run
-FROM eclipse-temurin:25-jdk-alpine
+FROM amazoncorretto:25.0.1-al2023-headless
 WORKDIR /app
-COPY target/AllerFree-0.0.1-SNAPSHOT.jar /app/AllerFree-0.0.1-SNAPSHOT.jar
-EXPOSE 8081
-CMD ["java", "-jar", "/app/AllerFree-0.0.1-SNAPSHOT.jar"]
+COPY --from=builder /build/target/*.jar app.jar
+CMD ["java", "-jar", "app.jar"]

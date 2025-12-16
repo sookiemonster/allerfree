@@ -18,12 +18,15 @@ services:
     networks:
       - internal
 
-  server-api:
+  server:
     build:
       context: ./server
     image: ghcr.io/sookiemonster/allerfree-server:v1
     environment:
       - MODEL_URL=http://language-model:8000
+
+    ports:
+      - "8081:8081"
 
     networks:
       - internal
