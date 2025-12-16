@@ -65,14 +65,16 @@ public class MenuService {
         return CompletableFuture.supplyAsync(() -> {
             //If we query something -> refresh creation time (so it persists if accessed frequently)
             if (cached != null){
-                Update update = new Update().set("creationTime", new Date())
-                                            .set("results", cached.getResults());
+                Update update = new Update().set("results", cached.getResults())
+                                            .set("creationTime", new Date());
                 mongoTemplate.upsert(new Query(Criteria.where("restaurantName").is(restaurantName).and("restaurantLocation").is(coords)), 
                                     update, Menu.class, "menus");
             }
             return cached;
         }).handle((result, e) -> {
-            clearCacheOldest();
+            if (e != null){
+                clearCacheOldest();
+            }
             return cached;
         });
     }
@@ -81,9 +83,10 @@ public class MenuService {
     //Save Menu into MongoDB Cluster
     public CompletableFuture<Void> saveToCache(String restaurantName, Coordinate restaurantLocation, MenuPage results){
         //Create document in cluster
-        // System.out.println("Saving to MongoDB Cluster")
-        Update update = new Update().set("creationTime", new Date())
-                                    .set("results", results);
+        System.out.println("Saving to MongoDB Cluster");
+        Update update = new Update().set("results", results)
+                                    .set("creationTime", new Date());
+                                    
         mongoTemplate.upsert(new Query(Criteria.where("restaurantName").is(restaurantName).and("restaurantLocation").is(restaurantLocation)), 
                             update, Menu.class, "menus");
         return CompletableFuture.completedFuture(null);
@@ -155,7 +158,10 @@ public class MenuService {
                                 }
                                 return saveToCache(req.getRestaurantName(), req.getRestaurantLocation(), llmRes.getMenu())
                                                 .handle((voidRes, e) -> {
-                                                    clearCacheOldest();
+                                                    if (e != null) {
+                                                        System.out.println("ERROR SAVING");
+                                                        clearCacheOldest();
+                                                    }
                                                     return llmDetect;
                                                 });
                             });
