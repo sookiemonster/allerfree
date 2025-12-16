@@ -103,7 +103,7 @@ public class MenuService {
 
     @Async("taskExecutorForLLM")
     public CompletableFuture<LlmResponse> llmCall(List<Image> images){
-        System.out.println("Calling LLM");
+        // System.out.println("Calling LLM");
         LlmResponse res = new LlmResponse();
 
         //Filter bad images from the list

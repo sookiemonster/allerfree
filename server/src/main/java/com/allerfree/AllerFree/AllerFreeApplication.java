@@ -23,9 +23,9 @@ public class AllerFreeApplication {
 	@Bean(name = "asyncExec")
 	public DelegatingSecurityContextAsyncTaskExecutor taskExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setCorePoolSize(10);
-		executor.setMaxPoolSize(20);
-		executor.setQueueCapacity(500);
+		executor.setCorePoolSize(2);
+		executor.setMaxPoolSize(4);
+		executor.setQueueCapacity(50);
 		executor.initialize();
 		return new DelegatingSecurityContextAsyncTaskExecutor(executor);
 	}
@@ -35,7 +35,7 @@ public class AllerFreeApplication {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
 		executor.setCorePoolSize(2);
 		executor.setMaxPoolSize(4);
-		executor.setQueueCapacity(250);
+		executor.setQueueCapacity(50);
 		executor.initialize();
 		return new DelegatingSecurityContextAsyncTaskExecutor(executor);
 	}
