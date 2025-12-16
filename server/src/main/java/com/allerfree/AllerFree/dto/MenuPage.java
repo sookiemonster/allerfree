@@ -5,13 +5,15 @@ import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class MenuOutput {
-    private List<MenuSection> sections = new ArrayList<MenuSection>();
+public class MenuPage {
+    private List<MenuSection> sections;
+
+    public MenuPage(){
+        sections  = new ArrayList<MenuSection>();
+    }
 
     public void combineSections(List<MenuSection> sec){
         sections.addAll(sec);
@@ -23,3 +25,4 @@ public class MenuOutput {
         sections.add(sec);
     }
 }
+    

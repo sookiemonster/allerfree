@@ -2,11 +2,10 @@ package com.allerfree.AllerFree.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@NoArgsConstructor
 @AllArgsConstructor
 @Data
 public class MenuItem {
@@ -14,4 +13,11 @@ public class MenuItem {
     private String description;
     private List<String> symbols;
     private List<AllergenPrediction> contains;
+
+    public MenuItem(){
+        name = "";
+        description = "";
+        symbols = new ArrayList<String>();
+        contains = new ArrayList<AllergenPrediction>();
+    }
 }
