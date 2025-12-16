@@ -2,7 +2,7 @@ services:
   language-model:
     build:
       context: ./language-model
-    image: ghcr.io/sookiemonster/allerfree-language-model:v1
+    image: ghcr.io/sookiemonster/allerfree-language-model:main
     env_file:
       - .env.model
 
@@ -21,7 +21,7 @@ services:
   server:
     build:
       context: ./server
-    image: ghcr.io/sookiemonster/allerfree-server:v1
+    image: ghcr.io/sookiemonster/allerfree-server:main
     environment:
       - MODEL_URL=http://language-model:8000
 
