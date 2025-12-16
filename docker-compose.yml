@@ -1,9 +1,16 @@
 services:
   language-model:
-    build: ./language-model
+    build:
+      context: ./language-model
     image: ghcr.io/sookiemonster/allerfree-language-model:v1
     env_file:
-      - .env.language-model
+      - .env.model
+
+    volumes:
+      - ./language-model/gcp-credentials.json:/app/secrets/gcp-credentials.json:ro
+
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/secrets/gcp-credentials.json
 
     expose:
       - "8000"
@@ -12,7 +19,8 @@ services:
       - internal
 
   server-api:
-    build: ./server
+    build:
+      context: ./server
     image: ghcr.io/sookiemonster/allerfree-server:v1
     environment:
       - MODEL_URL=http://language-model:8000
@@ -20,7 +28,8 @@ services:
     networks:
       - internal
 
-    depends_on: language-model
+    depends_on:
+      - language-model
 
 networks:
   internal:
