@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-model-image:
-    name: Build & pushing Language Model Image
+    name: Build/Push Language Model Image
     environment: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
     concurrency: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
     runs-on: ubuntu-latest
