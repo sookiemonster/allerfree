@@ -44,7 +44,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository_owner }}/language-model
+          images: ghcr.io/${{ github.repository_owner }}/allerfree-language-model
           labels: |
             org.opencontainers.image.title=Language-Model-Service
             org.opencontainers.image.description=The FastAPI service responsible for menu reading & allergen detection.
@@ -111,7 +111,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository_owner }}/server
+          images: ghcr.io/${{ github.repository_owner }}/allerfree-server
           labels: |
             org.opencontainers.image.title=SpringBoot-Server
             org.opencontainers.image.description=The Spring service responsible for mediating between the front-end & other microservices.
