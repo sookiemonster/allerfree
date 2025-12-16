@@ -1,15 +1,13 @@
-name: "Backend CI"
+name: "Backend CI/CD"
 on:
   push:
     branches:
       - main
-      - ci
+      - deployment
 
 jobs:
   build-model-image:
     name: Build/Push Language Model Image
-    # environment: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
-    # concurrency: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
     runs-on: ubuntu-latest
 
     permissions:
@@ -73,8 +71,6 @@ jobs:
 
   build-server-image:
     name: Build/Push Springboot Server Image
-    # environment: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
-    # concurrency: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
     runs-on: ubuntu-latest
 
     permissions:
@@ -137,3 +133,50 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  deploy:
+    name: Deploy to Server
+
+    environment: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
+    concurrency: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
+
+    needs:
+      - build-model-image
+      - build-server-image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Copy Docker Compose File
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "docker-compose.yml"
+          target: "~/allerfree/deploy"
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_USER: ${{ github.actor }}
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: GH_TOKEN,GH_USER
+          script: |
+            # 1. Navigate to project folder
+            cd ~/allerfree/deploy
+
+            # 2. Pull the latest images
+            docker compose pull
+
+            # 3. Restart updated containers
+            docker compose up -d --remove-orphans
+
+            # 4. Prune old images to save disk space
+            docker image prune -f
