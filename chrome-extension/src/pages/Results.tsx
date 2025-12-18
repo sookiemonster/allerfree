@@ -1,5 +1,6 @@
 // src/pages/Results.tsx
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import type { DetectionResult } from "../types";
 
 import { useProfiles } from "../contexts/ProfileContext";
@@ -58,6 +59,11 @@ function makeRestaurantKeyFromRestaurantInfo(
 
 export default function Results() {
   const portRef = useRef<chrome.runtime.Port | null>(null);
+
+  // search params for opening from content script
+  // (clicking on a job)
+  const [searchParams] = useSearchParams();
+  const deepLinkRk = (searchParams.get("rk") || "").trim();
 
   // Which view are we in?
   const [isResultsView, setIsResultsView] = useState(false);
@@ -176,7 +182,30 @@ export default function Results() {
 
       setHistoryJobs(successSummaries);
 
-      // Auto-select most recent success job
+      // If we opened via overlay click, force Results view + select that job.
+      if (deepLinkRk) {
+        setIsResultsView(true);
+
+        const full =
+          found.find((x) => x.job.restaurantKey === deepLinkRk)?.job || null;
+
+        selectedJobKeyRef.current = deepLinkRk;
+        setSelectedJobKey(deepLinkRk);
+        setSelectedHistoryJob(full);
+
+        // If it wasn't found in the bulk scan for some reason, try direct fetch.
+        if (!full) {
+          const key = storageKeyForRestaurantKey(deepLinkRk);
+          chrome.storage.local.get(key, (d2) => {
+            const job = (d2?.[key] as AnalysisJob) || null;
+            setSelectedHistoryJob(job);
+          });
+        }
+
+        return;
+      }
+
+      // Default behavior: auto-select most recent success job
       if (successSummaries.length > 0) {
         const rk = successSummaries[0].restaurantKey;
         selectedJobKeyRef.current = rk;
@@ -190,7 +219,8 @@ export default function Results() {
         setSelectedHistoryJob(null);
       }
     });
-  }, []);
+  }, [deepLinkRk]);
+
 
   // Listen to chrome.storage changes:
   // - keep historyJobs (success-only) in sync
