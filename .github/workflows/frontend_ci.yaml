@@ -1,0 +1,95 @@
+name: chrome_extension_continuous_delivery
+
+on:
+  push:
+    branches:
+      - master
+      - "frontend/CICD"
+
+permissions:
+  contents: write
+
+jobs:
+  build_test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: chrome-extension
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: chrome-extension/package-lock.json
+
+      - name: Install deps
+        run: npm ci
+
+  extension_build:
+    name: Build Chrome extension + zip + create release
+    needs:
+      - build_test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: chrome-extension
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: chrome-extension/package-lock.json
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Compute names (from manifest.json)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq zip
+
+          MANIFEST=public/manifest.json
+          VERSION=$(jq -r '.version' "$MANIFEST")
+          EXT_NAME=$(jq -r '.name // "chrome-extension"' "$MANIFEST" | tr ' ' '-' | tr -cd '[:alnum:]._-' )
+
+          echo "SNAP=v${VERSION}-$(date -u +'%Y%m%d.%H%M%S')" >> $GITHUB_ENV
+          echo "ZIP_NAME=${EXT_NAME}-chrome-${VERSION}.zip" >> $GITHUB_ENV
+
+      - name: Build extension
+        env:
+          CI: "1"
+        run: npm run build
+
+      - name: Zip build output
+        run: |
+          if [ ! -d dist ]; then
+            echo "Expected build output folder 'dist' not found."
+            exit 1
+          fi
+          (cd dist && zip -r "../${ZIP_NAME}" .)
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: chrome-ext-${{ env.SNAP }}
+          path: chrome-extension/${{ env.ZIP_NAME }}
+          retention-days: 67
+
+      - name: Create Github Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.SNAP }}
+          name: ${{ env.SNAP }}
+          prerelease: ${{ github.ref_name != 'master' }}
+          make_latest: ${{ github.ref_name == 'master' }}
+          files: chrome-extension/${{ env.ZIP_NAME }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
