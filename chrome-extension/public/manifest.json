@@ -27,6 +27,7 @@
         "content/menu-scrape.js",
         "content/restaurant.js",
         "content/menu.js",
+        "content/config.generated.js",
         "content/analysis.js",
         "content/analysisContext.js",
         "content/restaurant-loading.js",

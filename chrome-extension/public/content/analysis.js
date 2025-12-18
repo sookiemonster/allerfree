@@ -7,6 +7,10 @@
 (function (g) {
   const ns = (g.__allerfree ||= {});
 
+  const API_BASE_URL =
+  (self.__allerfreeConfig && self.__allerfreeConfig.apiBaseUrl) ||
+  "http://localhost:8081";
+
   /**
    * Replace the tail starting at the last "w" with "w720".
    * If there is no "w" in the string, returns the original URL.
@@ -85,7 +89,8 @@
 
   async function getToken() {
     try {
-      const url = "http://localhost:8081/requestToken";
+      // const url = "http://localhost:8081/requestToken";
+      const url = new URL("/requestToken", API_BASE_URL).toString();
       const response = await fetch(url, { method: "POST" });
 
       if (!response.ok) {
@@ -113,7 +118,8 @@
       // return await res.json();
 
       const tokenData = await getToken();
-      const url = "http://localhost:8081/detect";
+      // const url = "http://localhost:8081/detect";
+      const url = new URL("/detect", API_BASE_URL).toString();
 
       const postData = {
         restaurantName: restaurant.name,
