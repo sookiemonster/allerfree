@@ -35,6 +35,17 @@
   /** @type {Array<{restaurantKey: string, job: any, state: string, updatedAt: number}>} */
   let jobQueue = [];
 
+  // Default click handler: alert the restaurantKey(dev b4 actual click logic)
+  if (typeof ns.onJobQueueItemClick !== "function") {
+    ns.onJobQueueItemClick = function (payload) {
+      const key = String(payload?.restaurantKey || "").trim();
+      if (!key) return;
+
+      alert(key);
+    };
+  }
+
+
   function normalizeState(state) {
     if (state === "success" || state === "error" || state === "loading") return state;
     if (state === "running") return "loading";
@@ -341,7 +352,7 @@
       fontWeight: "500",
       gap: "12px",
       boxShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
-      cursor: "pointer",
+      cursor: "default"
     });
 
     const restaurant = item.job?.restaurant || { name: "Restaurant", url: "" };
@@ -350,28 +361,55 @@
     card.dataset.allerfreeRestaurantKey = String(item.restaurantKey || "");
     card.dataset.allerfreeRestaurantUrl = String(restaurant.url || "");
 
-    card.addEventListener("click", () => {
-      if (typeof ns.onJobQueueItemClick === "function") {
-        ns.onJobQueueItemClick({
-          restaurantKey: item.restaurantKey,
-          job: item.job,
-        });
-      }
-    });
-
     const nameSpan = document.createElement("span");
     nameSpan.textContent = restaurant.name || "Restaurant";
     nameSpan.style.flex = "1";
 
     const state = normalizeState(item.state || "loading");
     const icon =
-      state === "success" ? createCheckmark() : state === "error" ? createErrorIcon() : createSpinner();
+      state === "success"
+        ? createCheckmark()
+        : state === "error"
+          ? createErrorIcon()
+          : createSpinner();
+
+    // reflect in ui if a user can open job 
+    const isClickable = state === "success";
+    if (isClickable) {
+      card.style.cursor = "pointer";
+
+      const baseFontStyle = nameSpan.style.fontStyle || "";
+      const baseFontWeight = nameSpan.style.fontWeight || ""; 
+      // const baseBg = nameSpan.style.backgroundColor || "";
+
+      card.addEventListener("mouseenter", () => {
+        nameSpan.style.fontStyle = "italic";
+        nameSpan.style.fontWeight = "1000";
+        // nameSpan.style.backgroundColor = "rgba(255, 255, 255, 0.10)";
+      });
+      card.addEventListener("mouseleave", () => {
+        nameSpan.style.fontStyle = baseFontStyle;
+        nameSpan.style.fontWeight = baseFontWeight;
+        // nameSpan.style.backgroundColor = baseBg;
+      });
+
+      // attach logic to click
+      card.addEventListener("click", () => {
+        if (typeof ns.onJobQueueItemClick === "function") {
+          ns.onJobQueueItemClick({
+            restaurantKey: item.restaurantKey,
+            job: item.job,
+          });
+        }
+      });
+    }
 
     card.appendChild(nameSpan);
     card.appendChild(icon);
 
     return card;
   }
+
 
   function createSpinner() {
     const spinner = document.createElement("div");
