@@ -30,7 +30,8 @@ def load_test_data(file_path: os.PathLike) -> Tuple[dict, dict]:
         }
 
     label_dict = raw_df[["Label", "image_link"]].drop_duplicates()
-    label_dict = label_dict.groupby("image_link").to_dict("index")
+    label_dict = label_dict.set_index("image_link").to_dict("index")
+    label_dict = {key: val["Label"] for key, val in label_dict.items()}
 
     return data, label_dict
 
