@@ -35,13 +35,22 @@
   /** @type {Array<{restaurantKey: string, job: any, state: string, updatedAt: number}>} */
   let jobQueue = [];
 
-  // Default click handler: alert the restaurantKey(dev b4 actual click logic)
+  // Default click handler: Clicking a COMPLETE job opens the popup straight to that job in Results.
   if (typeof ns.onJobQueueItemClick !== "function") {
     ns.onJobQueueItemClick = function (payload) {
-      const key = String(payload?.restaurantKey || "").trim();
-      if (!key) return;
+      const restaurantKey = String(payload?.restaurantKey || "").trim();
+      if (!restaurantKey) return;
 
-      alert(key);
+      try {
+        chrome.runtime.sendMessage({
+          type: "OPEN_POPUP",
+          route: `#/results?rk=${encodeURIComponent(restaurantKey)}`,
+        });
+      } catch (e) {
+        console.warn("[onJobQueueItemClick] OPEN_POPUP failed:", e);
+        // optional fallback:
+        // alert(restaurantKey);
+      }
     };
   }
 
