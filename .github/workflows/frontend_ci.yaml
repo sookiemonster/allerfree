@@ -66,6 +66,7 @@ jobs:
       - name: Build extension
         env:
           CI: "1"
+          ALLERFREE_API_BASE_URL: ${{ secrets.ALLERFREE_API_BASE_URL }}
         run: npm run build
 
       - name: Zip build output
