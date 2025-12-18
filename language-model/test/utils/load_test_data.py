@@ -1,13 +1,15 @@
 import pandas as pd
 import os
 import pickle
-from typing import Optional
+from typing import Optional, Tuple
 
 
-def load_test_data(file_path: os.PathLike) -> dict:
+def load_test_data(file_path: os.PathLike) -> Tuple[dict, dict]:
+
     raw_df = pd.read_csv(
         file_path,
         usecols=[
+            "Label",
             "Menu URL",
             "Items",
             "contains_gluten",
@@ -26,9 +28,11 @@ def load_test_data(file_path: os.PathLike) -> dict:
             "contains_shellfish": row["contains_shellfish"],
             "contains_peanuts": row["contains_peanuts"],
         }
-        # data[row['image_link']].append(row.drop('image_link'))
 
-    return data
+    label_dict = raw_df[["Label", "image_link"]].drop_duplicates()
+    label_dict = label_dict.groupby("image_link").to_dict("index")
+
+    return data, label_dict
 
 
 def save_obj(
