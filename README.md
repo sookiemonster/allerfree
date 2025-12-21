@@ -72,25 +72,51 @@ Allerfree currently supports:
 4. Results are shown per selected profile with a short explanation.
 
 ## Technologies used
-**Chrome extension**
+**Frontend (Chrome extension)**
 - React + TypeScript (popup UI)
-- JavaScript + Chrome Extension APIs (content scripts on Google Maps)
-- `chrome.storage` for syncing profiles and analysis jobs
+- JavaScript content scripts injected into Google Maps
+- Persistent storage via `chrome.storage` to keep profiles and job state synced
 
-**Backend + model**
-- Spring Boot (API gateway), MongoDB Atlas (caching)
-- FastAPI (Python), Google Cloud Vision (OCR), Gemini (analysis)
+**Backend (API Gateway)**
+- Spring Boot
+- Spring WebFlux + Spring Security
+- MongoDB Atlas for caching
 
-## CI/CD + deployment
-We use GitHub Actions to build and release the Chrome extension, and to deploy backend services in a repeatable way.
+**Model service**
+- Python + FastAPI
+- Google Cloud Vision for OCR
+- Gemini for menu structuring and allergen detection
+
+## Frontend CI/CD (Chrome extension)
+
+We use a GitHub Actions workflow to continuously build and package the Chrome extension, then publish it through GitHub Releases.
+
+**Why we do this**
+- Keeps releases **reproducible** and easy to install for testers and reviewers  
+- Avoids hardcoding environments by injecting the **API base URL** at build time  
 
 **How it works**
-- The extension is built and packaged into a zip, with the **API base URL injected at build time** via GitHub Variables, then published through GitHub Releases.  
-- Backend services are shipped as Docker images and deployed together using Docker Compose on the deployment host.
+1. GitHub Actions installs dependencies and builds the extension.
+2. During the build, a config file is generated so the content scripts know which backend API to call (API base URL is provided via GitHub Variables).
+3. The built extension (`dist/`) is zipped and uploaded as a GitHub Release artifact.
 
-**Links**
-- Releases: [RELEASES](https://github.com/sookiemonster/allerfree/releases)  
-- Deployments: [DEPLOYMENTS](https://github.com/sookiemonster/allerfree/deployments)  
+**Link**
+- GitHub Releases: [RELEASES](https://github.com/sookiemonster/allerfree/releases)
+
+## Backend CI/CD + deployment (API gateway + model service)
+
+We deploy the backend as containerized services so the API gateway and model service run consistently in production.
+
+**Why we do this**
+- Docker provides a **consistent runtime** across machines  
+- Docker Compose deploys the full stack together (API gateway + model service)  
+
+**How it works**
+1. GitHub Actions builds Docker images for the API gateway and model service and publishes them to a container registry.
+2. The deployment host pulls the latest images and restarts the Docker Compose stack to apply updates.
+
+**Link**
+- Deployments page: [DEPLOYMENTS](https://github.com/sookiemonster/allerfree/deployments)
 
 ## Ethical considerations
 - **No mass scraping**: analysis is user-driven and only runs when someone is actively viewing a restaurant on Google Maps.  
@@ -98,6 +124,7 @@ We use GitHub Actions to build and release the Chrome extension, and to deploy b
 
 ## Team
 - [**Daniel**](https://github.com/sookiemonster): Product owner, system architecture, ML engineering, backend deployment  
-- [**Thomas**](https://github.com/thomasyu21): Spring Boot API, request/response adaptation, MongoDB Atlas caching, JWT security  
-- [**Kyle**](https://github.com/KymaiselHunter): Extension logic, content script integration, API communication, storage and job orchestration 
-- [**Kelly**](https://github.com/Kxlcl): UI/UX design and popup experience, presentation materials  
+- [**Thomas**](https://github.com/thomasyu21): Spring Boot API, request/response adaptation, MongoDB Atlas caching, backend deployment  
+- [**Kyle**](https://github.com/KymaiselHunter): Extension logic, async job orchestration, multi-tab synchronization, API communication  
+- [**Kelly**](https://github.com/Kxlcl): UI/UX for profiles and analysis flow, results interactions, on-page job rendering  
+
