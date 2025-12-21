@@ -112,11 +112,17 @@ We deploy the backend as containerized services so the API gateway and model ser
 - Docker Compose deploys the full stack together (API gateway + model service)  
 
 **How it works**
-1. GitHub Actions builds Docker images for the API gateway and model service and publishes them to a container registry.
-2. The deployment host pulls the latest images and restarts the Docker Compose stack to apply updates.
+1. GitHub Actions builds Docker images for the API gateway and model service.
+2. Those images are published to **GitHub Packages** so deployments can pull a versioned, repeatable artifact.
+3. The deployment host pulls the latest images and restarts the Docker Compose stack to apply updates.
 
-**Link**
-- Deployments page: [DEPLOYMENTS](https://github.com/sookiemonster/allerfree/deployments)
+**Links**
+- **Links**
+- Packages: [PACKAGES](https://github.com/sookiemonster?tab=packages&repo_name=allerfree)
+  - API gateway image: [allerfree-server](https://github.com/sookiemonster/allerfree/pkgs/container/allerfree-server)
+  - Model service image: [allerfree-language-model](https://github.com/sookiemonster/allerfree/pkgs/container/allerfree-language-model)
+
+- Deployments: [DEPLOYMENTS](https://github.com/sookiemonster/allerfree/deployments)
 
 ## Ethical considerations
 - **No mass scraping**: analysis is user-driven and only runs when someone is actively viewing a restaurant on Google Maps.  
