@@ -2,11 +2,7 @@
 
 **Allerfree makes dining out with allergies a piece of cake.**
 
-## Product vision
-Allerfree is built for people with food allergies (and anyone dining with them) who want a faster way to decide where to eat. As a Chrome extension on Google Maps, it analyzes a restaurant’s menu photos and highlights potential allergens using your saved profiles, without requiring you to copy links or upload images elsewhere.
-
-## How it works
-1. Open a restaurant on Google Maps and click the **Menu** tab (the one with menu images).  
+Allerfree is a Chrome extension that analyzes a restaurant’s menu photos **directly on Google Maps** and flags dishes that could trigger your allergies.
 
 ## How it works
 1. Open a restaurant on Google Maps and click the **Menu** tab (the one with menu images).  
@@ -64,63 +60,44 @@ Allerfree is built for people with food allergies (and anyone dining with them) 
 
 ## Supported allergies
 Allerfree currently supports:
-- Gluten  
-- Tree nuts  
-- Shellfish  
-  <img width="402" height="250" alt="Select: Gluten, Tree nuts or Shellfish" src="https://github.com/user-attachments/assets/8a264454-ef55-4ca9-b622-61a8d443ffa1" />
-
+- Gluten
+- Tree nuts
+- Shellfish
+<img width="360" alt="Allergen selection showing gluten, tree nuts, and shellfish." src="https://github.com/user-attachments/assets/8a264454-ef55-4ca9-b622-61a8d443ffa1" />
 
 ## High-level flow
-1. The Chrome extension reads the restaurant context and menu images from the Google Maps page.  
-2. An API gateway formats and validates the request, applies caching, and forwards it to the model service.  
-3. The model service runs OCR + analysis to structure the menu and flag likely allergens.  
-4. The extension displays results per selected profile (SAFE vs AVOID) with a short explanation.
+1. The extension reads restaurant context and menu images from Google Maps.  
+2. The backend validates the request, applies caching, and forwards it to the model service.  
+3. The model service runs OCR + analysis to flag likely allergens.  
+4. Results are shown per selected profile with a short explanation.
 
 ## Technologies used
-**Frontend (Chrome extension)**
+**Chrome extension**
 - React + TypeScript (popup UI)
-- JavaScript content scripts injected into Google Maps
-- Persistent storage via `chrome.storage` to keep profiles and job state synced
+- JavaScript + Chrome Extension APIs (content scripts on Google Maps)
+- `chrome.storage` for syncing profiles and analysis jobs
 
-**Backend (API Gateway)**
-- Spring Boot
-- Spring WebFlux + Spring Security
-- MongoDB Atlas for caching
+**Backend + model**
+- Spring Boot (API gateway), MongoDB Atlas (caching)
+- FastAPI (Python), Google Cloud Vision (OCR), Gemini (analysis)
 
-**Model service**
-- Python + FastAPI
-- Google Cloud Vision for OCR
-- Gemini for menu structuring and allergen detection
-
-## Frontend CI/CD (Chrome extension)
-
-We use a GitHub Actions workflow to continuously build and package the Chrome extension, then publish it through GitHub Releases.
-
-**Why we do this**
-- Keeps releases **reproducible** and easy to install for testers and reviewers  
-- Avoids hardcoding environments by injecting the **API base URL** at build time  
+## CI/CD + deployment
+We use GitHub Actions to build and release the Chrome extension, and to deploy backend services in a repeatable way.
 
 **How it works**
-1. GitHub Actions installs dependencies and builds the extension.
-2. During the build, a config file is generated so the content scripts know which backend API to call (API base URL is provided via GitHub Variables).
-3. The built extension (`dist/`) is zipped and uploaded as a GitHub Release artifact.
+- The extension is built and packaged into a zip, with the **API base URL injected at build time** via GitHub Variables, then published through GitHub Releases.  
+- Backend services are shipped as Docker images and deployed together using Docker Compose on the deployment host.
 
-**Link**
-- GitHub Releases: [RELEASES](https://github.com/sookiemonster/allerfree/releases)
+**Links**
+- Releases: [RELEASES](https://github.com/sookiemonster/allerfree/releases)  
+- Deployments: [DEPLOYMENTS](https://github.com/sookiemonster/allerfree/deployments)  
 
+## Ethical considerations
+- **No mass scraping**: analysis is user-driven and only runs when someone is actively viewing a restaurant on Google Maps.  
+- **Safety-first output**: results are guidance, not a guarantee. Allerfree is designed to be conservative when uncertainty exists.  
 
-## Backend CI/CD + deployment (API gateway + model service)
-
-We deploy the backend as containerized services so the API gateway and model service run consistently in production.
-
-**Why we do this**
-- Docker provides a **consistent runtime** across machines  
-- Docker Compose deploys the full stack together (API gateway + model service)  
-
-**How it works**
-1. GitHub Actions builds Docker images for the API gateway and model service and publishes them to a container registry.
-2. The deployment host pulls the latest images and restarts the Docker Compose stack to apply updates.
-
-**Link**
-- Deployments page: [DEPLOYMENTS](https://github.com/sookiemonster/allerfree/deployments)
-
+## Team
+- [**Daniel**](https://github.com/sookiemonster): Product owner, system architecture, ML engineering, backend deployment  
+- [**Thomas**](https://github.com/thomasyu21): Spring Boot API, request/response adaptation, MongoDB Atlas caching, JWT security  
+- [**Kyle**](https://github.com/KymaiselHunter): Extension logic, content script integration, API communication, storage and job orchestration 
+- [**Kelly**](https://github.com/Kxlcl): UI/UX design and popup experience, presentation materials  
