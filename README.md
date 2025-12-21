@@ -49,8 +49,22 @@ Allerfree is built for people with food allergies (and anyone dining with them) 
   </tr>
 </table>
 
-## What you get
-- **Saved profiles** for different people, including allergen preferences and sensitivity  
-- **Menu photo analysis** directly on the Google Maps restaurant page  
-- **Clear results** that list safer items first and items to avoid below, with conservative warnings when the menu is unclear  
-- **Group-friendly planning** so one restaurant check can work for everyone at once  
+## Supported allergies
+Allerfree currently supports:
+- Gluten  
+- Tree nuts  
+- Shellfish  
+  <img width="402" height="250" alt="Select: Gluten, Tree nuts or Shellfish" src="https://github.com/user-attachments/assets/8a264454-ef55-4ca9-b622-61a8d443ffa1" />
+
+
+## High-level flow
+1. The Chrome extension reads the restaurant context and menu images from the Google Maps page.  
+2. An API gateway formats and validates the request, applies caching, and forwards it to the model service.  
+3. The model service runs OCR + analysis to structure the menu and flag likely allergens.  
+4. The extension displays results per selected profile (SAFE vs AVOID) with a short explanation.
+
+## Technologies used
+- **Chrome extension:** React, TypeScript, JavaScript, Vite, Chrome Extension APIs (MV3)  
+- **Backend:** Spring Boot (API gateway), MongoDB (caching)  
+- **Model service:** FastAPI (Python), Google Cloud Vision (OCR), Gemini (menu structuring + allergen detection)  
+- **Deployment:** Docker + Docker Compose (hosted on DigitalOcean)  
