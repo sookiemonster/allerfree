@@ -4,6 +4,10 @@
 
 Allerfree is a Chrome extension that analyzes a restaurant’s menu photos **directly on Google Maps** and flags dishes that could trigger your allergies.
 
+## Product Demo
+
+https://github.com/user-attachments/assets/b3915d2a-4cec-410e-9286-6a311062658e
+
 ## How it works
 1. Open a restaurant on Google Maps and click the **Menu** tab (the one with menu images).  
 
